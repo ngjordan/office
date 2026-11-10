@@ -21,6 +21,15 @@ jobs:
   gate:
     name: Gate
     runs-on: ubuntu-24.04
+    env:
+      # The apps embed the permitted craft-fonts faces and the craft-i18n language data
+      # from these checkouts; without them the build falls back to system fonts and
+      # no spelling patterns.
+      CRAFT_FONTS_DIR: /tmp/craft-fonts
+      CRAFT_I18N_DIR: /tmp/craft-i18n
+      # The test binaries are ~2.8 GB with debug info, and cargo links up to this many
+      # of them at once: concurrent links get the runner OOM-killed.
+      CARGO_BUILD_JOBS: 1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -39,7 +48,8 @@ jobs:
             gh repo clone "ngjordan/$name" "../$dir" -- --depth 1
           done
 
-      # The font and translation assets the build reads.
+      # The font and translation assets the build reads. CRAFT_FONTS_DIR and
+      # CRAFT_I18N_DIR below point at these paths.
       - name: Check out the assets
         env:
           GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
@@ -72,7 +82,5 @@ jobs:
       - name: Dependency policy
         run: cargo deny check
 
-      # The test binaries are ~2.8 GB with debug info, and cargo links up to
-      # CARGO_BUILD_JOBS of them at once: concurrent links get the runner OOM-killed.
       - name: Tests
         run: cargo test -p iridium-office -j 1

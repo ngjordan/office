@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AppStream metadata (software centres, Flathub). Template: package.sh substitutes
+     @VERSION@ and @DATE@ from Cargo.toml and the build date. -->
+<component type="desktop-application">
+  <id>@APP_ID@</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT OR Apache-2.0</project_license>
+  <name>@APP_NAME@</name>
+  <summary>One window, five apps: Sheets, Docs, CAD, Decks and PDF</summary>
+  <developer id="@APP_ID@">
+    <name>Iridium Technologies, Inc.</name>
+  </developer>
+  <description>
+    <p>
+      The Office suite is an open-source office suite: five applications in one window.
+      A spreadsheet, a word processor, a drafting tool, a presentation tool and a PDF
+      workbench, each keeping its own commands, formats and parity work, with a shared
+      document tab strip and a left rail that switches between them.
+    </p>
+  </description>
+  <launchable type="desktop-id">@APP_ID@.desktop</launchable>
+  <icon type="stock">@APP_ID@</icon>
+  <!-- Only url types known to appstream 0.15 (Ubuntu 22.04, where CI validates): no vcs-browser. -->
+  <url type="homepage">https://iridium.ph</url>
+  <url type="bugtracker">https://github.com/ngjordan/office/issues</url>
+  <url type="help">https://github.com/ngjordan/office</url>
+  <categories>
+    <category>Office</category>
+    <category>Productivity</category>
+  </categories>
+  <keywords>
+    <keyword>spreadsheet</keyword>
+    <keyword>word processor</keyword>
+    <keyword>cad</keyword>
+    <keyword>presentation</keyword>
+    <keyword>pdf</keyword>
+  </keywords>
+  <branding>
+    <color type="primary" scheme_preference="light">#0B6E4F</color>
+    <color type="primary" scheme_preference="dark">#0B6E4F</color>
+  </branding>
+  <requires>
+    <display_length compare="ge">960</display_length>
+  </requires>
+  <supports>
+    <control>keyboard</control>
+    <control>pointing</control>
+    <control>tablet</control>
+  </supports>
+  <provides>
+    <binary>iridium-office</binary>
+    <mediatype>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</mediatype>
+    <mediatype>application/vnd.openxmlformats-officedocument.wordprocessingml.document</mediatype>
+    <mediatype>application/vnd.openxmlformats-officedocument.presentationml.presentation</mediatype>
+    <mediatype>application/pdf</mediatype>
+  </provides>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="@VERSION@" date="@DATE@"/>
+  </releases>
+</component>

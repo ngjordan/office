@@ -1,0 +1,188 @@
+name: Release
+
+on:
+  push:
+    branches: [release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version override for a test run, e.g. 0.2.0-rc.1 (empty: Cargo.toml)"
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # The suite is a merged workspace: its apps live in five sibling repositories and come in
+  # as path dependencies, so a build needs them checked out beside this one. The default
+  # GITHUB_TOKEN cannot read them, so this needs a PAT with `repo` scope in OFFICE_TOKEN.
+  checkout-apps:
+    name: Check out the apps
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Check out the apps
+        env:
+          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
+        run: |
+          set -euo pipefail
+          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft; do
+            name="${pair%%:*}"; dir="${pair##*:}"
+            gh repo clone "ngjordan/$name" "../$dir" -- --depth 1
+          done
+
+      # The font and translation assets the build reads; the env vars below point at them.
+      - name: Check out the assets
+        env:
+          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ngjordan/craft-fonts.git /tmp/craft-fonts
+          git clone --depth 1 https://github.com/ngjordan/craft-i18n.git /tmp/craft-i18n
+
+      - name: Read the version
+        id: version
+        run: |
+          set -euo pipefail
+          v="${{ inputs.version }}"
+          if [[ -z "$v" ]]; then
+            v="$(awk '/^\[workspace.package\]/{p=1;next} /^\[/{p=0} p&&$1=="version"{gsub(/[" ]/,"",$3);print $3;exit}' Cargo.toml)"
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "$v"
+
+  macos:
+    name: macOS universal
+    needs: checkout-apps
+    runs-on: macos-14
+    env:
+      CRAFT_FONTS_DIR: /tmp/craft-fonts
+      CRAFT_I18N_DIR: /tmp/craft-i18n
+      CARGO_BUILD_JOBS: 2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check out the apps
+        env:
+          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
+        run: |
+          set -euo pipefail
+          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft; do
+            name="${pair%%:*}"; dir="${pair##*:}"
+            gh repo clone "ngjordan/$name" "../$dir" -- --depth 1
+          done
+
+      - name: Check out the assets
+        env:
+          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ngjordan/craft-fonts.git /tmp/craft-fonts
+          git clone --depth 1 https://github.com/ngjordan/craft-i18n.git /tmp/craft-i18n
+
+      - name: Import the signing certificate
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: packaging/macos/import-cert.sh
+
+      - name: Build, sign and notarize
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: packaging/macos/package.sh --arch universal
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f3c4d0bb5aa # v4.6.2
+        with:
+          name: macos
+          path: |
+            dist/release/*.dmg
+            dist/release/*.zip
+
+  linux:
+    name: Linux
+    needs: checkout-apps
+    runs-on: ubuntu-22.04
+    env:
+      CRAFT_FONTS_DIR: /tmp/craft-fonts
+      CRAFT_I18N_DIR: /tmp/craft-i18n
+      CARGO_BUILD_JOBS: 2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check out the apps
+        env:
+          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
+        run: |
+          set -euo pipefail
+          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft; do
+            name="${pair%%:*}"; dir="${pair##*:}"
+            gh repo clone "ngjordan/$name" "../$dir" -- --depth 1
+          done
+
+      - name: Check out the assets
+        env:
+          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ngjordan/craft-fonts.git /tmp/craft-fonts
+          git clone --depth 1 https://github.com/ngjordan/craft-i18n.git /tmp/craft-i18n
+
+      - name: Install nfpm
+        run: |
+          set -euo pipefail
+          curl -sSfL -o nfpm.deb https://github.com/goreleaser/nfpm/releases/download/v2.47.0/nfpm_2.47.0_linux_amd64.deb
+          sudo dpkg -i nfpm.deb
+
+      - name: Build and package
+        run: packaging/linux/package.sh --formats "deb rpm tar"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f3c4d0bb5aa # v4.6.2
+        with:
+          name: linux
+          path: |
+            dist/release/*.deb
+            dist/release/*.rpm
+            dist/release/*.tar.gz
+
+  # The GitHub release itself: a tag and a list of assets. Publishing does not need a runner
+  # with a spending limit, so this is the one job that works even when the build jobs cannot
+  # start.
+  release:
+    name: Draft the release
+    needs: [checkout-apps, macos, linux]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372e1d0f8 # v4.1.8
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Draft the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.checkout-apps.outputs.version }}
+        run: |
+          set -euo pipefail
+          gh release create "v$TAG" artifacts/* --title "$TAG" --notes "The Office suite $TAG." --draft
