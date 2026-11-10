@@ -37,9 +37,27 @@ to `CARGO_BUILD_JOBS` of them at once — concurrent links get the build OOM-kil
 
 | Test | What it holds down |
 |---|---|
-| `tests/five_in_one.rs` | Phase 0 regression gate: all five apps construct, paint and share one egui context |
-| `tests/suite.rs` | Phase 2b: the switcher, file routing, and the look rules across a switch |
-| `src/suite.rs` unit tests | the per-module look (style, zoom, fonts), using a fake module that owns its look |
+- `tests/five_in_one.rs` — Phase 0 regression gate: all five apps construct, paint and share one egui context.
+- `tests/suite.rs` — Phase 2b: the switcher, file routing, and the look rules across a switch.
+- `src/suite.rs` unit tests — the per-module look (style, zoom, fonts), using a fake module that owns its look.
+
+## CI and the dependency policy
+
+`.github/workflows/ci.yml` runs the same gate locally: format, clippy, dependency policy
+(`deny.toml`), and the tests. It checks the five apps out as siblings, so it needs a PAT
+with `repo` scope in the repository secret **`OFFICE_TOKEN`** — the default `GITHUB_TOKEN`
+cannot read the app repositories.
+
+`deny.toml` is the PDF repo's policy with the merged graph's differences:
+
+- `MPL-2.0` is allowed: CAD's DWG reader (`acadrust`) and Decks' media decoder
+  (`symphonia`) already ship it in their standalone builds.
+- `storytold/winprint.rs` is allowed: the merged graph still resolves the upstream
+  spooler at four revisions, because redirecting them to the mirror makes Cargo report
+  `specification 'winprint' is ambiguous`.
+- The wildcard-version check warns instead of failing: the four repos that are not PDF
+  write their internal path dependencies as `version = "*"`.
+
 
 ## How the look works
 

@@ -1,0 +1,101 @@
+# cargo-deny policy (M0.4). Run with `cargo deny check` from the merged Office workspace.
+# Code dependencies follow the same rule as assets (AGENTS.md): permissive licences only.
+# Copyleft (GPL, AGPL, LGPL) is never linked; such tools run only as external oracle processes.
+
+[graph]
+all-features = true
+
+[licenses]
+confidence-threshold = 0.9
+allow = [
+    "MIT",
+    "MIT-0",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "BSL-1.0",
+    "CC0-1.0",
+    # MPL-2.0 is weak (file-level) copyleft. It reaches the merged graph through CAD's
+    # DWG reader (acadrust) and Decks' media decoder (symphonia), both of which already
+    # ship it in their standalone builds. The Office host adds no copyleft of its own.
+    "MPL-2.0",
+]
+
+[licenses.private]
+ignore = true
+
+[bans]
+multiple-versions = "allow"
+# The four app repos that are not PDF write their internal path dependencies as
+# `version = "*"`, which this check rejects for a crate it believes is publishable. The
+# merged workspace is not published, and those crates are policed in their own
+# repositories, so here the check warns instead of failing.
+wildcards = "warn"
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+# Shared UI components and spooler; Cargo.toml pins the immutable revision. craft-print pins
+# ngjordan's winprint fork (Windows printing, #1107) to an immutable revision of its own.
+allow-git = [
+    "https://github.com/ngjordan/craft-libs",
+    "https://github.com/ngjordan/winprint.rs",
+    # The reviewed egui 0.37 and winit 0.30.13 fork revisions (immutable pins in Cargo.toml).
+    "https://github.com/ngjordan/egui.git",
+    "https://github.com/ngjordan/winit.git",
+    # The merged graph still resolves the UPSTREAM spooler at four revisions. Redirecting
+    # them to the mirror makes Cargo report "specification `winprint` is ambiguous",
+    # because the two revisions collapse onto one and the downstream GDI types would
+    # change identity. The standalone apps pin the mirror; this graph cannot yet.
+    "https://github.com/storytold/winprint.rs",
+]
+
+[advisories]
+yanked = "warn"
+ignore = [
+    # rustybuzz is unmaintained (no successor release). It reaches the tree through
+    # krilla, PDF's PDF writer, and is used only to shape text on export.
+    { id = "RUSTSEC-2026-0206", reason = "rustybuzz unmaintained; text shaping in krilla" },
+    # ttf-parser is unmaintained (no successor release). It reaches the tree through
+    # rustybuzz, and only parses font tables.
+    { id = "RUSTSEC-2026-0192", reason = "ttf-parser unmaintained; font table parsing" },
+    # Marvin (RSA private-key timing side channel, no fixed `rsa` release). iridium-pdf-sign uses
+    # `rsa` only for public-key signature verification, which the advisory does not affect; RSA
+    # private-key operations use aws-lc-rs on native targets and are refused in the browser
+    # (ADR-0009). Revisit when a fixed `rsa` ships.
+    { id = "RUSTSEC-2023-0071", reason = "rsa is used for verification only (ADR-0009)" },
+    # proc-macro-error is unmaintained (no vulnerability). It reaches the tree as a proc macro of
+    # winprint's fmt-derive (craft-print's Windows spooler), so it runs at compile time on Windows
+    # and is not in the binary.
+    { id = "RUSTSEC-2024-0370", reason = "compile-time proc macro of winprint's fmt-derive (craft-print Windows printing, #1107)" },
+    # zvariant, zbus_names and zvariant_derive are unmaintained (no vulnerability, and no fixed
+    # release to move to). They reach the tree as the D-Bus stack behind `accesskit_unix` ->
+    # `atspi`, which is Linux accessibility only, and as a dev-dependency of iridium-pdf-platform.
+    # Revisit when the accesskit/zbus chain moves to a maintained successor.
+    { id = "RUSTSEC-2026-0370", reason = "zvariant unmaintained; Linux a11y stack via accesskit_unix" },
+    { id = "RUSTSEC-2026-0371", reason = "zbus_names unmaintained; Linux a11y stack via accesskit_unix" },
+    { id = "RUSTSEC-2026-0372", reason = "zvariant_derive unmaintained; Linux a11y stack via accesskit_unix" },
+]
+
+# egui's default UI fonts (Ubuntu-Light, Hack, emoji-icon-font): font licences on the AGENTS.md
+# §1.2 allowlist, attributed in ATTRIBUTION.toml as dependency-bundled assets.
+[[licenses.exceptions]]
+crate = "epaint_default_fonts"
+allow = ["OFL-1.1", "Ubuntu-font-1.0"]
+
+# winprint (craft-print's Windows spooler, #1107) lists reqwest as a build-dependency for its
+# PDFium download, which only runs with its `pdfium` feature; craft-print turns that off. The CA
+# bundle reqwest brings is CDLA-Permissive-2.0 data and is compiled into winprint's build script
+# only, never into PDF. Remove when winprint makes those build-dependencies optional.
+[[licenses.exceptions]]
+crate = "webpki-roots"
+allow = ["CDLA-Permissive-2.0"]
+
+[[licenses.exceptions]]
+crate = "webpki-root-certs"
+allow = ["CDLA-Permissive-2.0"]

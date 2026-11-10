@@ -1,0 +1,78 @@
+name: CI
+
+# Gate for the Office host: the merged workspace that runs the five apps in one
+# window. The apps themselves are gated in their own repositories; this workflow
+# checks the host against them.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# The token is only used to check out the code: no job writes to the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Gate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The five apps live in their own repositories and come in as path
+      # dependencies. The default GITHUB_TOKEN cannot read them, so this needs a
+      # PAT with `repo` scope in the OFFICE_TOKEN secret.
+      - name: Check out the apps
+        env:
+          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
+        run: |
+          set -euo pipefail
+          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft; do
+            name="${pair%%:*}"; dir="${pair##*:}"
+            gh repo clone "ngjordan/$name" "../$dir" -- --depth 1
+          done
+
+      # The font and translation assets the build reads.
+      - name: Check out the assets
+        env:
+          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ngjordan/craft-fonts.git /tmp/craft-fonts
+          git clone --depth 1 https://github.com/ngjordan/craft-i18n.git /tmp/craft-i18n
+
+      - name: Install the build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pkg-config libasound2-dev libxkbcommon-dev libwayland-dev libx11-dev \
+            libxrandr-dev libxi-dev libgl1-mesa-dev libgtk-3-dev curl
+
+      - name: Install cargo-deny
+        run: |
+          set -euo pipefail
+          curl -sSfL -o cargo-deny.tar.xz \
+            https://github.com/EmbarkStudios/cargo-deny/releases/download/0.20.2/cargo-deny-0.20.2-x86_64-unknown-linux-musl.tar.xz
+          tar -xJf cargo-deny.tar.xz -C /usr/local/bin --strip-components=1 cargo-deny
+          cargo deny --version
+
+      - name: Formatting
+        run: cargo fmt --all -- --check
+
+      - name: Lints
+        run: cargo clippy -p iridium-office --all-targets -- -D warnings
+
+      - name: Dependency policy
+        run: cargo deny check
+
+      # The test binaries are ~2.8 GB with debug info, and cargo links up to
+      # CARGO_BUILD_JOBS of them at once: concurrent links get the runner OOM-killed.
+      - name: Tests
+        run: cargo test -p iridium-office -j 1
