@@ -1,0 +1,67 @@
+[workspace]
+resolver = "3"
+members = ["apps/iridium-office"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+rust-version = "1.95"
+repository = "https://github.com/ngjordan/office"
+
+[workspace.dependencies]
+# The five apps' UI crates, by path for the spike (Phase 5 switches these to git + rev).
+iridium-ui-egui = { path = "../gc-gridcraft/crates/ui-egui" }
+iridium-engine = { path = "../gc-gridcraft/crates/engine" }
+iridium-docs-ui-egui = { path = "../wc-wordcraft/crates/ui-egui" }
+iridium-docs-engine = { path = "../wc-wordcraft/crates/engine" }
+iridium-cad-ui-egui = { path = "../cc-cadcraft/crates/ui-egui" }
+iridium-cad-engine = { path = "../cc-cadcraft/crates/engine" }
+iridium-decks-ui-egui = { path = "../dc-deckcraft/crates/ui-egui" }
+iridium-decks-engine = { path = "../dc-deckcraft/crates/engine" }
+iridium-pdf-ui-egui = { path = "../pdfcraft/crates/ui-egui" }
+
+egui = "0.37"
+eframe = { version = "0.37", default-features = false, features = ["default_fonts", "wgpu", "glow", "accesskit", "persistence"] }
+
+# Phase 1: the five apps' shell libraries (the suite hosts these).
+iridium-sheets-shell = { path = "../gc-gridcraft/crates/sheets-shell" }
+iridium-docs-shell = { path = "../wc-wordcraft/crates/docs-shell" }
+iridium-cad-shell = { path = "../cc-cadcraft/crates/cad-shell" }
+iridium-decks-shell = { path = "../dc-deckcraft/crates/decks-shell" }
+iridium-pdf-shell = { path = "../pdfcraft/crates/pdf-shell" }
+
+[patch.crates-io]
+ecolor = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+emath = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+epaint = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+epaint_default_fonts = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+egui = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+egui-winit = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+egui-wgpu = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+egui_glow = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+egui_extras = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+egui_kittest = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+egui_system_font_provider = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+eframe = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+egui_demo_lib = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+egui_inspection = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
+winit = { git = "https://github.com/ngjordan/winit.git", rev = "a517b3846ee8457d84ee4975110bfda6797c44dc" }
+
+# pdfcraft vendors hayro and patches it in; without these the office workspace resolves
+# hayro-jbig2 0.3.1 from crates.io, whose API differs from the vendored 0.3.0.
+
+# craft-libs' own [patch.crates-io] is ignored when craft-libs is a git dependency, so the
+# office workspace must repeat the patches itself. krilla must be the PATCHED fork: craft-pdf
+# asserts backend::CRAFT_UNWIND_POISONING / CRAFT_PRINT_COLOR / CRAFT_OPTIONAL_CONTENT, which
+# stock crates.io krilla 0.8.2 does not have.
+krilla = { git = "https://github.com/ngjordan/craft-libs", rev = "92d392cff132eaf53e13afff77f38b5c11b73aa0" }
+hayro-interpret = { path = "../pdfcraft/vendor/hayro-interpret" }
+hayro = { path = "../pdfcraft/vendor/hayro" }
+hayro-syntax = { path = "../pdfcraft/vendor/hayro-syntax" }
+hayro-cmap = { path = "../pdfcraft/vendor/hayro-cmap" }
+hayro-postscript = { path = "../pdfcraft/vendor/hayro-postscript" }
+hayro-jbig2 = { path = "../pdfcraft/vendor/hayro-jbig2" }
+lopdf = { path = "../pdfcraft/vendor/lopdf" }
+vello_common = { path = "../pdfcraft/vendor/vello_common" }
+vello_cpu = { path = "../pdfcraft/vendor/vello_cpu" }
