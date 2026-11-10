@@ -11,25 +11,25 @@ repository = "https://github.com/ngjordan/office"
 
 [workspace.dependencies]
 # The five apps' UI crates, by path for the spike (Phase 5 switches these to git + rev).
-iridium-ui-egui = { path = "../gc-gridcraft/crates/ui-egui" }
-iridium-engine = { path = "../gc-gridcraft/crates/engine" }
-iridium-docs-ui-egui = { path = "../wc-wordcraft/crates/ui-egui" }
-iridium-docs-engine = { path = "../wc-wordcraft/crates/engine" }
-iridium-cad-ui-egui = { path = "../cc-cadcraft/crates/ui-egui" }
-iridium-cad-engine = { path = "../cc-cadcraft/crates/engine" }
-iridium-decks-ui-egui = { path = "../dc-deckcraft/crates/ui-egui" }
-iridium-decks-engine = { path = "../dc-deckcraft/crates/engine" }
-iridium-pdf-ui-egui = { path = "../pdfcraft/crates/ui-egui" }
+iridium-ui-egui = { path = "../office-vendor/sheets/crates/ui-egui" }
+iridium-engine = { path = "../office-vendor/sheets/crates/engine" }
+iridium-docs-ui-egui = { path = "../office-vendor/docs/crates/ui-egui" }
+iridium-docs-engine = { path = "../office-vendor/docs/crates/engine" }
+iridium-cad-ui-egui = { path = "../office-vendor/cad/crates/ui-egui" }
+iridium-cad-engine = { path = "../office-vendor/cad/crates/engine" }
+iridium-decks-ui-egui = { path = "../office-vendor/decks/crates/ui-egui" }
+iridium-decks-engine = { path = "../office-vendor/decks/crates/engine" }
+iridium-pdf-ui-egui = { path = "../office-vendor/pdf/crates/ui-egui" }
 
 egui = "0.37"
 eframe = { version = "0.37", default-features = false, features = ["default_fonts", "wgpu", "glow", "accesskit", "persistence"] }
 
 # Phase 1: the five apps' shell libraries (the suite hosts these).
-iridium-sheets-shell = { path = "../gc-gridcraft/crates/sheets-shell" }
-iridium-docs-shell = { path = "../wc-wordcraft/crates/docs-shell" }
-iridium-cad-shell = { path = "../cc-cadcraft/crates/cad-shell" }
-iridium-decks-shell = { path = "../dc-deckcraft/crates/decks-shell" }
-iridium-pdf-shell = { path = "../pdfcraft/crates/pdf-shell" }
+iridium-sheets-shell = { path = "../office-vendor/sheets/crates/sheets-shell" }
+iridium-docs-shell = { path = "../office-vendor/docs/crates/docs-shell" }
+iridium-cad-shell = { path = "../office-vendor/cad/crates/cad-shell" }
+iridium-decks-shell = { path = "../office-vendor/decks/crates/decks-shell" }
+iridium-pdf-shell = { path = "../office-vendor/pdf/crates/pdf-shell" }
 
 [patch.crates-io]
 ecolor = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }
@@ -56,12 +56,12 @@ winit = { git = "https://github.com/ngjordan/winit.git", rev = "a517b3846ee8457d
 # asserts backend::CRAFT_UNWIND_POISONING / CRAFT_PRINT_COLOR / CRAFT_OPTIONAL_CONTENT, which
 # stock crates.io krilla 0.8.2 does not have.
 krilla = { git = "https://github.com/ngjordan/craft-libs", rev = "92d392cff132eaf53e13afff77f38b5c11b73aa0" }
-hayro-interpret = { path = "../pdfcraft/vendor/hayro-interpret" }
-hayro = { path = "../pdfcraft/vendor/hayro" }
-hayro-syntax = { path = "../pdfcraft/vendor/hayro-syntax" }
-hayro-cmap = { path = "../pdfcraft/vendor/hayro-cmap" }
-hayro-postscript = { path = "../pdfcraft/vendor/hayro-postscript" }
-hayro-jbig2 = { path = "../pdfcraft/vendor/hayro-jbig2" }
-lopdf = { path = "../pdfcraft/vendor/lopdf" }
-vello_common = { path = "../pdfcraft/vendor/vello_common" }
-vello_cpu = { path = "../pdfcraft/vendor/vello_cpu" }
+hayro-interpret = { path = "../office-vendor/pdf/vendor/hayro-interpret" }
+hayro = { path = "../office-vendor/pdf/vendor/hayro" }
+hayro-syntax = { path = "../office-vendor/pdf/vendor/hayro-syntax" }
+hayro-cmap = { path = "../office-vendor/pdf/vendor/hayro-cmap" }
+hayro-postscript = { path = "../office-vendor/pdf/vendor/hayro-postscript" }
+hayro-jbig2 = { path = "../office-vendor/pdf/vendor/hayro-jbig2" }
+lopdf = { path = "../office-vendor/pdf/vendor/lopdf" }
+vello_common = { path = "../office-vendor/pdf/vendor/vello_common" }
+vello_cpu = { path = "../office-vendor/pdf/vendor/vello_cpu" }

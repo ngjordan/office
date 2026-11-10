@@ -58,6 +58,10 @@ jobs:
           git clone --depth 1 https://github.com/ngjordan/craft-fonts.git /tmp/craft-fonts
           git clone --depth 1 https://github.com/ngjordan/craft-i18n.git /tmp/craft-i18n
 
+      # The workspace's path dependencies point at ../office-vendor/<app>.
+      - name: Create the vendor tree
+        run: packaging/setup-vendor.sh "$(dirname "$GITHUB_WORKSPACE")"
+
       - name: Install the build dependencies
         run: |
           sudo apt-get update

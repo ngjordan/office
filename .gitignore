@@ -1,1 +1,6 @@
 /target
+
+# The five apps are checked out beside this repository and linked in here by
+# packaging/setup-vendor.sh. The links point outside the repository, so they are
+# not part of it.
+vendor/
