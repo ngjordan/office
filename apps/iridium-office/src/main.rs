@@ -16,7 +16,8 @@ const BRAND: &str = include_str!("../../../branding/brand.env");
 
 /// One value out of the brand file.
 fn brand(key: &str) -> &'static str {
-    BRAND.lines()
+    BRAND
+        .lines()
         .find_map(|line| line.strip_prefix(key).and_then(|l| l.strip_prefix("=\"")))
         .and_then(|v| v.strip_suffix('"'))
         .unwrap_or_default()

@@ -139,6 +139,28 @@ fn a_runtime_look_change_of_the_active_module_survives() {
     );
 }
 
+/// The tab strip: the suite knows which documents are open.
+#[test]
+fn the_suite_tracks_its_open_documents() {
+    let ctx = egui::Context::default();
+    let sheets = iridium_office::module::Kind::Sheets;
+    let docs = iridium_office::module::Kind::Docs;
+    let mut s = Suite::new(vec![(sheets, vec!["/tmp/book.xlsx".to_string()])]);
+
+    // The file given at start-up is an open document.
+    assert_eq!(s.open_documents().len(), 1);
+    assert_eq!(s.open_documents()[0].1, "/tmp/book.xlsx");
+
+    // Opening one more adds a tab, and opening the same one again does not.
+    s.open_document(docs, "/tmp/letter.docx", &ctx, None);
+    assert_eq!(s.open_documents().len(), 2);
+    s.open_document(docs, "/tmp/letter.docx", &ctx, None);
+    assert_eq!(s.open_documents().len(), 2, "the same file is one tab");
+
+    // The tab strip draws.
+    assert!(frame(&mut s, &ctx, 1600.0, 1000.0) > 0);
+}
+
 /// A file is routed to the app that owns it.
 #[test]
 fn a_file_opens_in_the_app_that_owns_it() {

@@ -35,6 +35,9 @@ pub struct Suite {
     active: Option<Kind>,
     /// Files to open when a module is first started.
     pending: Vec<(Kind, Vec<String>)>,
+    /// The documents this suite has open, in the order they were opened. The tab strip
+    /// shows one per document.
+    open_documents: Vec<(Kind, String)>,
     /// Whether egui has drawn a pass yet. The context's fonts cannot be read before that.
     saw_ui: bool,
 }
@@ -42,12 +45,43 @@ pub struct Suite {
 impl Suite {
     /// A suite with no modules started yet.
     pub fn new(files: Vec<(Kind, Vec<String>)>) -> Self {
+        let open_documents: Vec<(Kind, String)> = files
+            .iter()
+            .flat_map(|(k, paths)| paths.iter().map(move |p| (*k, p.clone())))
+            .collect();
         Self {
             started: Vec::new(),
             looks: Vec::new(),
             active: None,
             pending: files,
+            open_documents,
             saw_ui: false,
+        }
+    }
+
+    /// The documents this suite has open.
+    pub fn open_documents(&self) -> &[(Kind, String)] {
+        &self.open_documents
+    }
+
+    /// Open a document in the app that owns it, and remember it for the tab strip.
+    pub fn open_document(
+        &mut self,
+        kind: Kind,
+        path: &str,
+        ctx: &egui::Context,
+        storage: Option<&dyn eframe::Storage>,
+    ) {
+        self.activate(kind, ctx, storage);
+        if !self
+            .open_documents
+            .iter()
+            .any(|(k, p)| *k == kind && p == path)
+        {
+            self.open_documents.push((kind, path.to_string()));
+        }
+        if let Some((_, m)) = self.started.iter_mut().find(|(k, _)| *k == kind) {
+            m.open_path(path);
         }
     }
 
@@ -214,6 +248,36 @@ impl Suite {
             self.home(ui, storage, &ctx);
             return;
         };
+
+        // The tab strip: one tab per open document. The click is collected and acted on
+        // after the panel closes, so the borrow of `self` inside the panel does not
+        // overlap the switch.
+        let mut chosen_doc: Option<(Kind, String)> = None;
+        let mut closed: Option<usize> = None;
+        egui::Panel::top("tabs").show(ui, |ui| {
+            ui.horizontal(|ui| {
+                for (i, (kind, path)) in self.open_documents.iter().enumerate() {
+                    let name = path.rsplit('/').next().unwrap_or(path);
+                    ui.horizontal(|ui| {
+                        if ui
+                            .button(format!("{} \u{2014} {name}", kind.label()))
+                            .clicked()
+                        {
+                            chosen_doc = Some((*kind, path.clone()));
+                        }
+                        if ui.small_button("\u{2715}").clicked() {
+                            closed = Some(i);
+                        }
+                    });
+                }
+            });
+        });
+        if let Some((kind, path)) = chosen_doc {
+            self.open_document(kind, &path, &ctx, storage);
+        }
+        if let Some(i) = closed {
+            self.open_documents.remove(i);
+        }
 
         // The rail. The click is collected and acted on after the panel closes, so
         // the borrow of `self` inside the panel does not overlap the switch.
