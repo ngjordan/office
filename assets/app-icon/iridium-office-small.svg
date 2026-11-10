@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Office icon: a page with a folded corner, lines and a small chart, on Iridium green. -->
+  <defs>
+    <linearGradient id="g-office" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B6E4F"/>
+      <stop offset="1" stop-color="#074C36"/>
+    </linearGradient>
+  </defs>
+  <rect x="32" y="32" width="448" height="448" rx="100" fill="url(#g-office)"/>
+  <path d="M148 112h144l74 74v214a28 28 0 0 1-28 28H148a28 28 0 0 1-28-28V140a28 28 0 0 1 28-28Z" fill="#fff"/>
+  <path d="M292 112v56a18 18 0 0 0 18 18h56Z" fill="#4FB389"/>
+  <path d="M156 230h200" stroke="#0B6E4F" stroke-width="22" stroke-linecap="round"/>
+  <path d="M156 278h200" stroke="#0B6E4F" stroke-width="22" stroke-linecap="round"/>
+  <path d="M156 326h108" stroke="#0B6E4F" stroke-width="22" stroke-linecap="round"/>
+  <rect x="278" y="310" width="32" height="32" rx="6" fill="#0B6E4F"/>
+  <rect x="318" y="290" width="32" height="52" rx="6" fill="#0B6E4F"/>
+</svg>
