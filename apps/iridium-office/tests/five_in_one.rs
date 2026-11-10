@@ -4,20 +4,32 @@ use eframe::App as _;
 #[test]
 fn five_in_one() {
     let ctx = egui::Context::default();
-    let mut sheets = iridium_ui_egui::SheetApp::new(iridium_engine::Session::new(), iridium_ui_egui::Services::default());
+    let mut sheets = iridium_ui_egui::SheetApp::new(
+        iridium_engine::Session::new(),
+        iridium_ui_egui::Services::default(),
+    );
     let mut docs = iridium_docs_ui_egui::WordApp::new(
         iridium_docs_engine::Session::new(iridium_docs_engine::sample::sample_document()),
         iridium_docs_ui_egui::Services::default(),
     );
-    let mut cad = iridium_cad_ui_egui::CadApp::new(iridium_cad_engine::Session::empty(), iridium_cad_ui_egui::Services::default());
-    let mut decks = iridium_decks_ui_egui::SlideApp::new(iridium_decks_engine::Session::new(), iridium_decks_ui_egui::Services::default());
+    let mut cad = iridium_cad_ui_egui::CadApp::new(
+        iridium_cad_engine::Session::empty(),
+        iridium_cad_ui_egui::Services::default(),
+    );
+    let mut decks = iridium_decks_ui_egui::SlideApp::new(
+        iridium_decks_engine::Session::new(),
+        iridium_decks_ui_egui::Services::default(),
+    );
     let mut pdf = iridium_pdf_ui_egui::PdfApp::new();
     let mut frame = eframe::Frame::_new_kittest();
 
     let mut total_shapes = 0;
     for n in 0..3 {
         let mut raw = egui::RawInput {
-            screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1600.0, 1000.0))),
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(1600.0, 1000.0),
+            )),
             ..Default::default()
         };
         sheets.raw_input_hook(&ctx, &mut raw);

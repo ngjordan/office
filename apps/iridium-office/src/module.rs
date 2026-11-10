@@ -17,13 +17,7 @@ pub enum Kind {
 
 impl Kind {
     /// Every kind, in the order the rail shows them.
-    pub const ALL: [Kind; 5] = [
-        Kind::Sheets,
-        Kind::Docs,
-        Kind::Cad,
-        Kind::Decks,
-        Kind::Pdf,
-    ];
+    pub const ALL: [Kind; 5] = [Kind::Sheets, Kind::Docs, Kind::Cad, Kind::Decks, Kind::Pdf];
 
     /// The product name, as the apps brand themselves.
     pub fn label(self) -> &'static str {

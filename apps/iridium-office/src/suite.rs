@@ -148,7 +148,12 @@ impl Suite {
     }
 
     /// The home screen: one button per app.
-    fn home(&mut self, ui: &mut egui::Ui, storage: Option<&dyn eframe::Storage>, ctx: &egui::Context) {
+    fn home(
+        &mut self,
+        ui: &mut egui::Ui,
+        storage: Option<&dyn eframe::Storage>,
+        ctx: &egui::Context,
+    ) {
         let mut chosen = None;
         egui::CentralPanel::default().show(ui, |ui| {
             ui.vertical_centered(|ui| {

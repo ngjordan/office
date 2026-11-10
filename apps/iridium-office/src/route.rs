@@ -49,10 +49,7 @@ pub fn table() -> Vec<(&'static str, Kind)> {
 /// The app that owns a path, by its extension.
 pub fn kind_for(path: &std::path::Path) -> Option<Kind> {
     let ext = path.extension()?.to_str()?.to_ascii_lowercase();
-    table()
-        .into_iter()
-        .find(|(e, _)| *e == ext)
-        .map(|(_, k)| k)
+    table().into_iter().find(|(e, _)| *e == ext).map(|(_, k)| k)
 }
 
 /// The app that owns a string by its extension.
