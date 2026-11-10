@@ -59,12 +59,6 @@ macro_rules! adapter {
                 fn fonts(&self) -> egui::FontDefinitions {
                     self.shell.fonts()
                 }
-                fn style(&self) -> egui::Style {
-                    self.shell.style()
-                }
-                fn zoom(&self) -> f32 {
-                    self.shell.zoom()
-                }
                 fn install_native_menu(&mut self) {
                     self.shell.install_native_menu();
                 }

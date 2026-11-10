@@ -113,6 +113,32 @@ fn the_active_modules_look_is_restored_on_a_switch() {
     );
 }
 
+/// A runtime change to the active module's own look SURVIVES.
+///
+/// The suite restores the active module's look before it draws, so it must restore the
+/// look the module currently wants — not a snapshot from when it was built. A snapshot
+/// would revert a theme toggle or an interface-size change made while the module was
+/// active.
+#[test]
+fn a_runtime_look_change_of_the_active_module_survives() {
+    let ctx = egui::Context::default();
+    let mut s = suite();
+
+    let sheets = iridium_office::module::Kind::Sheets;
+    s.activate(sheets, &ctx, None);
+    frame(&mut s, &ctx, 1600.0, 1000.0);
+
+    // The app changes its own zoom while it is active (the user picked a different
+    // interface size). The suite must not undo it.
+    ctx.set_zoom_factor(1.75);
+    frame(&mut s, &ctx, 1600.0, 1000.0);
+    assert_eq!(
+        ctx.zoom_factor(),
+        1.75,
+        "the suite reverted the active module's own zoom change"
+    );
+}
+
 /// A file is routed to the app that owns it.
 #[test]
 fn a_file_opens_in_the_app_that_owns_it() {

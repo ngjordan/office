@@ -2,6 +2,7 @@
 //!
 //! The binary in `main.rs` is a thin wrapper over this library.
 
+pub mod look;
 pub mod module;
 pub mod modules;
 pub mod route;

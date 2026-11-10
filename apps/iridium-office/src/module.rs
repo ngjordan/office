@@ -68,10 +68,15 @@ pub trait Module {
     /// Whether the module is safe to close.
     fn can_close(&self) -> bool;
 
-    /// The look this module installed, so the suite can restore it on a switch.
+    /// The font set this module installed.
+    ///
+    /// The suite reads the style and the zoom from the context itself (it captures the
+    /// look live, after the module's logic ran). The fonts are the one thing it cannot
+    /// read back before egui's first pass, so the module reports them.
+    ///
+    /// This is the set the module BUILDS. The suite keeps it up to date from the context
+    /// as well, so faces the module adds while running (a document's own fonts) are kept.
     fn fonts(&self) -> egui::FontDefinitions;
-    fn style(&self) -> egui::Style;
-    fn zoom(&self) -> f32;
 
     /// Re-install this module's native menu (macOS). A no-op where there is none.
     fn install_native_menu(&mut self);
