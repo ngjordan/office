@@ -9,6 +9,30 @@
 
 use iridium_office::{route, suite::Suite};
 
+/// The suite's name, slug and app id, from `branding/brand.env` - the one place they
+/// live, so changing one is a one-line edit. It is read at compile time, so the built
+/// app does not need the file beside it.
+const BRAND: &str = include_str!("../../../branding/brand.env");
+
+/// One value out of the brand file.
+fn brand(key: &str) -> &'static str {
+    BRAND.lines()
+        .find_map(|line| line.strip_prefix(key).and_then(|l| l.strip_prefix("=\"")))
+        .and_then(|v| v.strip_suffix('"'))
+        .unwrap_or_default()
+}
+
+/// The window icon.
+fn icon() -> Option<egui::IconData> {
+    let bytes = include_bytes!("../../../assets/app-icon/iridium-office-512.png");
+    let img = image::load_from_memory(bytes).ok()?.to_rgba8();
+    Some(egui::IconData {
+        width: img.width(),
+        height: img.height(),
+        rgba: img.into_raw(),
+    })
+}
+
 /// The suite's own state, owned by eframe.
 struct App {
     suite: Suite,
@@ -42,10 +66,13 @@ fn main() -> eframe::Result<()> {
     let files: Vec<std::path::PathBuf> = std::env::args_os().skip(1).map(Into::into).collect();
     let routed = route::route(&files);
 
-    let viewport = egui::ViewportBuilder::default()
-        .with_title("Office")
+    let mut viewport = egui::ViewportBuilder::default()
+        .with_title(brand("APP_NAME"))
         .with_inner_size([1280.0, 820.0])
         .with_min_inner_size([720.0, 520.0]);
+    if let Some(icon) = icon() {
+        viewport = viewport.with_icon(icon);
+    }
 
     let options = eframe::NativeOptions {
         viewport,
@@ -53,7 +80,7 @@ fn main() -> eframe::Result<()> {
     };
 
     eframe::run_native(
-        "Office",
+        brand("APP_NAME"),
         options,
         Box::new(|cc| {
             let storage = cc.storage;
