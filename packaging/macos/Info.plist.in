@@ -208,6 +208,11 @@
       <array>
         <string>ph.cad.dxf</string>
       </array>
+      <key>CFBundleTypeExtensions</key>
+      <array>
+        <string>dxf</string>
+        <string>dwg</string>
+      </array>
     </dict>
     <dict>
       <key>CFBundleTypeName</key>
