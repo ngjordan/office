@@ -279,6 +279,24 @@ jobs:
             # No SignPath: sign locally with a CA certificate or Azure, and build the archive.
             packaging/windows/package.ps1 -Arch ${{ matrix.arch }} -SkipBuild
           }
+          # Record the signing state so the release notes say what the user will really see.
+          # Get-AuthenticodeSignature is built into PowerShell; the status is NotSigned for
+          # an unsigned installer.
+          $msi = Get-ChildItem (Join-Path $env:GITHUB_WORKSPACE 'dist\release') -Filter '*.msi' -ErrorAction SilentlyContinue |
+                 Select-Object -First 1
+          if ($msi) {
+            # A marker is not worth failing a release over: anything unexpected reads as
+            # unsigned, and the notes say so.
+            $status = 'NotSigned'
+            try {
+              $sig = Get-AuthenticodeSignature -FilePath $msi.FullName -ErrorAction Stop
+              if ($sig.Status -eq 'Valid') { $status = 'Valid' }
+              Write-Output "the installer signature status is $($sig.Status)"
+            } catch {
+              Write-Output "::warning::could not read the installer signature: $($_.Exception.Message)"
+            }
+            Set-Content -Path (Join-Path $env:GITHUB_WORKSPACE 'dist\release\SIGNING') -Value $status
+          }
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -286,6 +304,7 @@ jobs:
           path: |
             dist/release/*.msi
             dist/release/*.zip
+            dist/release/SIGNING
 
   # The GitHub release itself: a tag and a list of assets. Publishing does not need a runner
   # with a spending limit, so this is the one job that works even when the build jobs cannot
@@ -313,7 +332,9 @@ jobs:
         run: |
           set -euo pipefail
           # A platform that failed contributes no artifacts; publish whatever did build.
-          mapfile -t assets < <(find artifacts -type f | sort)
+          # The markers say how the artifacts were signed: they are read for the notes, not
+          # published as downloads.
+          mapfile -t assets < <(find artifacts -type f ! -name 'NOTARIZATION' ! -name 'SIGNING' | sort)
           if [[ ${#assets[@]} -eq 0 ]]; then
             echo "::error::no artifacts were built, refusing to publish an empty release"
             exit 1
@@ -323,6 +344,13 @@ jobs:
           # A re-run of the same version finds the release already there: add the new
           # assets to it instead of failing on the existing tag.
           NOTES="The Office suite $TAG."
+          if [[ -f artifacts/SIGNING ]]; then
+            if grep -q "^Valid$" artifacts/SIGNING; then
+              NOTES="$NOTES The Windows artifacts are signed."
+            else
+              NOTES="$NOTES The Windows artifacts are NOT signed: Windows shows \"Windows protected your PC\". Choose More info, then Run anyway."
+            fi
+          fi
           if [[ -f artifacts/NOTARIZATION ]] && grep -q "^notarized$" artifacts/NOTARIZATION; then
             NOTES="$NOTES The macOS artifacts are signed and notarized."
           else
