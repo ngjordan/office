@@ -49,6 +49,9 @@ jobs:
     name: macOS universal
     needs: checkout-apps
     runs-on: macos-15
+    # The notary credentials live in this environment, which only the default branch may
+    # deploy to. A fork's pull_request cannot reach them.
+    environment: release
     env:
       CRAFT_FONTS_DIR: /tmp/craft-fonts
       CRAFT_I18N_DIR: /tmp/craft-i18n
@@ -83,6 +86,37 @@ jobs:
       # macos-14 is an ARM runner: the universal build needs the x86_64 target too.
       - name: Install the Rust targets
         run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      # The notary key is checked before the long build: notarytool history authenticates
+      # against the notary service and submits nothing, so a wrong key fails in seconds
+      # instead of after a 48-minute build.
+      - name: Check the notary credentials
+        env:
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          umask 077
+          KEY="$RUNNER_TEMP/notary-smoke.p8"
+          trap 'rm -f "$KEY"' EXIT
+          if [[ -n "${APPLE_API_KEY:-}" ]]; then
+            printf '%s' "$APPLE_API_KEY" | base64 --decode > "$KEY"
+            grep -q "BEGIN PRIVATE KEY" "$KEY"
+            xcrun notarytool history --key "$KEY" --key-id "$APPLE_API_KEY_ID" \
+              --issuer "$APPLE_API_ISSUER_ID" > /dev/null
+            echo "the notary API key works"
+          elif [[ -n "${APPLE_ID:-}" && -n "${APPLE_PASSWORD:-}" && -n "${APPLE_TEAM_ID:-}" ]]; then
+            xcrun notarytool history --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" \
+              --team-id "$APPLE_TEAM_ID" > /dev/null
+            echo "the Apple ID works"
+          else
+            echo "::error::no notary credentials: the artifacts would ship un-notarized"
+            exit 1
+          fi
 
       - name: Import the signing certificate
         env:
