@@ -22,7 +22,12 @@ fn main() {
         .next()
         .unwrap_or("0.0.0")
         .split('.');
-    let mut word = || parts.next().and_then(|p| p.parse::<u64>().ok()).unwrap_or(0);
+    let mut word = || {
+        parts
+            .next()
+            .and_then(|p| p.parse::<u64>().ok())
+            .unwrap_or(0)
+    };
     let (major, minor, patch, release) = (word(), word(), word(), word());
     let version = (major << 48) | (minor << 32) | (patch << 16) | release;
 

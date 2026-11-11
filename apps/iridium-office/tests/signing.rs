@@ -55,7 +55,9 @@ fn attribute(xml: &str, attribute: &str) -> String {
         .unwrap_or_else(|| panic!("the artifact configuration does not set {attribute}"))
         + needle.len();
     let rest = &xml[start..];
-    let end = rest.find('"').expect("unterminated string in the artifact configuration");
+    let end = rest
+        .find('"')
+        .expect("unterminated string in the artifact configuration");
     rest[..end].to_string()
 }
 
@@ -66,7 +68,10 @@ fn the_signing_configuration_and_the_binary_metadata_agree() {
 
     // SignPath checks these on every signing request, so a change in one file has to be
     // made in the other.
-    assert_eq!(versioninfo(&build_rs, "ProductName"), attribute(&xml, "product-name"));
+    assert_eq!(
+        versioninfo(&build_rs, "ProductName"),
+        attribute(&xml, "product-name")
+    );
     assert_eq!(
         versioninfo(&build_rs, "CompanyName"),
         attribute(&xml, "company-name")
