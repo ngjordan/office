@@ -77,6 +77,15 @@ jobs:
           tar -xJf cargo-deny.tar.xz -C /usr/local/bin --strip-components=1 cargo-deny
           cargo deny --version
 
+      # The release workflows run these scripts directly, so a script that is not executable
+      # fails the job with "Permission denied" instead of running.
+      - name: The packaging scripts are executable
+        run: |
+          set -euo pipefail
+          for f in packaging/linux/package.sh packaging/macos/package.sh packaging/setup-vendor.sh; do
+            test -x "$f" || { echo "::error::$f is not executable"; exit 1; }
+          done
+
       - name: Formatting
         run: cargo fmt --all -- --check
 
