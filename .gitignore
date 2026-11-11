@@ -4,3 +4,4 @@
 # packaging/setup-vendor.sh. The links point outside the repository, so they are
 # not part of it.
 vendor/
+/dist

@@ -54,3 +54,12 @@ copy_font_licences() {
     cp "$f" "$dest/OFL-$family.txt"
   done
 }
+
+# Copy the licence and notice files a package must ship into <dest>.
+copy_docs() {
+  local dest="$1" f
+  for f in README.md LICENSE-MIT LICENSE-APACHE NOTICE; do
+    if [[ -f "$ROOT/$f" ]]; then cp "$ROOT/$f" "$dest/"; fi
+  done
+  return
+}

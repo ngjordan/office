@@ -1,0 +1,20 @@
+Office
+A single desktop application hosting Sheets, Docs, CAD, Decks and PDF.
+
+Based on GridCraft (c) 2026 ArtCraft Team and the GridCraft contributors,
+WordCraft (c) 2026 ArtCraft Team and the WordCraft contributors,
+CADCraft (c) 2026 ArtCraft Team and the CADCraft contributors,
+DeckCraft (c) 2026 ArtCraft Team and the DeckCraft contributors, and
+PdfCraft (c) 2026 ArtCraft Team and the PdfCraft contributors.
+Copyright (c) 2026 Iridium Technologies, Inc.
+Licensed under the MIT License or the Apache License, Version 2.0, at your option
+(LICENSE-MIT, LICENSE-APACHE).
+
+This is a modified distribution. The upstream name, wordmark and logos have been
+removed as the upstream brand licence requires; the credit is kept above and in
+ATTRIBUTION.md. The code remains under the MIT License or the Apache License,
+Version 2.0, at your option.
+
+The shared libraries this application links (craft-libs, craft-i18n and their
+dependencies) carry their own notices; see ATTRIBUTION.md for the full list of
+assets, fonts, translations and the licences that cover them.
