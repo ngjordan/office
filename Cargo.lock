@@ -1673,7 +1673,7 @@ dependencies = [
 [[package]]
 name = "craft-proof"
 version = "0.1.0"
-source = "git+https://github.com/ngjordan/craft-libs?rev=136c9a7cb818979f80312ecea234a23101348fa8#136c9a7cb818979f80312ecea234a23101348fa8"
+source = "git+https://github.com/ngjordan/craft-libs?rev=ea5c45461b04eacd9ff9f79a2ffc262b9ab4fe6a#ea5c45461b04eacd9ff9f79a2ffc262b9ab4fe6a"
 dependencies = [
  "log",
  "miniz_oxide 0.9.1",
@@ -1777,7 +1777,7 @@ dependencies = [
 [[package]]
 name = "craft-update"
 version = "0.1.0"
-source = "git+https://github.com/ngjordan/craft-libs?rev=04428cee1e5bb2b85c3b6537aeb10ba0da228ff9#04428cee1e5bb2b85c3b6537aeb10ba0da228ff9"
+source = "git+https://github.com/ngjordan/craft-libs?rev=7ad94d4fdd66#7ad94d4fdd663ef080341621124131ed2fd4f2eb"
 dependencies = [
  "chrono",
  "dunce",
@@ -1803,7 +1803,7 @@ dependencies = [
 [[package]]
 name = "craft-update"
 version = "0.1.0"
-source = "git+https://github.com/ngjordan/craft-libs?rev=136c9a7cb818979f80312ecea234a23101348fa8#136c9a7cb818979f80312ecea234a23101348fa8"
+source = "git+https://github.com/ngjordan/craft-libs?rev=9f9b19b7140e#9f9b19b7140e9a72d3c89bf27df8645810e54c56"
 dependencies = [
  "chrono",
  "dunce",
@@ -1829,7 +1829,7 @@ dependencies = [
 [[package]]
 name = "craft-update"
 version = "0.1.0"
-source = "git+https://github.com/ngjordan/craft-libs?rev=1b34eba41e62138fc2438d2734523b302840b45d#1b34eba41e62138fc2438d2734523b302840b45d"
+source = "git+https://github.com/ngjordan/craft-libs?rev=a31a60d15b4b#a31a60d15b4b05010b35b45c85fcb3a966541faa"
 dependencies = [
  "chrono",
  "dunce",
@@ -1855,7 +1855,7 @@ dependencies = [
 [[package]]
 name = "craft-update"
 version = "0.1.0"
-source = "git+https://github.com/ngjordan/craft-libs?rev=c5a1cbfb5f9049f9270955caffb5bee5997aebf7#c5a1cbfb5f9049f9270955caffb5bee5997aebf7"
+source = "git+https://github.com/ngjordan/craft-libs?rev=f167c81b7ab0#f167c81b7ab00d1440f71744fdc08730577f51e6"
 dependencies = [
  "chrono",
  "dunce",
@@ -4142,7 +4142,7 @@ version = "0.17.0"
 dependencies = [
  "chrono",
  "craft-ui 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=e9c3f87b4fb807dcb23dc85e82906510a229b72a)",
- "craft-update 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=c5a1cbfb5f9049f9270955caffb5bee5997aebf7)",
+ "craft-update 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=f167c81b7ab0)",
  "craft-window 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=e9c3f87b4fb807dcb23dc85e82906510a229b72a)",
  "egui",
  "egui-wgpu",
@@ -4444,7 +4444,7 @@ name = "iridium-decks-ui-egui"
 version = "0.15.0"
 dependencies = [
  "craft-ui 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=04428cee1e5bb2b85c3b6537aeb10ba0da228ff9)",
- "craft-update 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=04428cee1e5bb2b85c3b6537aeb10ba0da228ff9)",
+ "craft-update 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=9f9b19b7140e)",
  "egui",
  "iridium-decks-anim",
  "iridium-decks-color",
@@ -4692,7 +4692,7 @@ dependencies = [
  "chrono",
  "craft-i18n 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=92d392cff132eaf53e13afff77f38b5c11b73aa0)",
  "craft-ui 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=92d392cff132eaf53e13afff77f38b5c11b73aa0)",
- "craft-update 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=136c9a7cb818979f80312ecea234a23101348fa8)",
+ "craft-update 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=a31a60d15b4b)",
  "craft-window 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=92d392cff132eaf53e13afff77f38b5c11b73aa0)",
  "egui",
  "image",
@@ -5224,7 +5224,7 @@ dependencies = [
  "craft-menu",
  "craft-quit",
  "craft-ui 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=95cee510eb4dd48e8cb76b9fa71a45df57fb89ad)",
- "craft-update 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=1b34eba41e62138fc2438d2734523b302840b45d)",
+ "craft-update 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=7ad94d4fdd66)",
  "eframe",
  "egui",
  "egui_extras",
@@ -5317,7 +5317,7 @@ name = "iridium-ui-egui"
 version = "0.18.3"
 dependencies = [
  "craft-ui 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=04428cee1e5bb2b85c3b6537aeb10ba0da228ff9)",
- "craft-update 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=04428cee1e5bb2b85c3b6537aeb10ba0da228ff9)",
+ "craft-update 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=9f9b19b7140e)",
  "craft-window 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=04428cee1e5bb2b85c3b6537aeb10ba0da228ff9)",
  "egui",
  "image",
@@ -5526,7 +5526,7 @@ checksum = "e2db585e1d738fc771bf08a151420d3ed193d9d895a36df7f6f8a9456b911ddc"
 [[package]]
 name = "krilla"
 version = "0.8.2"
-source = "git+https://github.com/ngjordan/craft-libs?rev=92d392cff132eaf53e13afff77f38b5c11b73aa0#92d392cff132eaf53e13afff77f38b5c11b73aa0"
+source = "git+https://github.com/ngjordan/craft-libs?rev=7ad94d4fdd663ef080341621124131ed2fd4f2eb#7ad94d4fdd663ef080341621124131ed2fd4f2eb"
 dependencies = [
  "base64 0.22.1",
  "bumpalo",
@@ -6514,7 +6514,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d8fae84b431384b68627d0f9b3b1245fcf9f46f6c0e3dc902e9dce64edd1967"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.45.0",
 ]
 
 [[package]]

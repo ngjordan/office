@@ -65,3 +65,7 @@ hayro-jbig2 = { path = "../office-vendor/pdf/vendor/hayro-jbig2" }
 lopdf = { path = "../office-vendor/pdf/vendor/lopdf" }
 vello_common = { path = "../office-vendor/pdf/vendor/vello_common" }
 vello_cpu = { path = "../office-vendor/pdf/vendor/vello_cpu" }
+
+[profile.release]
+# The symbol table is half the binary and carries upstream crate and file names.
+strip = true
