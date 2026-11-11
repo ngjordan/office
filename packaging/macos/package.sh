@@ -68,9 +68,17 @@ echo "==> $APP_NAME $VERSION for macOS ($ARCH), identity: $IDENTITY, notarize: $
 
 # ---- build -------------------------------------------------------------------------------------
 if [[ "$SKIP_BUILD" = 0 ]]; then
-  args=()
-  for t in "${TARGETS[@]}"; do args+=(--target "$t"); done
-  (cd "$ROOT" && cargo build --release --locked -p iridium-office "${args[@]}")
+  # One cargo process per target, in parallel: a universal build compiles the whole workspace
+  # twice, and two targets do not share a build directory, so this halves the wall time.
+  (cd "$ROOT"
+   pids=()
+   for t in "${TARGETS[@]}"; do
+     cargo build --release --locked -p iridium-office --target "$t" &
+     pids+=($!)
+   done
+   rc=0
+   for pid in "${pids[@]}"; do wait "$pid" || rc=1; done
+   exit "$rc")
 fi
 
 rm -rf "$WORK"
