@@ -41,6 +41,40 @@ to `CARGO_BUILD_JOBS` of them at once — concurrent links get the build OOM-kil
 - `tests/suite.rs` — Phase 2b: the switcher, file routing, and the look rules across a switch.
 - `src/suite.rs` unit tests — the per-module look (style, zoom, fonts), using a fake module that owns its look.
 
+## Release
+
+`.github/workflows/release.yml` builds the macOS universal app and the Windows x64 and
+arm64 installers. It runs the `release` **environment**, which only the `main` and
+`release` branches may deploy to, so the signing credentials never reach a run from
+somewhere else.
+
+Secrets (all in the `release` environment, *Settings > Environments > release*):
+
+| Secret | What it is |
+|---|---|
+| `APPLE_CERTIFICATE` | the Developer ID `.p12`, base64 |
+| `APPLE_CERTIFICATE_PASSWORD` | the `.p12` password |
+| `KEYCHAIN_PASSWORD` | the temporary keychain's password |
+| `APPLE_API_KEY` | the App Store Connect `.p8`, base64, no newlines |
+| `APPLE_API_KEY_ID` | the key id |
+| `APPLE_API_ISSUER_ID` | the issuer id |
+| `AZURE_TENANT_ID` | the Entra ID tenant |
+| `AZURE_CLIENT_ID` | the app registration's client id |
+| `AZURE_CLIENT_SECRET` | the app registration's client secret |
+| `AZURE_SIGNING_ENDPOINT` | e.g. `https://eus.codesigning.azure.net` |
+| `AZURE_SIGNING_ACCOUNT` | the Trusted Signing account name |
+| `AZURE_CERT_PROFILE` | the certificate profile name |
+
+The Apple notarization works with either the API key (`APPLE_API_*`) or an Apple ID
+with an app-specific password (`APPLE_ID` + `APPLE_PASSWORD` + `APPLE_TEAM_ID`); the
+API key is preferred, because it does not expire and needs no interactive 2FA. With
+neither, the app is still signed, but not notarized, and the release notes say so.
+
+Windows signing uses Azure Trusted Signing when the `AZURE_*` secrets are set, and a
+`.pfx` (`WINDOWS_CERTIFICATE` + `WINDOWS_CERTIFICATE_PASSWORD`) otherwise. With neither,
+the installer ships unsigned.
+
+
 ## CI and the dependency policy
 
 `.github/workflows/ci.yml` runs the same gate locally: format, clippy, dependency policy
