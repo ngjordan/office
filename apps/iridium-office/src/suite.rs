@@ -195,11 +195,12 @@ impl Suite {
         if owned_by_other {
             return;
         }
-        if let Some((_, look)) = self.looks.iter_mut().find(|(k, _)| *k == active) {
-            if sig != look.font_sig && look.covers(&sig) {
-                look.fonts = fonts;
-                look.font_sig = sig;
-            }
+        if let Some((_, look)) = self.looks.iter_mut().find(|(k, _)| *k == active)
+            && sig != look.font_sig
+            && look.covers(&sig)
+        {
+            look.fonts = fonts;
+            look.font_sig = sig;
         }
     }
 
