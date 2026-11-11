@@ -3,6 +3,7 @@ name = "iridium-office"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+build = "build.rs"
 rust-version.workspace = true
 repository.workspace = true
 
@@ -27,3 +28,6 @@ egui = { workspace = true }
 eframe = { workspace = true }
 serde_json = "1"
 log = "0.4"
+
+[build-dependencies]
+winresource = "0.1"

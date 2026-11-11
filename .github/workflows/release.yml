@@ -174,12 +174,83 @@ jobs:
             dist/release/*.rpm
             dist/release/*.tar.gz
 
+  windows:
+    name: Windows ${{ matrix.arch }}
+    needs: checkout-apps
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: x64, target: x86_64-pc-windows-msvc }
+          - { arch: arm64, target: aarch64-pc-windows-msvc }
+    env:
+      CRAFT_FONTS_DIR: /tmp/craft-fonts
+      CRAFT_I18N_DIR: /tmp/craft-i18n
+      CARGO_BUILD_JOBS: 2
+      DIST: ${{ github.workspace }}\dist\release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check out the apps
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
+        run: |
+          set -euo pipefail
+          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft; do
+            name="${pair%%:*}"; dir="${pair##*:}"
+            gh repo clone "ngjordan/$name" "../$dir" -- --depth 1
+          done
+
+      - name: Check out the assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ngjordan/craft-fonts.git /tmp/craft-fonts
+          git clone --depth 1 https://github.com/ngjordan/craft-i18n.git /tmp/craft-i18n
+
+      # The workspace's path dependencies point at ../office-vendor/<app>.
+      - name: Create the vendor tree
+        shell: bash
+        run: packaging/setup-vendor.sh "$(dirname "$GITHUB_WORKSPACE")"
+
+      - name: Install the Rust target and WiX
+        shell: pwsh
+        run: |
+          rustup target add ${{ matrix.target }}
+          dotnet tool install --global wix --version 5.0.2
+
+      - name: Build, sign and package
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_SIGNING_ENDPOINT: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+          AZURE_SIGNING_ACCOUNT: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+          AZURE_CERT_PROFILE: ${{ secrets.AZURE_CERT_PROFILE }}
+        run: packaging/windows/package.ps1 -Arch ${{ matrix.arch }}
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f3c4d0bb5aa # v4.6.2
+        with:
+          name: windows-${{ matrix.arch }}
+          path: |
+            dist/release/*.msi
+            dist/release/*.zip
+
   # The GitHub release itself: a tag and a list of assets. Publishing does not need a runner
   # with a spending limit, so this is the one job that works even when the build jobs cannot
   # start.
   release:
     name: Draft the release
-    needs: [checkout-apps, macos, linux]
+    needs: [checkout-apps, macos, windows, linux]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

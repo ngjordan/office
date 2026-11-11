@@ -178,3 +178,55 @@ fn a_file_opens_in_the_app_that_owns_it() {
     assert_eq!(s.active(), Some(iridium_office::module::Kind::Sheets));
     assert!(frame(&mut s, &ctx, 1600.0, 1000.0) > 0);
 }
+
+/// The Windows installer must register exactly the extensions the suite routes.
+/// A file type that routes but is not registered opens in nothing; one that is
+/// registered but does not route opens in the wrong module.
+#[test]
+fn the_windows_installer_registers_exactly_the_routed_extensions() {
+    let wxs = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../packaging/windows/iridium-office.wxs"
+    ))
+    .expect("the Windows installer source must exist");
+
+    let registered: std::collections::HashSet<String> = wxs
+        .lines()
+        .filter_map(|l| l.trim().strip_prefix("<Extension Id=\""))
+        .filter_map(|l| l.split('"').next())
+        .map(|s| s.to_string())
+        .collect();
+
+    let routed: std::collections::HashSet<String> = iridium_office::route::table()
+        .into_iter()
+        .map(|(e, _)| e.to_string())
+        .collect();
+
+    let missing: Vec<_> = routed.difference(&registered).collect();
+    let extra: Vec<_> = registered.difference(&routed).collect();
+    assert!(
+        missing.is_empty(),
+        "routed but not registered on Windows: {missing:?}"
+    );
+    assert!(
+        extra.is_empty(),
+        "registered on Windows but not routed: {extra:?}"
+    );
+}
+
+/// Every registered extension needs an open verb, or double-clicking the file
+/// does nothing.
+#[test]
+fn every_registered_extension_has_an_open_verb() {
+    let wxs = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../packaging/windows/iridium-office.wxs"
+    ))
+    .expect("the Windows installer source must exist");
+    let extensions = wxs.matches("<Extension Id=\"").count();
+    let verbs = wxs.matches("<Verb Id=\"open\"").count();
+    assert_eq!(
+        extensions, verbs,
+        "each registered extension needs one open verb"
+    );
+}

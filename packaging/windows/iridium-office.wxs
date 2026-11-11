@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <?ifndef HasCraftFontLicences ?>
+  <?define HasCraftFontLicences=0 ?>
+  <?endif?>
+  <Package Name="Office" Manufacturer="Iridium Technologies, Inc." Version="$(var.Version)" UpgradeCode="B4E9C2A1-7D63-5F08-9C14-2E8A6D5F30B7" Scope="perUserOrMachine" Compressed="yes" Language="1033">
+    <SummaryInformation Description="Office suite" Manufacturer="Iridium Technologies, Inc." />
+    <!-- Same-version upgrades let successive pre-releases of one X.Y.Z replace each other
+         (MSI versions are numeric, so 1.2.3-rc.1 and 1.2.3-rc.2 are both 1.2.3). -->
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of Office is already installed." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <Icon Id="OfficeIcon.ico" SourceFile="$(var.IconPath)" />
+    <Property Id="ARPPRODUCTICON" Value="OfficeIcon.ico" />
+    <Property Id="ARPURLINFOABOUT" Value="https://iridium.ph" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://iridium.ph" />
+    <Property Id="ARPHELPLINK" Value="https://iridium.ph" />
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="CraftSuiteFolder" Name="Iridium">
+        <Directory Id="INSTALLFOLDER" Name="Office" />
+      </Directory>
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder" />
+
+    <Feature Id="Main" Title="Office" Level="1">
+      <?if $(var.HasCraftFontLicences) = 1 ?>
+      <ComponentGroupRef Id="CraftFontLicences" />
+      <?endif?>
+      <ComponentGroupRef Id="OfficeFiles" />
+    </Feature>
+  <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <UI>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2" Condition="NOT Installed" />
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2" Condition="NOT Installed" />
+    </UI>
+  </Package>
+
+  <Fragment>
+    <?if $(var.HasCraftFontLicences) = 1 ?>
+    <ComponentGroup Id="CraftFontLicences" Directory="INSTALLFOLDER">
+      <Files Include="$(var.DocsDir)\**" />
+    </ComponentGroup>
+    <?endif?>
+    <ComponentGroup Id="OfficeFiles" Directory="INSTALLFOLDER">
+      <Component Id="OfficeApp" Guid="2C7B4F19-5E8A-4D31-B6C9-0F3A8D2E5741">
+        <File Id="OfficeNotice" Source="$(var.BinDir)\NOTICE" KeyPath="no" />
+        <File Id="OfficeExe" Source="$(var.BinDir)\iridium-office.exe" KeyPath="yes">
+          <!-- No Icon here, so the shortcut shows the icon embedded in iridium-office.exe (build.rs).
+               An MSI Icon is cached under %APPDATA%\Microsoft\Installer\{ProductCode}\, and every
+               update is a major upgrade with a new ProductCode that deletes the old folder. A
+               taskbar pin is a copy of this shortcut that the update never touches, so it kept
+               pointing at the deleted file and lost its icon. The exe's path survives updates; the
+               shortcut is not advertised, so it targets that path and its icon is the exe's own.
+               The Icon above stays for ARPPRODUCTICON (Apps and features). -->
+          <Shortcut Id="StartMenuShortcut" Directory="ProgramMenuFolder" Name="Office" Description="Office suite" WorkingDirectory="INSTALLFOLDER" Advertise="no" />
+        </File>
+
+        <!-- The suite routes every format to the module that owns it, so it registers the union
+             of the five apps' extensions. One ProgId per extension keeps the file association
+             with the suite itself. -->
+        <ProgId Id="Office.Spreadsheet" Description="Office Spreadsheet">
+          <Extension Id="xlsx" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.MacroSpreadsheet" Description="Office Spreadsheet">
+          <Extension Id="xlsm" ContentType="application/vnd.ms-excel.sheet.macroEnabled.12">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.BinarySpreadsheet" Description="Office Spreadsheet">
+          <Extension Id="xlsb" ContentType="application/vnd.ms-excel.sheet.binary.macroEnabled.12">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.OpenSpreadsheet" Description="Office Spreadsheet">
+          <Extension Id="ods" ContentType="application/vnd.oasis.opendocument.spreadsheet">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.Csv" Description="Office Spreadsheet">
+          <Extension Id="csv" ContentType="text/csv">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.Tsv" Description="Office Spreadsheet">
+          <Extension Id="tsv" ContentType="text/tab-separated-values">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+
+        <ProgId Id="Office.Document" Description="Office Document">
+          <Extension Id="docx" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.MacroDocument" Description="Office Document">
+          <Extension Id="docm" ContentType="application/vnd.ms-word.document.macroEnabled.12">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.Template" Description="Office Document">
+          <Extension Id="dotx" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.template">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.MacroTemplate" Description="Office Document">
+          <Extension Id="dotm" ContentType="application/vnd.ms-word.template.macroEnabled.12">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.OldDocument" Description="Office Document">
+          <Extension Id="doc" ContentType="application/msword">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.OldTemplate" Description="Office Document">
+          <Extension Id="dot" ContentType="application/msword-template">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.OpenDocument" Description="Office Document">
+          <Extension Id="odt" ContentType="application/vnd.oasis.opendocument.text">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.Rtf" Description="Office Document">
+          <Extension Id="rtf" ContentType="text/rtf">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.Html" Description="Office Document">
+          <Extension Id="html" ContentType="text/html">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.Markdown" Description="Office Document">
+          <Extension Id="md" ContentType="text/markdown">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        
+          <Extension Id="markdown" ContentType="text/markdown">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        
+          <Extension Id="mkd" ContentType="text/markdown">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.Xhtml" Description="Office Document">
+          <Extension Id="htm" ContentType="application/xhtml+xml">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.Latex" Description="Office Document">
+          <Extension Id="tex" ContentType="text/x-tex">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        
+          <Extension Id="dtx" ContentType="text/x-tex">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        
+          <Extension Id="ins" ContentType="text/x-tex">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        
+          <Extension Id="latex" ContentType="text/x-tex">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        
+          <Extension Id="ltx" ContentType="text/x-tex">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        
+          <Extension Id="sty" ContentType="text/x-tex">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+
+        <ProgId Id="Office.Presentation" Description="Office Presentation">
+          <Extension Id="pptx" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.Slideshow" Description="Office Presentation">
+          <Extension Id="ppsx" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideshow">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.PresentationTemplate" Description="Office Presentation">
+          <Extension Id="potx" ContentType="application/vnd.openxmlformats-officedocument.presentationml.template">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.Deck" Description="Office Presentation">
+          <Extension Id="iridium-decks" ContentType="application/x-iridium-decks">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+
+        <ProgId Id="Office.Pdf" Description="Office Document">
+          <Extension Id="pdf" ContentType="application/pdf">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.Drawing" Description="Office Drawing">
+          <Extension Id="dwg" ContentType="image/vnd.dwg">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="Office.Dxf" Description="Office Drawing">
+          <Extension Id="dxf" ContentType="image/vnd.dxf">
+            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+
+
+        <!-- "Open with" for every format, without becoming the default. -->
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe" Name="FriendlyAppName" Value="Office" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\shell\open\command" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".csv" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".doc" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".docm" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".docx" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dot" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dotm" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dotx" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dwg" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dxf" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".htm" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".html" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".iridium-decks" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".md" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".ods" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".odt" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".pdf" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".potx" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".ppsx" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".pptx" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".rtf" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".tex" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".tsv" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".xlsb" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".xlsm" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".xlsx" Value="" Type="string" />
+
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dtx" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".ins" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".latex" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".ltx" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".markdown" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".mkd" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".sty" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Microsoft\Windows\CurrentVersion\App Paths\iridium-office.exe" Value="[#OfficeExe]" Type="string" />
+      <RegistryValue Root="HKMU" Key="Software\Office" Name="InstallDir" Value="[INSTALLFOLDER]" Type="string" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>
