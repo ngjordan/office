@@ -115,17 +115,37 @@ notarize() {
   local auth=()
   if [[ -n "${APPLE_API_KEY:-}" && -n "${APPLE_API_KEY_ID:-}" && -n "${APPLE_API_ISSUER_ID:-}" ]]; then
     local key="$TMP/notary-$$.p8"
-    printf '%s' "$APPLE_API_KEY" | base64 --decode >"$key"
+    # The key file goes even if notarization fails, so the trap covers the error path too.
+    trap 'rm -f "$key"' RETURN
+    ( umask 077; printf '%s' "$APPLE_API_KEY" | base64 --decode >"$key" )
     chmod 600 "$key"
     auth=(--key "$key" --key-id "$APPLE_API_KEY_ID" --issuer "$APPLE_API_ISSUER_ID")
   else
     auth=(--apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID")
   fi
-  out="$(xcrun notarytool submit "$file" "${auth[@]}" \
-    --wait --timeout 1h --output-format json)" || true
+  # Submit without --wait, then poll the service. A team's first submission can sit In Progress
+  # for hours; resubmitting would throw that work away and start the clock again.
+  out="$(xcrun notarytool submit "$file" "${auth[@]}" --output-format json)" || true
   echo "$out"
   id="$(printf '%s' "$out" | plutil -extract id raw -o - - 2>/dev/null || true)"
-  status="$(printf '%s' "$out" | plutil -extract status raw -o - - 2>/dev/null || true)"
+  if [[ -z "$id" ]]; then
+    echo "error: the notary service returned no submission id" >&2
+    exit 1
+  fi
+  echo "==> submission $id; waiting for the notary service"
+  status=""
+  local attempt
+  for attempt in $(seq 1 240); do
+    status="$(xcrun notarytool info "$id" "${auth[@]}" --output-format json 2>/dev/null \
+      | plutil -extract status raw -o - - 2>/dev/null || true)"
+    if [[ "$status" = "Accepted" || "$status" = "Invalid" ]]; then
+      break
+    fi
+    if [[ $((attempt % 20)) = 0 ]]; then
+      echo "    still $status after $((attempt * 30))s"
+    fi
+    sleep 30
+  done
   if [[ "$status" != "Accepted" ]]; then
     if [[ -n "$id" ]]; then
       xcrun notarytool log "$id" "${auth[@]}" || true
@@ -133,7 +153,6 @@ notarize() {
     echo "error: notarization of $(basename "$file") failed (status: ${status:-unknown})" >&2
     exit 1
   fi
-  [[ -n "${key:-}" ]] && rm -f "$key"
   return 0
 }
 
@@ -154,6 +173,10 @@ sed -e "s/@APP_NAME@/$APP_NAME/g" -e "s/@APP_ID@/$APP_ID/g" \
   "$HERE/Info.plist.in" >"$APP/Contents/Info.plist"
 plutil -lint "$APP/Contents/Info.plist"
 printf 'APPL????' >"$APP/Contents/PkgInfo"
+
+# Strip the extended attributes before signing. A copied bundle can carry a resource fork or
+# Finder information, and codesign --strict rejects that as "detritus".
+xattr -cr "$APP"
 
 # Sign inside-out: nested code first, then the bundle itself (no --deep on the final signature).
 sign --options runtime --entitlements "$HERE/entitlements.plist" "$APP/Contents/MacOS/$APP_NAME"
