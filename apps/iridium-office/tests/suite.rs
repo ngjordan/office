@@ -179,22 +179,35 @@ fn a_file_opens_in_the_app_that_owns_it() {
     assert!(frame(&mut s, &ctx, 1600.0, 1000.0) > 0);
 }
 
-/// The Windows installer must register exactly the extensions the suite routes.
-/// A file type that routes but is not registered opens in nothing; one that is
-/// registered but does not route opens in the wrong module.
+/// The Windows installer must offer exactly the extensions the suite routes.
+/// A file type that routes but is not offered opens in nothing; one that is
+/// offered but does not route opens in the wrong module.
 #[test]
-fn the_windows_installer_registers_exactly_the_routed_extensions() {
+fn the_windows_installer_offers_exactly_the_routed_extensions() {
     let wxs = std::fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/../../packaging/windows/iridium-office.wxs"
     ))
     .expect("the Windows installer source must exist");
 
-    let registered: std::collections::HashSet<String> = wxs
+    // The suite's own format is registered as an Extension, so it is the default
+    // handler for it. Every other type is only offered: an Extension for a foreign
+    // type would take it over from whatever the user already had.
+    let owned: std::collections::HashSet<String> = wxs
         .lines()
         .filter_map(|l| l.trim().strip_prefix("<Extension Id=\""))
         .filter_map(|l| l.split('"').next())
         .map(|s| s.to_string())
+        .collect();
+    let offered: std::collections::HashSet<String> = wxs
+        .lines()
+        .filter(|l| l.contains("OpenWithProgids"))
+        .filter_map(|l| {
+            // the row is Key=".<ext>\OpenWithProgids"
+            let rest = &l[l.find("Key=\".")? + 6..];
+            let end = rest.find('\\')?;
+            Some(rest[..end].to_string())
+        })
         .collect();
 
     let routed: std::collections::HashSet<String> = iridium_office::route::table()
@@ -202,31 +215,41 @@ fn the_windows_installer_registers_exactly_the_routed_extensions() {
         .map(|(e, _)| e.to_string())
         .collect();
 
-    let missing: Vec<_> = routed.difference(&registered).collect();
-    let extra: Vec<_> = registered.difference(&routed).collect();
+    let all: std::collections::HashSet<String> = owned.union(&offered).cloned().collect();
+    let missing: Vec<_> = routed.difference(&all).collect();
+    let extra: Vec<_> = all.difference(&routed).collect();
     assert!(
         missing.is_empty(),
-        "routed but not registered on Windows: {missing:?}"
+        "routed but not offered on Windows: {missing:?}"
     );
     assert!(
         extra.is_empty(),
-        "registered on Windows but not routed: {extra:?}"
+        "offered on Windows but not routed: {extra:?}"
+    );
+
+    assert_eq!(
+        owned.iter().cloned().collect::<Vec<_>>(),
+        vec!["iridium-decks".to_string()],
+        "only the suite's own format may be registered as an Extension"
     );
 }
 
-/// Every registered extension needs an open verb, or double-clicking the file
+/// Every offered extension needs an open command, or double-clicking the file
 /// does nothing.
 #[test]
-fn every_registered_extension_has_an_open_verb() {
+fn every_offered_extension_has_an_open_command() {
     let wxs = std::fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/../../packaging/windows/iridium-office.wxs"
     ))
     .expect("the Windows installer source must exist");
-    let extensions = wxs.matches("<Extension Id=\"").count();
-    let verbs = wxs.matches("<Verb Id=\"open\"").count();
-    assert_eq!(
-        extensions, verbs,
-        "each registered extension needs one open verb"
-    );
+    let offered = wxs.matches("\\OpenWithProgids\"").count();
+    let commands = wxs.matches("shell\\open\\command").count();
+    assert!(commands > 0);
+    assert!(offered > 0);
+    // one open command per ProgId, and every ProgId is referenced by at least one extension
+    let progids = wxs
+        .matches("<RegistryKey Root=\"HKCR\" Key=\"Office.")
+        .count();
+    assert_eq!(commands, progids, "each ProgId needs one open command");
 }
