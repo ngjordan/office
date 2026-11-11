@@ -14,21 +14,7 @@
     windows_subsystem = "windows"
 )]
 
-use iridium_office::{route, suite::Suite};
-
-/// The suite's name, slug and app id, from `branding/brand.env` - the one place they
-/// live, so changing one is a one-line edit. It is read at compile time, so the built
-/// app does not need the file beside it.
-const BRAND: &str = include_str!("../../../branding/brand.env");
-
-/// One value out of the brand file.
-fn brand(key: &str) -> &'static str {
-    BRAND
-        .lines()
-        .find_map(|line| line.strip_prefix(key).and_then(|l| l.strip_prefix("=\"")))
-        .and_then(|v| v.strip_suffix('"'))
-        .unwrap_or_default()
-}
+use iridium_office::{brand, route, suite::Suite};
 
 /// The window icon.
 fn icon() -> Option<egui::IconData> {
@@ -71,6 +57,9 @@ impl eframe::App for App {
 }
 
 fn main() -> eframe::Result<()> {
+    // First: a panic during start-up is exactly what the hook exists for, and the suite is a
+    // GUI app, so without it the failure would be invisible.
+    iridium_office::panic::install();
     let files: Vec<std::path::PathBuf> = std::env::args_os().skip(1).map(Into::into).collect();
     let routed = route::route(&files);
 
