@@ -100,3 +100,60 @@ jobs:
 
       - name: Tests
         run: cargo test -p iridium-office -j 1
+
+  # The Linux gate does not compile the Windows-only code: a cfg(target_os = "windows")
+  # block is invisible to it. That is how an "extern blocks must be unsafe" error (Rust
+  # 2024) sat in the tree until a release run hit it fifty minutes later. This job checks
+  # the Windows target on every push. cargo check does not link, so it is quick.
+  windows:
+    name: Windows check
+    runs-on: windows-latest
+    env:
+      # A native Windows path: the Rust build scripts read these.
+      CRAFT_FONTS_DIR: ${{ github.workspace }}\deps\craft-fonts
+      CRAFT_I18N_DIR: ${{ github.workspace }}\deps\craft-i18n
+      CARGO_BUILD_JOBS: 2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check out the apps
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $parent = Split-Path $env:GITHUB_WORKSPACE -Parent
+          foreach ($pair in @(
+            @('sheets','gc-gridcraft'), @('docs','wc-wordcraft'), @('cad','cc-cadcraft'),
+            @('decks','dc-deckcraft'), @('pdf','pdfcraft'))) {
+            git clone --depth 1 "https://github.com/ngjordan/$($pair[0]).git" (Join-Path $parent $pair[1])
+          }
+
+      - name: Check out the assets
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $deps = Join-Path $env:GITHUB_WORKSPACE 'deps'
+          New-Item -ItemType Directory -Force -Path $deps | Out-Null
+          git clone --depth 1 https://github.com/ngjordan/craft-fonts.git (Join-Path $deps 'craft-fonts')
+          git clone --depth 1 https://github.com/ngjordan/craft-i18n.git (Join-Path $deps 'craft-i18n')
+
+      # The workspace's path dependencies point at ../office-vendor/<app>. A junction, not a
+      # symlink: Windows allows directory junctions without elevation.
+      - name: Create the vendor tree
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $parent = Split-Path $env:GITHUB_WORKSPACE -Parent
+          $vendor = Join-Path $parent 'office-vendor'
+          New-Item -ItemType Directory -Force -Path $vendor | Out-Null
+          foreach ($pair in @(
+            @('sheets','gc-gridcraft'), @('docs','wc-wordcraft'), @('cad','cc-cadcraft'),
+            @('decks','dc-deckcraft'), @('pdf','pdfcraft'))) {
+            $link = Join-Path $vendor $pair[0]
+            if (Test-Path $link) { Remove-Item -Recurse -Force $link }
+            New-Item -ItemType Junction -Path $link -Target (Join-Path $parent $pair[1]) | Out-Null
+          }
+
+      - name: Check the Windows build
+        run: cargo check -p iridium-office --all-targets --target x86_64-pc-windows-msvc
