@@ -243,5 +243,13 @@ echo "==> building $ZIP"
 rm -f "$ZIP"
 ditto -c -k --keepParent "$APP" "$ZIP"
 
+# The release notes have to say whether the artifacts are notarized, and the release job
+# cannot ask the build job: it writes this instead.
+if [[ "$NOTARIZE" = 1 ]]; then
+  echo "notarized" >"$DIST/NOTARIZATION"
+else
+  echo "not notarized" >"$DIST/NOTARIZATION"
+fi
+
 echo "==> done"
 ls -lh "$DMG" "$ZIP"

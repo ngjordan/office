@@ -114,8 +114,10 @@ jobs:
               --team-id "$APPLE_TEAM_ID" > /dev/null
             echo "the Apple ID works"
           else
-            echo "::error::no notary credentials: the artifacts would ship un-notarized"
-            exit 1
+            # No credentials at all: carry on and sign only. package.sh warns about it and
+            # the release notes say the artifacts are not notarized. A credential that is
+            # present but wrong fails above, which is the case worth stopping for.
+            echo "::warning::no notary credentials: the artifacts will be signed but not notarized"
           fi
 
       - name: Import the signing certificate
@@ -141,6 +143,7 @@ jobs:
           path: |
             dist/release/*.dmg
             dist/release/*.zip
+            dist/release/NOTARIZATION
 
 
   windows:
@@ -270,9 +273,15 @@ jobs:
           printf '  %s\n' "${assets[@]}"
           # A re-run of the same version finds the release already there: add the new
           # assets to it instead of failing on the existing tag.
+          NOTES="The Office suite $TAG."
+          if [[ -f artifacts/NOTARIZATION ]] && grep -q "^notarized$" artifacts/NOTARIZATION; then
+            NOTES="$NOTES The macOS artifacts are signed and notarized."
+          else
+            NOTES="$NOTES The macOS artifacts are signed but NOT notarized: Gatekeeper will warn on the first launch."
+          fi
           if gh release view "v$TAG" >/dev/null 2>&1; then
             echo "release v$TAG exists: uploading the assets to it"
             gh release upload "v$TAG" "${assets[@]}" --clobber
           else
-            gh release create "v$TAG" "${assets[@]}" --title "$TAG" --notes "The Office suite $TAG." --draft
+            gh release create "v$TAG" "${assets[@]}" --title "$TAG" --notes "$NOTES" --draft
           fi
