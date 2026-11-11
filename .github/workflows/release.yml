@@ -150,6 +150,9 @@ jobs:
     name: Windows ${{ matrix.arch }}
     needs: checkout-apps
     runs-on: windows-latest
+    # The code-signing credentials live here too, so they only reach a release run from
+    # the default branch or the release branch.
+    environment: release
     strategy:
       fail-fast: false
       matrix:
