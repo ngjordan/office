@@ -282,4 +282,11 @@ jobs:
           fi
           printf 'publishing %d asset(s):\n' "${#assets[@]}"
           printf '  %s\n' "${assets[@]}"
-          gh release create "v$TAG" "${assets[@]}" --title "$TAG" --notes "The Office suite $TAG." --draft
+          # A re-run of the same version finds the release already there: add the new
+          # assets to it instead of failing on the existing tag.
+          if gh release view "v$TAG" >/dev/null 2>&1; then
+            echo "release v$TAG exists: uploading the assets to it"
+            gh release upload "v$TAG" "${assets[@]}" --clobber
+          else
+            gh release create "v$TAG" "${assets[@]}" --title "$TAG" --notes "The Office suite $TAG." --draft
+          fi
