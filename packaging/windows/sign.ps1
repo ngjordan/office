@@ -61,6 +61,8 @@ New-Item -ItemType Directory -Path $tmp | Out-Null
 
 try {
   if ($haveCert) {
+    # A .pfx from a public CA, or from our own CA (self-signed root). Same signtool
+    # invocation either way; only the trust that the verifier applies differs.
     Write-Output "Signing with WINDOWS_CERTIFICATE: $($Files -join ', ')"
     $pfx = Join-Path $tmp 'cert.pfx'
     [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE))

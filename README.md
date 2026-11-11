@@ -77,17 +77,57 @@ secrets are set, and a CA-issued `.pfx` (`WINDOWS_CERTIFICATE` +
 
 Buying a certificate from a CA rather than using Azure:
 
-- **SSL.com** still documents the plain `.pfx` route - `signtool sign /fd sha256 /f cert.pfx
-  /p password` - which is exactly what the signing script does. Their `eSigner` cloud HSM
-  issues the `.pfx` for CI use.
-- **DigiCert** (Keypair) and **Sectigo** keep the key in a FIPS token or their own cloud
-  HSM and sign through a provider DLL, not a `.pfx`. The signing script would need that
-  provider's DLL and metadata format, like the Azure path.
-- Since **1 March 2026** a publicly trusted code-signing certificate may not be issued for
-  more than **460 days**, so the certificate is renewed every year or so and the secret has
-  to be replaced when it is.
-- An OV certificate is issued to an organisation, so the publisher name comes from the
-  business registration. An individual code-signing certificate is much harder to get.
+- **No public CA issues an exportable `.pfx` for code signing.** Since 1 June 2023 the
+  CA/Browser Forum requires the private key to live in a FIPS 140-2 token or cloud HSM, and
+  SSL.com, DigiCert and Sectigo all say it outright: the key cannot be exported and the
+  certificate is not issued as a downloadable `.pfx`. The `WINDOWS_CERTIFICATE` route above
+  therefore only works with a certificate from before that rule, or with a self-signed one.
+- **The signing script therefore needs a third branch**: a provider that signs on the CA's
+  behalf, the way the Azure path already does. For Azure that is `/dlib` plus a metadata
+  JSON; for SSL.com it is the eSigner CKA (a Windows CNG key storage provider, so
+  `signtool` finds the cert locally) or eSigner CodeSignTool (a Docker image that calls the
+  CSC API). DigiCert Keypair and Sectigo use their own provider DLLs and metadata formats.
+- **Own CA (self-signed root, your own PKI)**: possible, and it is the only option that
+  needs no vendor, but Windows will treat the result as untrusted. It works for your own
+  machines once the root is in the Trusted Root store, and it needs no CA/Browser approval -
+  but it gives no SmartScreen reputation and it is not what a public download needs.
+
+### Running your own CA
+
+`packaging/windows/make_own_ca.py` mints the two certificates this needs: a self-signed
+root that stays offline, and a code-signing leaf that the release environment can use.
+The leaf is an ordinary `.pfx`, so `sign.ps1` needs no change for it.
+
+```bash
+# once: the root. Keep this offline - anyone with the root key can mint a
+# certificate for any publisher name, which is why public CAs do the same.
+python3 packaging/windows/make_own_ca.py root --out-dir ~/iridium-ca
+
+# per release: the leaf, then upload it
+python3 packaging/windows/make_own_ca.py leaf --ca-dir ~/iridium-ca \
+    --out ~/iridium-office.pfx --password '<the password>'
+python3 packaging/windows/set_signing_secrets.py --pfx ~/iridium-office.pfx --password '<the password>'
+```
+
+The machines that verify the signature need the root in their Trusted Root store:
+
+```
+certutil -addstore -f Root ~/iridium-ca/ca.der
+```
+
+Two details the script handles that are easy to get wrong by hand:
+
+- The `.pfx` is written with `openssl pkcs12 -legacy`. OpenSSL 3 defaults to
+  PBES2/AES-256, and Windows `signtool.exe` cannot import that - it fails with an
+  unhelpful error. The legacy 3DES/RC2 form is what Windows reads.
+- The leaf carries the `codeSigning` EKU and the Microsoft individual-code-signing OID
+  (`1.3.6.1.4.1.311.2.1.21`), which is what SmartScreen looks for.
+
+Since **1 March 2026** a publicly trusted code-signing certificate may not be issued for
+more than **460 days**, so the certificate is renewed every year or so and the secret has
+to be replaced when it is. An OV certificate is issued to an organisation, so the publisher
+name comes from the business registration. An individual code-signing certificate is much
+harder to get.
 
 Two things to know about Artifact Signing:
 
