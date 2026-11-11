@@ -39,8 +39,8 @@ pub fn log_file() -> Option<PathBuf> {
 /// nowhere to show one, so the log file is all there is.
 #[cfg(target_os = "windows")]
 fn show(caption: &str, text: &str) {
-    use std::os::windows::ffi::OsStrExt;
-    extern "system" {
+    // Rust 2024: an extern block has to be unsafe, and calling into it needs an unsafe block.
+    unsafe extern "system" {
         fn MessageBoxW(
             hwnd: *mut std::ffi::c_void,
             text: *const u16,
@@ -56,7 +56,6 @@ fn show(caption: &str, text: &str) {
     unsafe {
         MessageBoxW(std::ptr::null_mut(), t.as_ptr(), c.as_ptr(), KIND);
     }
-    let _ = std::ffi::OsStr::new("");
 }
 
 #[cfg(not(target_os = "windows"))]
