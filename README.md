@@ -70,9 +70,24 @@ with an app-specific password (`APPLE_ID` + `APPLE_PASSWORD` + `APPLE_TEAM_ID`);
 API key is preferred, because it does not expire and needs no interactive 2FA. With
 neither, the app is still signed, but not notarized, and the release notes say so.
 
-Windows signing uses Azure Trusted Signing when the `AZURE_*` secrets are set, and a
-`.pfx` (`WINDOWS_CERTIFICATE` + `WINDOWS_CERTIFICATE_PASSWORD`) otherwise. With neither,
-the installer ships unsigned.
+Windows signing uses Azure Artifact Signing (formerly Trusted Signing) when the `AZURE_*`
+secrets are set, and a `.pfx` (`WINDOWS_CERTIFICATE` + `WINDOWS_CERTIFICATE_PASSWORD`)
+otherwise. With neither, the installer ships unsigned.
+
+Two things to know about Artifact Signing:
+
+- **Use the Public Trust model.** A Private Trust certificate is not in any root program, so
+  Windows treats it like a self-signed one. Public Trust is issued under the Microsoft Root
+  Certificate Program and is what a public download needs.
+- **The certificate names the publisher, not the product.** The subject is the validated
+  identity - the legal entity, or the individual's legal name - and Azure does not let you
+  set a custom one. The product name comes from `signtool /d` and from the binary's
+  VERSIONINFO (`ProductName`, `CompanyName`), both set in `build.rs`.
+
+SmartScreen still warns on a brand new binary until the publisher has reputation, which
+builds over weeks of clean downloads. Signing means the prompt names the publisher instead
+of saying "Unknown Publisher", and later releases inherit that reputation; an unsigned file
+has to rebuild it from zero every time.
 
 
 ## CI and the dependency policy
