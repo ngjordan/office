@@ -47,6 +47,8 @@ export MACOSX_DEPLOYMENT_TARGET=11.0
 IDENTITY="${MACOS_SIGN_IDENTITY:--}"
 SHORT_VERSION="${VERSION%%-*}"
 WORK="$CARGO_TARGET_DIR/macos-package"
+# A scratch directory for the temporary notary key file.
+TMP="$WORK/tmp"
 APP="$WORK/$APP_NAME.app"
 DMG="$DIST/iridium-office-$VERSION-macos-$ARCH.dmg"
 ZIP="$DIST/iridium-office-$VERSION-macos-$ARCH.zip"
@@ -54,10 +56,12 @@ ZIP="$DIST/iridium-office-$VERSION-macos-$ARCH.zip"
 NOTARIZE=0
 if [[ "$IDENTITY" = "-" ]]; then
   warn "macOS: ad-hoc signing (no MACOS_SIGN_IDENTITY); artifacts are not notarized"
+elif [[ -n "${APPLE_API_KEY:-}" ]] && [[ -n "${APPLE_API_KEY_ID:-}" ]] && [[ -n "${APPLE_API_ISSUER_ID:-}" ]]; then
+  NOTARIZE=1
 elif [[ -n "${APPLE_ID:-}" ]] && [[ -n "${APPLE_PASSWORD:-}" ]] && [[ -n "${APPLE_TEAM_ID:-}" ]]; then
   NOTARIZE=1
 else
-  warn "macOS: APPLE_ID / APPLE_PASSWORD / APPLE_TEAM_ID incomplete; signed but not notarized"
+  warn "macOS: no notary credentials (APPLE_API_KEY trio, or APPLE_ID/APPLE_PASSWORD/APPLE_TEAM_ID); signed but not notarized"
 fi
 
 echo "==> $APP_NAME $VERSION for macOS ($ARCH), identity: $IDENTITY, notarize: $NOTARIZE"
@@ -70,7 +74,7 @@ if [[ "$SKIP_BUILD" = 0 ]]; then
 fi
 
 rm -rf "$WORK"
-mkdir -p "$WORK/bin"
+mkdir -p "$WORK/bin" "$TMP"
 inputs=()
 for t in "${TARGETS[@]}"; do inputs+=("$CARGO_TARGET_DIR/$t/release/iridium-office"); done
 lipo -create -output "$WORK/bin/iridium-office" "${inputs[@]}"
@@ -104,18 +108,33 @@ stapler_retry() {
 notarize() {
   local file="$1" out id status
   echo "==> notarizing $(basename "$file") (this can take a few minutes)"
-  out="$(xcrun notarytool submit "$file" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" \
-    --team-id "$APPLE_TEAM_ID" --wait --timeout 1h --output-format json)" || true
+  # Two ways to authenticate to the notary service:
+  #   1. an App Store Connect API key (APPLE_API_KEY + APPLE_API_KEY_ID + APPLE_API_ISSUER_ID)
+  #   2. an Apple ID and an app-specific password (APPLE_ID + APPLE_PASSWORD + APPLE_TEAM_ID)
+  # The API key is preferred: it does not expire and needs no interactive 2FA.
+  local auth=()
+  if [[ -n "${APPLE_API_KEY:-}" && -n "${APPLE_API_KEY_ID:-}" && -n "${APPLE_API_ISSUER_ID:-}" ]]; then
+    local key="$TMP/notary-$$.p8"
+    printf '%s' "$APPLE_API_KEY" | base64 --decode >"$key"
+    chmod 600 "$key"
+    auth=(--key "$key" --key-id "$APPLE_API_KEY_ID" --issuer "$APPLE_API_ISSUER_ID")
+  else
+    auth=(--apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID")
+  fi
+  out="$(xcrun notarytool submit "$file" "${auth[@]}" \
+    --wait --timeout 1h --output-format json)" || true
   echo "$out"
   id="$(printf '%s' "$out" | plutil -extract id raw -o - - 2>/dev/null || true)"
   status="$(printf '%s' "$out" | plutil -extract status raw -o - - 2>/dev/null || true)"
   if [[ "$status" != "Accepted" ]]; then
     if [[ -n "$id" ]]; then
-      xcrun notarytool log "$id" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" || true
+      xcrun notarytool log "$id" "${auth[@]}" || true
     fi
     echo "error: notarization of $(basename "$file") failed (status: ${status:-unknown})" >&2
     exit 1
   fi
+  [[ -n "${key:-}" ]] && rm -f "$key"
+  return 0
 }
 
 # ---- the app bundle ----------------------------------------------------------------------------
