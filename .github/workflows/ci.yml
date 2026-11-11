@@ -67,9 +67,17 @@ jobs:
       - name: Install cargo-deny
         run: |
           set -euo pipefail
-          curl -sSfL -o cargo-deny.tar.xz \
-            https://github.com/EmbarkStudios/cargo-deny/releases/download/0.20.2/cargo-deny-0.20.2-x86_64-unknown-linux-musl.tar.xz
-          tar -xJf cargo-deny.tar.xz -C /usr/local/bin --strip-components=1 cargo-deny
+          version=0.20.2
+          base="https://github.com/EmbarkStudios/cargo-deny/releases/download/$version"
+          asset="cargo-deny-$version-x86_64-unknown-linux-musl.tar.gz"
+          curl -sSfL -o "$asset" "$base/$asset"
+          # The release publishes the checksum next to the asset: check it, so a wrong or
+          # replaced download cannot become the tool that vets the dependency policy.
+          curl -sSfL -o "$asset.sha256" "$base/$asset.sha256"
+          echo "$(cat "$asset.sha256")  $asset" | sha256sum -c -
+          # The binary sits one directory deep, so the member is matched with a wildcard
+          # and the directory is stripped off.
+          tar -xzf "$asset" -C /usr/local/bin --strip-components=1 --wildcards '*/cargo-deny' 
           cargo deny --version
 
       # The release workflows run these scripts directly, so a script that is not executable
