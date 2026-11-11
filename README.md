@@ -71,8 +71,23 @@ API key is preferred, because it does not expire and needs no interactive 2FA. W
 neither, the app is still signed, but not notarized, and the release notes say so.
 
 Windows signing uses Azure Artifact Signing (formerly Trusted Signing) when the `AZURE_*`
-secrets are set, and a `.pfx` (`WINDOWS_CERTIFICATE` + `WINDOWS_CERTIFICATE_PASSWORD`)
-otherwise. With neither, the installer ships unsigned.
+secrets are set, and a CA-issued `.pfx` (`WINDOWS_CERTIFICATE` +
+`WINDOWS_CERTIFICATE_PASSWORD`) otherwise. With neither, the installer ships unsigned.
+`packaging/windows/set_signing_secrets.py` stores the `.pfx` pair in the environment.
+
+Buying a certificate from a CA rather than using Azure:
+
+- **SSL.com** still documents the plain `.pfx` route - `signtool sign /fd sha256 /f cert.pfx
+  /p password` - which is exactly what the signing script does. Their `eSigner` cloud HSM
+  issues the `.pfx` for CI use.
+- **DigiCert** (Keypair) and **Sectigo** keep the key in a FIPS token or their own cloud
+  HSM and sign through a provider DLL, not a `.pfx`. The signing script would need that
+  provider's DLL and metadata format, like the Azure path.
+- Since **1 March 2026** a publicly trusted code-signing certificate may not be issued for
+  more than **460 days**, so the certificate is renewed every year or so and the secret has
+  to be replaced when it is.
+- An OV certificate is issued to an organisation, so the publisher name comes from the
+  business registration. An individual code-signing certificate is much harder to get.
 
 Two things to know about Artifact Signing:
 
