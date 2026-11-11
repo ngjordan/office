@@ -48,7 +48,7 @@ jobs:
   macos:
     name: macOS universal
     needs: checkout-apps
-    runs-on: macos-14
+    runs-on: macos-15
     env:
       CRAFT_FONTS_DIR: /tmp/craft-fonts
       CRAFT_I18N_DIR: /tmp/craft-i18n
@@ -143,7 +143,7 @@ jobs:
       - name: Install nfpm
         run: |
           set -euo pipefail
-          curl -sSfL -o nfpm.deb https://github.com/goreleaser/nfpm/releases/download/v2.47.0/nfpm_2.47.0_linux_amd64.deb
+          curl -sSfL -o nfpm.deb https://github.com/goreleaser/nfpm/releases/download/v2.47.0/nfpm_2.47.0_amd64.deb
           sudo dpkg -i nfpm.deb
 
       - name: Build and package
