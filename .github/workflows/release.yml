@@ -18,9 +18,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # The suite is a merged workspace: its apps live in five sibling repositories and come in
-  # as path dependencies, so a build needs them checked out beside this one. The default
-  # GITHUB_TOKEN cannot read them, so this needs a PAT with `repo` scope in OFFICE_TOKEN.
+  # The suite is a merged workspace: its apps live in five sibling public repositories and
+  # come in as path dependencies, so a build needs them checked out beside this one. They
+  # clone anonymously: no long-lived token in this repository.
   # Reads the version once, so the release job and the build jobs agree on it. The build jobs
   # each clone the apps themselves: they run on different runners, so a clone here would not
   # be shared with them.
@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.version }}
+      version4: ${{ steps.version.outputs.version4 }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -43,6 +44,10 @@ jobs:
             v="$(awk '/^\[workspace.package\]/{p=1;next} /^\[/{p=0} p&&$1=="version"{gsub(/[" ]/,"",$3);print $3;exit}' Cargo.toml)"
           fi
           echo "version=$v" >> "$GITHUB_OUTPUT"
+          # The VERSIONINFO fields are four 16-bit numbers, so the SignPath metadata
+          # restriction compares against the four-part form: 0.1.0 -> 0.1.0.0
+          IFS=. read -ra parts <<< "$v"
+          echo "version4=${parts[0]}.${parts[1]}.${parts[2]}.${parts[3]:-0}" >> "$GITHUB_OUTPUT"
           echo "$v"
 
   macos:
@@ -62,18 +67,14 @@ jobs:
           persist-credentials: false
 
       - name: Check out the apps
-        env:
-          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
         run: |
           set -euo pipefail
           for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft; do
             name="${pair%%:*}"; dir="${pair##*:}"
-            gh repo clone "ngjordan/$name" "../$dir" -- --depth 1
+            git clone --depth 1 "https://github.com/ngjordan/$name.git" "../$dir"
           done
 
       - name: Check out the assets
-        env:
-          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
         run: |
           set -euo pipefail
           git clone --depth 1 https://github.com/ngjordan/craft-fonts.git /tmp/craft-fonts
@@ -173,21 +174,17 @@ jobs:
 
       - name: Check out the apps
         shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
         run: |
           $ErrorActionPreference = 'Stop'
           $parent = Split-Path $env:GITHUB_WORKSPACE -Parent
           foreach ($pair in @(
             @('sheets','gc-gridcraft'), @('docs','wc-wordcraft'), @('cad','cc-cadcraft'),
             @('decks','dc-deckcraft'), @('pdf','pdfcraft'))) {
-            gh repo clone "ngjordan/$($pair[0])" (Join-Path $parent $pair[1]) -- --depth 1
+            git clone --depth 1 "https://github.com/ngjordan/$($pair[0]).git" (Join-Path $parent $pair[1])
           }
 
       - name: Check out the assets
         shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
         run: |
           $ErrorActionPreference = 'Stop'
           $deps = Join-Path $env:GITHUB_WORKSPACE 'deps'
@@ -221,7 +218,42 @@ jobs:
           rustup target add ${{ matrix.target }}
           dotnet tool install --global wix --version 5.0.2
 
-      - name: Build, sign and package
+      - name: Build the installer
+        shell: pwsh
+        run: packaging/windows/package.ps1 -Arch ${{ matrix.arch }} -DeferSigning
+
+      # The unsigned artifacts go into a workflow artifact, because that is what SignPath
+      # checks: the files were built by this workflow, on a GitHub runner, from this
+      # repository. SignPath signs the executable inside the installer, the installer, and
+      # the standalone executable, in one request.
+      - name: Upload the unsigned artifacts
+        id: upload-unsigned
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unsigned-windows-${{ matrix.arch }}
+          path: dist/release/signpath/*
+          retention-days: 1
+
+      # SignPath Foundation. It is skipped until the repository's SignPath variables are
+      # set, so a release still works before the account exists.
+      - name: Sign with SignPath
+        id: signpath
+        if: ${{ vars.SIGNPATH_PROJECT_SLUG != '' }}
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION }}
+          github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
+          parameters: |
+            version: "${{ needs.checkout-apps.outputs.version4 }}"
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: ${{ github.workspace }}\dist\signed
+
+      - name: Assemble the release artifacts
         shell: pwsh
         env:
           WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
@@ -232,7 +264,21 @@ jobs:
           AZURE_SIGNING_ENDPOINT: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
           AZURE_SIGNING_ACCOUNT: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
           AZURE_CERT_PROFILE: ${{ secrets.AZURE_CERT_PROFILE }}
-        run: packaging/windows/package.ps1 -Arch ${{ matrix.arch }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $signed = Join-Path $env:GITHUB_WORKSPACE 'dist\signed'
+          $signedExe = Join-Path $signed 'iridium-office.exe'
+          $signedMsi = Get-ChildItem -Path $signed -Filter '*.msi' -ErrorAction SilentlyContinue |
+                       Select-Object -First 1
+          if ((Test-Path $signedExe) -and $signedMsi) {
+            # SignPath signed them: take the signed installer and the signed executable.
+            Copy-Item $signedMsi.FullName (Join-Path $env:GITHUB_WORKSPACE 'dist\release') -Force
+            Copy-Item $signedExe (Join-Path $env:GITHUB_WORKSPACE 'dist\release') -Force
+            packaging/windows/make-portable.ps1 -Arch ${{ matrix.arch }} -SignedExe $signedExe
+          } else {
+            # No SignPath: sign locally with a CA certificate or Azure, and build the archive.
+            packaging/windows/package.ps1 -Arch ${{ matrix.arch }} -SkipBuild
+          }
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:

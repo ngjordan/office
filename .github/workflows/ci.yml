@@ -35,24 +35,19 @@ jobs:
         with:
           persist-credentials: false
 
-      # The five apps live in their own repositories and come in as path
-      # dependencies. The default GITHUB_TOKEN cannot read them, so this needs a
-      # PAT with `repo` scope in the OFFICE_TOKEN secret.
+      # The five apps live in their own public repositories and come in as path
+      # dependencies, so they clone anonymously: no long-lived token in this repository.
       - name: Check out the apps
-        env:
-          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
         run: |
           set -euo pipefail
           for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft; do
             name="${pair%%:*}"; dir="${pair##*:}"
-            gh repo clone "ngjordan/$name" "../$dir" -- --depth 1
+            git clone --depth 1 "https://github.com/ngjordan/$name.git" "../$dir"
           done
 
       # The font and translation assets the build reads. CRAFT_FONTS_DIR and
       # CRAFT_I18N_DIR below point at these paths.
       - name: Check out the assets
-        env:
-          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
         run: |
           set -euo pipefail
           git clone --depth 1 https://github.com/ngjordan/craft-fonts.git /tmp/craft-fonts

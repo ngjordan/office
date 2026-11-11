@@ -41,6 +41,26 @@ to `CARGO_BUILD_JOBS` of them at once — concurrent links get the build OOM-kil
 - `tests/suite.rs` — Phase 2b: the switcher, file routing, and the look rules across a switch.
 - `src/suite.rs` unit tests — the per-module look (style, zoom, fonts), using a fake module that owns its look.
 
+## Code signing policy
+
+Free code signing provided by SignPath.io, certificate by SignPath Foundation.
+
+The Windows artifacts are signed with a certificate issued to SignPath Foundation, so
+SignPath Foundation is the publisher Windows shows. The full policy - what is signed, who
+approves a release, how the signing request works, and the privacy statement - is in
+[CODE_SIGNING.md](CODE_SIGNING.md).
+
+| Role | Who |
+|---|---|
+| Committers and reviewers | [the repository maintainers](https://github.com/ngjordan/office/graphs/contributors) |
+| Approvers | [the repository owners](https://github.com/ngjordan/office?tab=readme-ov-file#repository-owners-and-contributors) |
+
+**Privacy policy:** the Office suite collects no data and transmits none. It makes no network
+connection of its own - no telemetry, no analytics, no crash reporting, no automatic update
+check. The Sheets module can talk to Google Sheets and Microsoft 365, but only when you ask
+it to, with your own credentials, and it sends your data only to the service you chose.
+
+
 ## Release
 
 `.github/workflows/release.yml` builds the macOS universal app and the Windows x64 and
@@ -91,6 +111,47 @@ Buying a certificate from a CA rather than using Azure:
   needs no vendor, but Windows will treat the result as untrusted. It works for your own
   machines once the root is in the Trusted Root store, and it needs no CA/Browser approval -
   but it gives no SmartScreen reputation and it is not what a public download needs.
+
+### Signing the Windows artifacts
+
+There are three ways to sign the Windows installer, and the workflow uses the first one that
+is available:
+
+| Route | Cost | The publisher Windows shows | Set up |
+|---|---|---|---|
+| **SignPath Foundation** | free | SignPath Foundation | repository variables |
+| A CA certificate | $129/yr | your name or company | `set_signing_secrets.py` |
+| Azure Artifact Signing | ~$10/mo | your validated identity | `AZURE_*` secrets |
+| Nothing | free | *Unknown Publisher* | - |
+
+**SignPath Foundation** signs the artifacts for free, for qualifying open-source projects.
+The certificate is issued to SignPath Foundation, so that is the publisher Windows shows.
+It is free, there is no certificate to renew, and no HSM to run. What it costs is a human
+approval per release: the workflow waits for someone to approve the signing request in
+SignPath, which is what `CODE_SIGNING.md` describes.
+
+The artifact configuration is `packaging/windows/signpath/office-suite.xml`. It signs three
+things in one request: the executable inside the installer, the installer itself, and the
+standalone executable that goes into the portable archive. Signing the installer without the
+executable inside it would leave the installed program unsigned.
+
+Set these repository variables to turn it on:
+
+| Variable | Meaning |
+|---|---|
+| `SIGNPATH_ORGANIZATION_ID` | the SignPath organisation id |
+| `SIGNPATH_PROJECT_SLUG` | the project slug; **while this is empty the workflow skips signing** |
+| `SIGNPATH_POLICY_SLUG` | the signing policy slug |
+| `SIGNPATH_ARTIFACT_CONFIGURATION` | the artifact configuration slug |
+
+and this repository secret:
+
+| Secret | Meaning |
+|---|---|
+| `SIGNPATH_API_TOKEN` | the SignPath REST API access token |
+
+Without `SIGNPATH_PROJECT_SLUG` the workflow builds the same artifacts and signs them the
+old way, so a release still works before the account exists.
 
 ### Running your own CA
 

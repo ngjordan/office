@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SignPath artifact configuration for the Office suite's Windows artifacts.
+
+  SignPath signs the artifacts; this file tells it what is inside them. The root element is a
+  zip-file because GitHub stores every workflow artifact as a zip.
+
+  Three things are signed in one request, so a release needs one approval:
+
+    1. iridium-office.exe inside the MSI  - the program the user ends up running.
+    2. the MSI itself                    - the installer, so the install shows a publisher.
+    3. iridium-office.exe at the top     - the program that goes into the portable archive.
+
+  Signing the MSI without the executable inside it would leave the installed program unsigned,
+  and Windows would show "Unknown Publisher" when the app starts.
+
+  The metadata restriction states what the VERSIONINFO of the executable must contain.
+  apps/iridium-office/build.rs sets exactly these values: the product name, the company and
+  the version from the crate. The version is the four-part form (0.1.0.0), because that is how
+  the VERSIONINFO fields are encoded.
+
+  Create this in SignPath under Artifact Configurations, or upload an artifact sample and let
+  SignPath generate one - then check it against this file.
+-->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <parameters>
+    <parameter name="version" required="true" />
+  </parameters>
+  <zip-file>
+    <msi-file path="iridium-office-*-windows-*.msi">
+      <pe-file-set product-name="Office"
+                   product-version="${version}"
+                   file-version="${version}"
+                   company-name="Iridium Technologies, Inc."
+                   copyright="Copyright (c) the Office authors. MIT OR Apache-2.0."
+                   original-filename="${file.name}">
+        <include path="iridium-office.exe" />
+        <for-each>
+          <authenticode-sign />
+        </for-each>
+      </pe-file-set>
+      <authenticode-sign />
+    </msi-file>
+    <pe-file path="iridium-office.exe">
+      <authenticode-sign />
+    </pe-file>
+  </zip-file>
+</artifact-configuration>

@@ -21,7 +21,12 @@
 #>
 param(
   [ValidateSet('x64', 'x86', 'arm64')] [string] $Arch = 'x64',
-  [switch] $SkipBuild
+  [switch] $SkipBuild,
+  # SignPath signs the artifacts in CI, after this script built them. With this switch the
+  # script does not sign anything and does not build the portable archive: it leaves the
+  # executable and the installer in $Dist\signpath\ for the signing request, and the
+  # portable archive is built afterwards from the signed executable.
+  [switch] $DeferSigning
 )
 $ErrorActionPreference = 'Stop'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
@@ -95,7 +100,9 @@ New-Item -ItemType Directory -Force -Path $Stage | Out-Null
 Copy-Item -LiteralPath (Join-Path $Root 'NOTICE') -Destination $Stage
 Copy-Item (Join-Path $Bin 'iridium-office.exe') $Stage
 
-& (Join-Path $PSScriptRoot 'sign.ps1') (Join-Path $Stage 'iridium-office.exe')
+if (-not $DeferSigning) {
+  & (Join-Path $PSScriptRoot 'sign.ps1') (Join-Path $Stage 'iridium-office.exe')
+}
 
 # ---- font notices for the MSI ------------------------------------------------------------------
 # The portable ZIP already carries these notices; stage the complete files before MSI creation too.
@@ -121,6 +128,18 @@ Invoke-Native 'wix build' {
 }
 # wix writes its debug symbols (.wixpdb) next to the MSI; keep them out of the release assets.
 Remove-Item -Force -ErrorAction SilentlyContinue ([IO.Path]::ChangeExtension($Msi, '.wixpdb'))
+if ($DeferSigning) {
+  # The signing request takes the installer and the executable together: SignPath signs the
+  # executable inside the installer, the installer, and the standalone executable.
+  $SignDir = Join-Path $Dist 'signpath'
+  Remove-Item -Recurse -Force $SignDir -ErrorAction SilentlyContinue
+  New-Item -ItemType Directory -Force -Path $SignDir | Out-Null
+  Copy-Item $Msi $SignDir
+  Copy-Item (Join-Path $Stage 'iridium-office.exe') $SignDir
+  Write-Output "==> signing request input in $SignDir"
+  Get-Item $Msi | Format-Table Name, Length
+  exit 0
+}
 & (Join-Path $PSScriptRoot 'sign.ps1') $Msi
 
 # ---- portable zip ------------------------------------------------------------------------------
