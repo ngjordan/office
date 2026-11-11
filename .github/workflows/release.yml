@@ -98,7 +98,7 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: packaging/macos/package.sh --arch universal
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f3c4d0bb5aa # v4.6.2
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: macos
           path: |
@@ -149,7 +149,7 @@ jobs:
       - name: Build and package
         run: packaging/linux/package.sh --formats "deb rpm tar"
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f3c4d0bb5aa # v4.6.2
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: linux
           path: |
@@ -242,7 +242,7 @@ jobs:
           AZURE_CERT_PROFILE: ${{ secrets.AZURE_CERT_PROFILE }}
         run: packaging/windows/package.ps1 -Arch ${{ matrix.arch }}
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f3c4d0bb5aa # v4.6.2
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: windows-${{ matrix.arch }}
           path: |
@@ -263,7 +263,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372e1d0f8 # v4.1.8
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           path: artifacts
           merge-multiple: true
