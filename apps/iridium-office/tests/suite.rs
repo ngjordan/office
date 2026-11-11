@@ -244,12 +244,20 @@ fn every_offered_extension_has_an_open_command() {
     ))
     .expect("the Windows installer source must exist");
     let offered = wxs.matches("\\OpenWithProgids\"").count();
-    let commands = wxs.matches("shell\\open\\command").count();
-    assert!(commands > 0);
     assert!(offered > 0);
-    // one open command per ProgId, and every ProgId is referenced by at least one extension
-    let progids = wxs
-        .matches("<RegistryKey Root=\"HKCR\" Key=\"Office.")
-        .count();
-    assert_eq!(commands, progids, "each ProgId needs one open command");
+    // Every ProgId key carries exactly one open command.
+    let progid_blocks: Vec<&str> = wxs
+        .split("<RegistryKey Root=\"HKCR\" Key=\"Office.")
+        .skip(1)
+        .collect();
+    assert!(!progid_blocks.is_empty());
+    for block in progid_blocks {
+        let key_end = block.find("</RegistryKey>").unwrap_or(block.len());
+        let body = &block[..key_end];
+        assert_eq!(
+            body.matches("shell\\open\\command").count(),
+            1,
+            "each ProgId needs exactly one open command"
+        );
+    }
 }

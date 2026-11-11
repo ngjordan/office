@@ -6,8 +6,10 @@
   <Package Name="Office" Manufacturer="Iridium Technologies, Inc." Version="$(var.Version)" UpgradeCode="B4E9C2A1-7D63-5F08-9C14-2E8A6D5F30B7" Scope="perUserOrMachine" Compressed="yes" Language="1033">
     <SummaryInformation Description="Office suite" Manufacturer="Iridium Technologies, Inc." />
     <!-- Same-version upgrades let successive pre-releases of one X.Y.Z replace each other
-         (MSI versions are numeric, so 1.2.3-rc.1 and 1.2.3-rc.2 are both 1.2.3). -->
-    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of Office is already installed." />
+         (MSI versions are numeric, so 1.2.3-rc.1 and 1.2.3-rc.2 are both 1.2.3).
+         The removal is scheduled late, so an upgrade does not unpin the taskbar icon. -->
+    <MajorUpgrade AllowSameVersionUpgrades="yes" Schedule="afterInstallExecute"
+                  DowngradeErrorMessage="A newer version of Office is already installed." />
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
     <Icon Id="OfficeIcon.ico" SourceFile="$(var.IconPath)" />
@@ -28,6 +30,7 @@
       <ComponentGroupRef Id="CraftFontLicences" />
       <?endif?>
       <ComponentGroupRef Id="OfficeFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
     </Feature>
   <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
     <UI>
@@ -42,6 +45,16 @@
       <Files Include="$(var.DocsDir)\**" />
     </ComponentGroup>
     <?endif?>
+
+    <!-- The Start menu shortcut lives in its own component with an HKCU key path: a Shortcut
+         inside a File element trips ICE43/ICE57 in a package that can install per user or per
+         machine. -->
+    <Component Id="StartMenuShortcut" Directory="ProgramMenuFolder" Guid="8B4F1D6C-2E73-4A9B-9C05-7D1E6F38A204">
+      <Shortcut Id="StartMenuShortcut" Name="Office" Description="Office suite"
+                Target="[#OfficeExe]" WorkingDirectory="INSTALLFOLDER" Advertise="no" />
+      <RegistryValue Root="HKCU" Key="Software\Office" Name="StartMenu" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
     <ComponentGroup Id="OfficeFiles" Directory="INSTALLFOLDER">
       <Component Id="OfficeApp" Guid="2C7B4F19-5E8A-4D31-B6C9-0F3A8D2E5741">
         <File Id="OfficeNotice" Source="$(var.BinDir)\NOTICE" KeyPath="no" />
@@ -53,171 +66,215 @@
                pointing at the deleted file and lost its icon. The exe's path survives updates; the
                shortcut is not advertised, so it targets that path and its icon is the exe's own.
                The Icon above stays for ARPPRODUCTICON (Apps and features). -->
-          <Shortcut Id="StartMenuShortcut" Directory="ProgramMenuFolder" Name="Office" Description="Office suite" WorkingDirectory="INSTALLFOLDER" Advertise="no" />
         </File>
 
-        <!-- The suite routes every format to the module that owns it, so it registers the union
-             of the five apps' extensions. One ProgId per extension keeps the file association
-             with the suite itself. -->
-        <ProgId Id="Office.Spreadsheet" Description="Office Spreadsheet">
-          <Extension Id="xlsx" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.MacroSpreadsheet" Description="Office Spreadsheet">
-          <Extension Id="xlsm" ContentType="application/vnd.ms-excel.sheet.macroEnabled.12">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.BinarySpreadsheet" Description="Office Spreadsheet">
-          <Extension Id="xlsb" ContentType="application/vnd.ms-excel.sheet.binary.macroEnabled.12">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.OpenSpreadsheet" Description="Office Spreadsheet">
-          <Extension Id="ods" ContentType="application/vnd.oasis.opendocument.spreadsheet">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.Csv" Description="Office Spreadsheet">
-          <Extension Id="csv" ContentType="text/csv">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.Tsv" Description="Office Spreadsheet">
-          <Extension Id="tsv" ContentType="text/tab-separated-values">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
+        <!-- The suite routes every format to the module that owns it, so it offers the union of
+             the five apps' extensions.
 
-        <ProgId Id="Office.Document" Description="Office Document">
-          <Extension Id="docx" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.MacroDocument" Description="Office Document">
-          <Extension Id="docm" ContentType="application/vnd.ms-word.document.macroEnabled.12">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.Template" Description="Office Document">
-          <Extension Id="dotx" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.template">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.MacroTemplate" Description="Office Document">
-          <Extension Id="dotm" ContentType="application/vnd.ms-word.template.macroEnabled.12">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.OldDocument" Description="Office Document">
-          <Extension Id="doc" ContentType="application/msword">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.OldTemplate" Description="Office Document">
-          <Extension Id="dot" ContentType="application/msword-template">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.OpenDocument" Description="Office Document">
-          <Extension Id="odt" ContentType="application/vnd.oasis.opendocument.text">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.Rtf" Description="Office Document">
-          <Extension Id="rtf" ContentType="text/rtf">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.Html" Description="Office Document">
-          <Extension Id="html" ContentType="text/html">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.Markdown" Description="Office Document">
-          <Extension Id="md" ContentType="text/markdown">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        
-          <Extension Id="markdown" ContentType="text/markdown">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        
-          <Extension Id="mkd" ContentType="text/markdown">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.Xhtml" Description="Office Document">
-          <Extension Id="htm" ContentType="application/xhtml+xml">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.Latex" Description="Office Document">
-          <Extension Id="tex" ContentType="text/x-tex">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        
-          <Extension Id="dtx" ContentType="text/x-tex">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        
-          <Extension Id="ins" ContentType="text/x-tex">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        
-          <Extension Id="latex" ContentType="text/x-tex">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        
-          <Extension Id="ltx" ContentType="text/x-tex">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        
-          <Extension Id="sty" ContentType="text/x-tex">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
+             The suite's own format is registered as an Extension, so it is the default handler
+             for it. Every other type is only OFFERED: an Extension for a foreign type writes
+             HKCR\.pdf\(Default), which takes the file type over from whatever the user already
+             had and, on uninstall, breaks their association. The rows below put each type in
+             "Open with" and in the default apps settings, where the choice stays the user's.
 
-        <ProgId Id="Office.Presentation" Description="Office Presentation">
-          <Extension Id="pptx" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.Slideshow" Description="Office Presentation">
-          <Extension Id="ppsx" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideshow">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.PresentationTemplate" Description="Office Presentation">
-          <Extension Id="potx" ContentType="application/vnd.openxmlformats-officedocument.presentationml.template">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
+             WiX v5 derives a registry identifier from the content type, so two Extension
+             elements with the same ContentType under one ProgId collide. The raw registry rows
+             have distinct keys, so they do not. -->
         <ProgId Id="Office.Deck" Description="Office Presentation">
           <Extension Id="iridium-decks" ContentType="application/x-iridium-decks">
             <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
           </Extension>
         </ProgId>
 
-        <ProgId Id="Office.Pdf" Description="Office Document">
-          <Extension Id="pdf" ContentType="application/pdf">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.Drawing" Description="Office Drawing">
-          <Extension Id="dwg" ContentType="image/vnd.dwg">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
-        <ProgId Id="Office.Dxf" Description="Office Drawing">
-          <Extension Id="dxf" ContentType="image/vnd.dxf">
-            <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
-          </Extension>
-        </ProgId>
+        <RegistryKey Root="HKCR" Key="Office.BinarySpreadsheet">
+          <RegistryValue Type="string" Value="Office Spreadsheet" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Csv">
+          <RegistryValue Type="string" Value="Office Spreadsheet" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Document">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Drawing">
+          <RegistryValue Type="string" Value="Office Drawing" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Html">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Latex">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.MacroDocument">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.MacroSpreadsheet">
+          <RegistryValue Type="string" Value="Office Spreadsheet" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.MacroTemplate">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Markdown">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.OldDocument">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.OldTemplate">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.OpenDocument">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.OpenSpreadsheet">
+          <RegistryValue Type="string" Value="Office Spreadsheet" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Pdf">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Presentation">
+          <RegistryValue Type="string" Value="Office Presentation" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.PresentationTemplate">
+          <RegistryValue Type="string" Value="Office Presentation" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Rtf">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Slideshow">
+          <RegistryValue Type="string" Value="Office Presentation" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Spreadsheet">
+          <RegistryValue Type="string" Value="Office Spreadsheet" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Template">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Tsv">
+          <RegistryValue Type="string" Value="Office Spreadsheet" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Xhtml">
+          <RegistryValue Type="string" Value="Office Document" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
 
+        <!-- "Open with": the type appears in the list, but nothing is taken over. -->
+        <RegistryValue Root="HKCR" Key=".csv\OpenWithProgids" Name="Office.Csv" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".doc\OpenWithProgids" Name="Office.OldDocument" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".docm\OpenWithProgids" Name="Office.MacroDocument" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".docx\OpenWithProgids" Name="Office.Document" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".dot\OpenWithProgids" Name="Office.OldTemplate" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".dotm\OpenWithProgids" Name="Office.MacroTemplate" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".dotx\OpenWithProgids" Name="Office.Template" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".dtx\OpenWithProgids" Name="Office.Latex" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".dwg\OpenWithProgids" Name="Office.Drawing" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".dxf\OpenWithProgids" Name="Office.Drawing" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".htm\OpenWithProgids" Name="Office.Xhtml" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".html\OpenWithProgids" Name="Office.Html" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".ins\OpenWithProgids" Name="Office.Latex" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".latex\OpenWithProgids" Name="Office.Latex" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".ltx\OpenWithProgids" Name="Office.Latex" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".markdown\OpenWithProgids" Name="Office.Markdown" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".md\OpenWithProgids" Name="Office.Markdown" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mkd\OpenWithProgids" Name="Office.Markdown" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".ods\OpenWithProgids" Name="Office.OpenSpreadsheet" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".odt\OpenWithProgids" Name="Office.OpenDocument" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pdf\OpenWithProgids" Name="Office.Pdf" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".potx\OpenWithProgids" Name="Office.PresentationTemplate" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".ppsx\OpenWithProgids" Name="Office.Slideshow" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pptx\OpenWithProgids" Name="Office.Presentation" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".rtf\OpenWithProgids" Name="Office.Rtf" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".sty\OpenWithProgids" Name="Office.Latex" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".tex\OpenWithProgids" Name="Office.Latex" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".tsv\OpenWithProgids" Name="Office.Tsv" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".xlsb\OpenWithProgids" Name="Office.BinarySpreadsheet" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".xlsm\OpenWithProgids" Name="Office.MacroSpreadsheet" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".xlsx\OpenWithProgids" Name="Office.Spreadsheet" Type="string" Value="" />
 
-        <!-- "Open with" for every format, without becoming the default. -->
+        <!-- Settings > Default apps: the user can pick the suite per type. -->
+        <RegistryKey Root="HKMU" Key="Software\Office\Capabilities">
+          <RegistryValue Name="ApplicationName" Type="string" Value="Office" />
+          <RegistryValue Name="ApplicationDescription" Type="string" Value="Office suite" />
+          <RegistryValue Key="FileAssociations" Name=".csv" Type="string" Value="Office.Csv" />
+          <RegistryValue Key="FileAssociations" Name=".doc" Type="string" Value="Office.OldDocument" />
+          <RegistryValue Key="FileAssociations" Name=".docm" Type="string" Value="Office.MacroDocument" />
+          <RegistryValue Key="FileAssociations" Name=".docx" Type="string" Value="Office.Document" />
+          <RegistryValue Key="FileAssociations" Name=".dot" Type="string" Value="Office.OldTemplate" />
+          <RegistryValue Key="FileAssociations" Name=".dotm" Type="string" Value="Office.MacroTemplate" />
+          <RegistryValue Key="FileAssociations" Name=".dotx" Type="string" Value="Office.Template" />
+          <RegistryValue Key="FileAssociations" Name=".dtx" Type="string" Value="Office.Latex" />
+          <RegistryValue Key="FileAssociations" Name=".dwg" Type="string" Value="Office.Drawing" />
+          <RegistryValue Key="FileAssociations" Name=".dxf" Type="string" Value="Office.Drawing" />
+          <RegistryValue Key="FileAssociations" Name=".htm" Type="string" Value="Office.Xhtml" />
+          <RegistryValue Key="FileAssociations" Name=".html" Type="string" Value="Office.Html" />
+          <RegistryValue Key="FileAssociations" Name=".ins" Type="string" Value="Office.Latex" />
+          <RegistryValue Key="FileAssociations" Name=".latex" Type="string" Value="Office.Latex" />
+          <RegistryValue Key="FileAssociations" Name=".ltx" Type="string" Value="Office.Latex" />
+          <RegistryValue Key="FileAssociations" Name=".markdown" Type="string" Value="Office.Markdown" />
+          <RegistryValue Key="FileAssociations" Name=".md" Type="string" Value="Office.Markdown" />
+          <RegistryValue Key="FileAssociations" Name=".mkd" Type="string" Value="Office.Markdown" />
+          <RegistryValue Key="FileAssociations" Name=".ods" Type="string" Value="Office.OpenSpreadsheet" />
+          <RegistryValue Key="FileAssociations" Name=".odt" Type="string" Value="Office.OpenDocument" />
+          <RegistryValue Key="FileAssociations" Name=".pdf" Type="string" Value="Office.Pdf" />
+          <RegistryValue Key="FileAssociations" Name=".potx" Type="string" Value="Office.PresentationTemplate" />
+          <RegistryValue Key="FileAssociations" Name=".ppsx" Type="string" Value="Office.Slideshow" />
+          <RegistryValue Key="FileAssociations" Name=".pptx" Type="string" Value="Office.Presentation" />
+          <RegistryValue Key="FileAssociations" Name=".rtf" Type="string" Value="Office.Rtf" />
+          <RegistryValue Key="FileAssociations" Name=".sty" Type="string" Value="Office.Latex" />
+          <RegistryValue Key="FileAssociations" Name=".tex" Type="string" Value="Office.Latex" />
+          <RegistryValue Key="FileAssociations" Name=".tsv" Type="string" Value="Office.Tsv" />
+          <RegistryValue Key="FileAssociations" Name=".xlsb" Type="string" Value="Office.BinarySpreadsheet" />
+          <RegistryValue Key="FileAssociations" Name=".xlsm" Type="string" Value="Office.MacroSpreadsheet" />
+          <RegistryValue Key="FileAssociations" Name=".xlsx" Type="string" Value="Office.Spreadsheet" />
+        </RegistryKey>
+        <RegistryValue Root="HKMU" Key="Software\RegisteredApplications" Name="Office" Type="string" Value="Software\Office\Capabilities" />
+
+        <!-- The "Open with" list for the executable. App Paths alone only covers Win+R and
+             ShellExecute; this is what puts the suite in the Open with menu. -->
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe" Name="FriendlyAppName" Value="Office" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\shell\open\command" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".csv" Value="" Type="string" />
@@ -227,12 +284,17 @@
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dot" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dotm" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dotx" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dtx" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dwg" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dxf" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".htm" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".html" Value="" Type="string" />
-        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".iridium-decks" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".ins" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".latex" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".ltx" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".markdown" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".md" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".mkd" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".ods" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".odt" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".pdf" Value="" Type="string" />
@@ -240,21 +302,15 @@
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".ppsx" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".pptx" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".rtf" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".sty" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".tex" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".tsv" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".xlsb" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".xlsm" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".xlsx" Value="" Type="string" />
 
-        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".dtx" Value="" Type="string" />
-        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".ins" Value="" Type="string" />
-        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".latex" Value="" Type="string" />
-        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".ltx" Value="" Type="string" />
-        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".markdown" Value="" Type="string" />
-        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".mkd" Value="" Type="string" />
-        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".sty" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Microsoft\Windows\CurrentVersion\App Paths\iridium-office.exe" Value="[#OfficeExe]" Type="string" />
-      <RegistryValue Root="HKMU" Key="Software\Office" Name="InstallDir" Value="[INSTALLFOLDER]" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Office" Name="InstallDir" Value="[INSTALLFOLDER]" Type="string" />
       </Component>
     </ComponentGroup>
   </Fragment>
