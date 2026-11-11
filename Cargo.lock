@@ -4810,6 +4810,7 @@ version = "0.1.0"
 dependencies = [
  "eframe",
  "egui",
+ "fmv-macos-events",
  "image",
  "iridium-cad-engine",
  "iridium-cad-shell",

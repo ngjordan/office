@@ -108,57 +108,6 @@ jobs:
             dist/release/*.dmg
             dist/release/*.zip
 
-  linux:
-    name: Linux
-    needs: checkout-apps
-    runs-on: ubuntu-22.04
-    env:
-      CRAFT_FONTS_DIR: /tmp/craft-fonts
-      CRAFT_I18N_DIR: /tmp/craft-i18n
-      CARGO_BUILD_JOBS: 2
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Check out the apps
-        env:
-          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
-        run: |
-          set -euo pipefail
-          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft; do
-            name="${pair%%:*}"; dir="${pair##*:}"
-            gh repo clone "ngjordan/$name" "../$dir" -- --depth 1
-          done
-
-      - name: Check out the assets
-        env:
-          GH_TOKEN: ${{ secrets.OFFICE_TOKEN }}
-        run: |
-          set -euo pipefail
-          git clone --depth 1 https://github.com/ngjordan/craft-fonts.git /tmp/craft-fonts
-          git clone --depth 1 https://github.com/ngjordan/craft-i18n.git /tmp/craft-i18n
-
-      # The workspace's path dependencies point at ../office-vendor/<app>.
-      - name: Create the vendor tree
-        run: packaging/setup-vendor.sh "$(dirname "$GITHUB_WORKSPACE")"
-
-      - name: Install nfpm
-        run: |
-          set -euo pipefail
-          curl -sSfL -o nfpm.deb https://github.com/goreleaser/nfpm/releases/download/v2.47.0/nfpm_2.47.0_amd64.deb
-          sudo dpkg -i nfpm.deb
-
-      - name: Build and package
-        run: packaging/linux/package.sh --formats "deb rpm tar"
-
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: linux
-          path: |
-            dist/release/*.deb
-            dist/release/*.rpm
-            dist/release/*.tar.gz
 
   windows:
     name: Windows ${{ matrix.arch }}
@@ -257,7 +206,7 @@ jobs:
   # start.
   release:
     name: Draft the release
-    needs: [checkout-apps, macos, windows, linux]
+    needs: [checkout-apps, macos, windows]
     # One platform failing must not hide the others' artifacts.
     if: always()
     runs-on: ubuntu-24.04

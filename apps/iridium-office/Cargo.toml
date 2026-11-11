@@ -31,3 +31,8 @@ log = "0.4"
 
 [build-dependencies]
 winresource = "0.1"
+
+# The module adapters create the macOS event inboxes the shell crates expect.
+# macOS only: on other platforms the shell takes the inbox through a different path.
+[target.'cfg(target_os = "macos")'.dependencies]
+fmv-macos-events = "=0.1.0"

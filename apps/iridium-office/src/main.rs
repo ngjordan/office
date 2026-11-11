@@ -7,6 +7,13 @@
 //! 2. re-issue the active module's look (a background module may have replaced it),
 //! 3. the rail and the active module's `ui`.
 
+// A Windows release build is a GUI app: without this the .exe gets a console window
+// behind the app window. The same attribute the five apps carry.
+#![cfg_attr(
+    all(target_os = "windows", not(debug_assertions)),
+    windows_subsystem = "windows"
+)]
+
 use iridium_office::{route, suite::Suite};
 
 /// The suite's name, slug and app id, from `branding/brand.env` - the one place they
