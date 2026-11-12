@@ -30,6 +30,11 @@ fn main() {
     };
     let (major, minor, patch, release) = (word(), word(), word(), word());
     let version = (major << 48) | (minor << 32) | (patch << 16) | release;
+    // The same version as the four-part string. winresource fills the string fields from
+    // CARGO_PKG_VERSION ("0.2.0"), which is not the four-part form the numeric fields
+    // encode; the signing service compares the version against the artifact
+    // configuration, and which of the two it reads is not something to leave to chance.
+    let version4 = format!("{major}.{minor}.{patch}.{release}");
 
     let mut res = winresource::WindowsResource::new();
     res.set_icon("../../assets/app-icon/iridium-office.ico")
@@ -41,7 +46,9 @@ fn main() {
             "Copyright (c) the Office authors. MIT OR Apache-2.0.",
         )
         .set("OriginalFilename", "iridium-office.exe")
-        .set("InternalName", "iridium-office");
+        .set("InternalName", "iridium-office")
+        .set("FileVersion", &version4)
+        .set("ProductVersion", &version4);
     res.set_version_info(winresource::VersionInfo::FILEVERSION, version);
     res.set_version_info(winresource::VersionInfo::PRODUCTVERSION, version);
     if let Err(e) = res.compile() {

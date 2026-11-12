@@ -98,6 +98,19 @@ fn the_executable_name_is_the_same_everywhere() {
         xml.contains(&format!("path=\"{EXE}\"")),
         "the configuration does not sign {EXE}"
     );
+    // Inside the installer the executable sits in Program Files\Iridium\Office, so the
+    // path in the configuration has to name that directory: a path that matches no file
+    // fails the signing request.
+    assert!(
+        xml.contains("PFiles64/Iridium/Office/iridium-office.exe"),
+        "the configuration does not find the executable inside the installer"
+    );
+    let wxs = fs::read_to_string(root().join("../../packaging/windows/iridium-office.wxs"))
+        .expect("the installer source");
+    assert!(
+        wxs.contains("ProgramFiles6432Folder") && wxs.contains("Name=\"Iridium\""),
+        "the installer no longer puts the suite in Program Files/Iridium"
+    );
     assert!(
         package_ps1.contains(EXE),
         "the packaging script does not ship {EXE}"
@@ -125,9 +138,21 @@ fn the_version_in_the_binary_comes_from_the_crate() {
         build_rs.contains("env!(\"CARGO_PKG_VERSION\")"),
         "build.rs does not take the version from the crate"
     );
+    // The numeric fields are the packed form; the string fields carry the same four-part
+    // version, because the signing service compares the version against the artifact
+    // configuration and may read either one.
     assert!(
-        !build_rs.contains(".set(\"FileVersion\""),
-        "build.rs sets the version as a string; the fields have to be numeric"
+        build_rs.contains(".set(\"FileVersion\""),
+        "build.rs does not set the string version fields"
+    );
+    assert!(
+        build_rs.contains(".set(\"ProductVersion\""),
+        "build.rs does not set the string version fields"
+    );
+    // The string version is built from the crate version, not written out by hand.
+    assert!(
+        build_rs.contains("format!(\"{major}.{minor}.{patch}.{release}\")"),
+        "the string version is not derived from the crate version"
     );
 }
 

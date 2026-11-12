@@ -46,7 +46,10 @@ jobs:
           echo "version=$v" >> "$GITHUB_OUTPUT"
           # The VERSIONINFO fields are four 16-bit numbers, so the SignPath metadata
           # restriction compares against the four-part form: 0.1.0 -> 0.1.0.0
-          IFS=. read -ra parts <<< "$v"
+          # The four-part form the VERSIONINFO fields encode. A pre-release suffix is
+          # dropped: "0.2.0-rc.1" is not a version the fields can hold.
+          base="${v%%[-+]*}"
+          IFS=. read -ra parts <<< "$base"
           echo "version4=${parts[0]}.${parts[1]}.${parts[2]}.${parts[3]:-0}" >> "$GITHUB_OUTPUT"
           echo "$v"
 
@@ -276,6 +279,11 @@ jobs:
             Copy-Item $signedExe (Join-Path $env:GITHUB_WORKSPACE 'dist\release') -Force
             packaging/windows/make-portable.ps1 -Arch ${{ matrix.arch }} -SignedExe $signedExe
           } else {
+            # SignPath ran and succeeded but its output is not here: that is a failure, not
+            # a reason to ship unsigned binaries under the same release.
+            if ('${{ steps.signpath.outcome }}' -eq 'success') {
+              throw 'SignPath succeeded but the signed files are missing'
+            }
             # No SignPath: sign locally with a CA certificate or Azure, and build the archive.
             packaging/windows/package.ps1 -Arch ${{ matrix.arch }} -SkipBuild
           }
@@ -286,14 +294,38 @@ jobs:
                  Select-Object -First 1
           if ($msi) {
             # A marker is not worth failing a release over: anything unexpected reads as
-            # unsigned, and the notes say so.
+            # unsigned, and the notes say so. But "signed" has to mean all of it: the
+            # installer, the executable inside it, and the executable in the portable
+            # archive. Checking the installer alone would call a release signed when the
+            # program the user runs is not.
             $status = 'NotSigned'
             try {
               $sig = Get-AuthenticodeSignature -FilePath $msi.FullName -ErrorAction Stop
-              if ($sig.Status -eq 'Valid') { $status = 'Valid' }
               Write-Output "the installer signature status is $($sig.Status)"
+              if ($sig.Status -eq 'Valid') {
+                $exe = Get-ChildItem (Join-Path $env:GITHUB_WORKSPACE 'dist\release') -Filter 'iridium-office.exe' -ErrorAction SilentlyContinue |
+                       Select-Object -First 1
+                if (-not $exe) { throw 'the executable is missing from the release folder' }
+                $exeSig = Get-AuthenticodeSignature -FilePath $exe.FullName -ErrorAction Stop
+                Write-Output "the executable signature status is $($exeSig.Status)"
+                if ($exeSig.Status -ne 'Valid') { throw "the executable is $($exeSig.Status)" }
+                # The executable inside the installer is a third file. Extracting it is the
+                # only way to know it was signed.
+                $extract = Join-Path $env:RUNNER_TEMP "msi-extract"
+                Remove-Item -Recurse -Force $extract -ErrorAction SilentlyContinue
+                New-Item -ItemType Directory -Force -Path $extract | Out-Null
+                $admin = Start-Process msiexec.exe -ArgumentList @('/a', $msi.FullName, '/qn', "TARGETDIR=$extract") -Wait -PassThru
+                if ($admin.ExitCode -ne 0) { throw "could not extract the installer (msiexec exit $($admin.ExitCode))" }
+                $inner = Get-ChildItem -Path $extract -Filter 'iridium-office.exe' -Recurse -ErrorAction SilentlyContinue |
+                         Select-Object -First 1
+                if (-not $inner) { throw 'the installer does not contain the executable' }
+                $innerSig = Get-AuthenticodeSignature -FilePath $inner.FullName -ErrorAction Stop
+                Write-Output "the installed executable signature status is $($innerSig.Status)"
+                if ($innerSig.Status -ne 'Valid') { throw "the installed executable is $($innerSig.Status)" }
+                $status = 'Valid'
+              }
             } catch {
-              Write-Output "::warning::could not read the installer signature: $($_.Exception.Message)"
+              Write-Output "::warning::could not read the signature: $($_.Exception.Message)"
             }
             # The marker is per architecture: both matrix jobs used to write the same
             # path, and the publish job merges the artifacts, so one architecture's
@@ -318,6 +350,10 @@ jobs:
     # One platform failing must not hide the others' artifacts.
     if: always()
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      # The signing action reads the workflow's artifacts to submit them for signing.
+      actions: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -350,7 +386,8 @@ jobs:
           printf '  %s\n' "${assets[@]}"
           # A re-run of the same version finds the release already there: add the new
           # assets to it instead of failing on the existing tag.
-          NOTES="The Office suite $TAG."
+          NOTES="The Office suite $TAG.
+          Code signing policy: https://github.com/ngjordan/office/blob/main/CODE_SIGNING.md"
           # One marker per Windows architecture. The artifacts are signed only if every
           # architecture says so: a release where one architecture is signed and the
           # other is not is a mixed release, and the notes must not call it signed.
@@ -374,6 +411,10 @@ jobs:
           if gh release view "v$TAG" >/dev/null 2>&1; then
             echo "release v$TAG exists: uploading the assets to it"
             gh release upload "v$TAG" "${assets[@]}" --clobber
+            # The notes say whether the artifacts are signed. A re-run that changes the
+            # signing state has to change the notes too, or the release says one thing and
+            # ships another.
+            gh release edit "v$TAG" --notes "$NOTES"
           else
             # Published, not a draft: a draft has no download link, and the release is
             # the deliverable.

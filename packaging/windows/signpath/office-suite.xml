@@ -34,14 +34,26 @@
                    company-name="Iridium Technologies, Inc."
                    copyright="Copyright (c) the Office authors. MIT OR Apache-2.0."
                    original-filename="${file.name}">
-        <include path="iridium-office.exe" />
+        <!-- The installer puts the executable in Program Files\Iridium\Office, so the
+             path inside the MSI is that directory, not the bare file name. A path that
+             matches nothing fails the signing request: min-matches defaults to 1. -->
+        <include path="PFiles64/Iridium/Office/iridium-office.exe" />
         <for-each>
           <authenticode-sign />
         </for-each>
       </pe-file-set>
       <authenticode-sign />
     </msi-file>
-    <pe-file path="iridium-office.exe">
+    <!-- The standalone executable, for the portable archive. It carries the same metadata
+         restriction as the one inside the installer: the Foundation's terms ask for the
+         metadata of every signed binary to be set and enforced. -->
+    <pe-file path="iridium-office.exe"
+             product-name="Office"
+             product-version="${version}"
+             file-version="${version}"
+             company-name="Iridium Technologies, Inc."
+             copyright="Copyright (c) the Office authors. MIT OR Apache-2.0."
+             original-filename="iridium-office.exe">
       <authenticode-sign />
     </pe-file>
   </zip-file>

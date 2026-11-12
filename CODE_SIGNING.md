@@ -17,12 +17,13 @@ Only the artifacts this repository builds from its own source, in its own CI:
 - `iridium-office-<version>-windows-<arch>-portable.zip` - the portable archive, containing
   the signed executable.
 
-Nothing else is signed. The macOS and Linux artifacts are signed with a Developer ID
-certificate and an App Store Connect API key, which are not SignPath Foundation's business
-and are not covered by this policy.
+Nothing else is signed. The macOS artifacts are signed with a Developer ID certificate and
+an App Store Connect API key, which are not SignPath Foundation's business and are not
+covered by this policy. The suite ships no Linux artifact.
 
-The six applications this suite embeds live in their own repositories and are not signed
-with this certificate.
+The six applications this suite embeds live in their own repositories. Their standalone
+builds are not signed with this certificate; the suite's own executable, which contains them,
+is.
 
 ## Who may approve a release
 
@@ -59,9 +60,13 @@ signature.
 its own: there is no telemetry, no analytics, no crash reporting, and no automatic update
 check.
 
-The Sheets module can talk to Google Sheets and to Microsoft 365, but only when you ask it
-to, using your own credentials, and it sends your data only to the service you chose. What
-you open stays on your machine unless you send it somewhere yourself.
+This program will not transfer any information to other networked systems unless
+specifically requested by the user or the person installing or operating it.
+
+The Mail module talks to your mail server, the Sheets module can talk to Google Sheets and
+to Microsoft 365, and the Docs module can talk to a reference library - but only when you
+ask it to, using your own credentials, and it sends your data only to the service you
+chose. What you open stays on your machine unless you send it somewhere yourself.
 
 There is therefore no installation option to disable: there is nothing to disable.
 

@@ -15,6 +15,9 @@
 #>
 param(
   [ValidateSet('x64', 'x86', 'arm64')] [string] $Arch = 'x64',
+  # Mandatory: the archive must be built from the executable that was signed, not from
+  # whatever the build left lying around. A default here silently produces an unsigned zip.
+  [Parameter(Mandatory = $true)]
   [string] $SignedExe
 )
 $ErrorActionPreference = 'Stop'
@@ -34,10 +37,6 @@ $Dist = if ($env:DIST) { $env:DIST } else { Join-Path $Root 'dist\release' }
 $TargetDir = if ($env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR } else { Join-Path $Root 'target' }
 New-Item -ItemType Directory -Force -Path $Dist | Out-Null
 
-if (-not $SignedExe) {
-  $Target = switch ($Arch) { 'x64' { 'x86_64-pc-windows-msvc' } 'x86' { 'i686-pc-windows-msvc' } 'arm64' { 'aarch64-pc-windows-msvc' } }
-  $SignedExe = Join-Path $TargetDir "$Target\release\iridium-office.exe"
-}
 if (-not (Test-Path $SignedExe)) { throw "no executable at $SignedExe" }
 
 $Portable = Join-Path $TargetDir "windows-package\iridium-office-$Version-windows-$Arch-portable"

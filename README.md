@@ -54,7 +54,7 @@ approves a release, how the signing request works, and the privacy statement - i
 | Role | Who |
 |---|---|
 | Committers and reviewers | [the repository maintainers](https://github.com/ngjordan/office/graphs/contributors) |
-| Approvers | [the repository owners](https://github.com/ngjordan/office?tab=readme-ov-file#repository-owners-and-contributors) |
+| Approvers | [the repository owners](https://github.com/ngjordan) |
 
 **Privacy policy:** the Office suite collects no data and transmits none. It makes no network
 connection of its own - no telemetry, no analytics, no crash reporting, no automatic update
