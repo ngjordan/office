@@ -29,37 +29,37 @@
     ],
     [
       1,
-      "Office.Office.Message",
+      "Office.Message",
       "",
       ""
     ],
     [
       1,
-      "Office.Office.Mailbox",
+      "Office.Mailbox",
       "",
       ""
     ],
     [
       1,
-      "Office.Office.Calendar",
+      "Office.Calendar",
       "",
       ""
     ],
     [
       1,
-      "Office.Office.Contact",
+      "Office.Contact",
       "",
       ""
     ],
     [
       1,
-      "Office.Office.OutlookMessage",
+      "Office.OutlookMessage",
       "",
       ""
     ],
     [
       1,
-      "Office.Office.OutlookDataFile",
+      "Office.OutlookDataFile",
       "",
       ""
     ],
@@ -204,37 +204,37 @@
     [
       1,
       ".eml\\\\OpenWithProgids",
-      "Office.Office.Message",
+      "Office.Message",
       ""
     ],
     [
       1,
       ".mbox\\\\OpenWithProgids",
-      "Office.Office.Mailbox",
+      "Office.Mailbox",
       ""
     ],
     [
       1,
       ".ics\\\\OpenWithProgids",
-      "Office.Office.Calendar",
+      "Office.Calendar",
       ""
     ],
     [
       1,
       ".vcf\\\\OpenWithProgids",
-      "Office.Office.Contact",
+      "Office.Contact",
       ""
     ],
     [
       1,
       ".msg\\\\OpenWithProgids",
-      "Office.Office.OutlookMessage",
+      "Office.OutlookMessage",
       ""
     ],
     [
       1,
       ".pst\\\\OpenWithProgids",
-      "Office.Office.OutlookDataFile",
+      "Office.OutlookDataFile",
       ""
     ],
     [

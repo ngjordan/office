@@ -263,3 +263,35 @@ fn every_offered_extension_has_an_open_command() {
         );
     }
 }
+
+#[test]
+fn every_progid_the_policy_names_is_one_the_installer_defines() {
+    // The policy is what the release pipeline checks the installer against. A ProgId
+    // spelled differently in the two files is a mismatch the check throws on.
+    let base = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../packaging/windows");
+    let policy =
+        std::fs::read_to_string(base.join("install-policy.json")).expect("install-policy.json");
+    let wxs = std::fs::read_to_string(base.join("iridium-office.wxs")).expect("iridium-office.wxs");
+    assert!(
+        !policy.contains("Office.Office."),
+        "a ProgId is written with the prefix twice"
+    );
+    for name in [
+        "Message",
+        "Mailbox",
+        "Calendar",
+        "Contact",
+        "OutlookMessage",
+        "OutlookDataFile",
+    ] {
+        let progid = format!("Office.{name}");
+        assert!(
+            policy.contains(&format!("\"{progid}\"")),
+            "the policy names {progid}"
+        );
+        assert!(
+            wxs.contains(&format!("Key=\"{progid}\"")),
+            "the installer defines {progid}"
+        );
+    }
+}
