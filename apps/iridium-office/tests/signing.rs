@@ -130,3 +130,35 @@ fn the_version_in_the_binary_comes_from_the_crate() {
         "build.rs sets the version as a string; the fields have to be numeric"
     );
 }
+
+#[test]
+fn each_windows_architecture_reports_its_own_signing_state() {
+    let workflow = fs::read_to_string(root().join("../../.github/workflows/release.yml"))
+        .expect("release.yml");
+
+    // The Windows job runs once per architecture and both wrote the signing marker to the
+    // same path. The publish job merges the two artifacts, so one architecture's marker
+    // overwrote the other's, and the release notes described one architecture for both.
+    assert!(
+        !workflow.contains("dist\\release\\SIGNING'"),
+        "the signing marker is still written to a shared path"
+    );
+    assert!(
+        workflow.contains("SIGNING-${{ matrix.arch }}"),
+        "the signing marker is not named per architecture"
+    );
+    // The marker is not a download: it is read for the release notes.
+    assert!(
+        !workflow.contains("! -name 'SIGNING' |"),
+        "the shared marker is still excluded by an exact name"
+    );
+    assert!(
+        workflow.contains("! -name 'SIGNING-*'"),
+        "the per-architecture markers are not excluded from the downloads"
+    );
+    // Every architecture has to be signed for the release to say the artifacts are signed.
+    assert!(
+        workflow.contains("all_signed"),
+        "the release notes do not require every architecture to be signed"
+    );
+}

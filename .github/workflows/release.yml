@@ -295,7 +295,10 @@ jobs:
             } catch {
               Write-Output "::warning::could not read the installer signature: $($_.Exception.Message)"
             }
-            Set-Content -Path (Join-Path $env:GITHUB_WORKSPACE 'dist\release\SIGNING') -Value $status
+            # The marker is per architecture: both matrix jobs used to write the same
+            # path, and the publish job merges the artifacts, so one architecture's
+            # marker overwrote the other's and the notes described only one of them.
+            Set-Content -Path (Join-Path $env:GITHUB_WORKSPACE "dist\release\SIGNING-${{ matrix.arch }}") -Value $status
           }
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -304,7 +307,7 @@ jobs:
           path: |
             dist/release/*.msi
             dist/release/*.zip
-            dist/release/SIGNING
+            dist/release/SIGNING-*
 
   # The GitHub release itself: a tag and a list of assets. Publishing does not need a runner
   # with a spending limit, so this is the one job that works even when the build jobs cannot
@@ -338,7 +341,7 @@ jobs:
           # A platform that failed contributes no artifacts; publish whatever did build.
           # The markers say how the artifacts were signed: they are read for the notes, not
           # published as downloads.
-          mapfile -t assets < <(find artifacts -type f ! -name 'NOTARIZATION' ! -name 'SIGNING' | sort)
+          mapfile -t assets < <(find artifacts -type f ! -name 'NOTARIZATION' ! -name 'SIGNING' ! -name 'SIGNING-*' | sort)
           if [[ ${#assets[@]} -eq 0 ]]; then
             echo "::error::no artifacts were built, refusing to publish an empty release"
             exit 1
@@ -348,8 +351,16 @@ jobs:
           # A re-run of the same version finds the release already there: add the new
           # assets to it instead of failing on the existing tag.
           NOTES="The Office suite $TAG."
-          if [[ -f artifacts/SIGNING ]]; then
-            if grep -q "^Valid$" artifacts/SIGNING; then
+          # One marker per Windows architecture. The artifacts are signed only if every
+          # architecture says so: a release where one architecture is signed and the
+          # other is not is a mixed release, and the notes must not call it signed.
+          mapfile -t signing_markers < <(find artifacts -type f -name 'SIGNING-*' | sort)
+          if [[ ${#signing_markers[@]} -gt 0 ]]; then
+            all_signed=1
+            for marker in "${signing_markers[@]}"; do
+              grep -q "^Valid$" "$marker" || all_signed=0
+            done
+            if [[ $all_signed -eq 1 ]]; then
               NOTES="$NOTES The Windows artifacts are signed."
             else
               NOTES="$NOTES The Windows artifacts are NOT signed: Windows shows \"Windows protected your PC\". Choose More info, then Run anyway."
