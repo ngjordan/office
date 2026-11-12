@@ -138,6 +138,16 @@ fn the_version_in_the_binary_comes_from_the_crate() {
         build_rs.contains("env!(\"CARGO_PKG_VERSION\")"),
         "build.rs does not take the version from the crate"
     );
+    // A release run can override the version. The binary has to carry it, or the
+    // version the signing service compares against is not the version in the binary.
+    assert!(
+        build_rs.contains("IRIDIUM_OFFICE_VERSION"),
+        "build.rs does not take the version override"
+    );
+    assert!(
+        build_rs.contains("cargo:rerun-if-env-changed=IRIDIUM_OFFICE_VERSION"),
+        "build.rs does not rebuild when the version override changes"
+    );
     // The numeric fields are the packed form; the string fields carry the same four-part
     // version, because the signing service compares the version against the artifact
     // configuration and may read either one.

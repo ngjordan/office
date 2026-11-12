@@ -10,14 +10,23 @@
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    // A release run overrides the version; the binary has to carry that version, because
+    // the signing service compares the executable's version against the artifact
+    // configuration, and the configuration is built from the same override.
+    println!("cargo:rerun-if-env-changed=IRIDIUM_OFFICE_VERSION");
     println!("cargo:rerun-if-changed=../../assets/app-icon/iridium-office.ico");
     println!("cargo:rerun-if-env-changed=IRIDIUM_OFFICE_REQUIRE_WINRES");
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("windows") {
         return;
     }
-    // The crate version is major.minor.patch; any pre-release suffix is dropped, because the
-    // VERSIONINFO fields are four 16-bit numbers.
-    let mut parts = env!("CARGO_PKG_VERSION")
+    // The version is the crate version, or the override a release run sets. Any
+    // pre-release suffix is dropped, because the VERSIONINFO fields are four 16-bit
+    // numbers.
+    let version = std::env::var("IRIDIUM_OFFICE_VERSION")
+        .ok()
+        .filter(|v| !v.trim().is_empty())
+        .unwrap_or_else(|| env!("CARGO_PKG_VERSION").to_string());
+    let mut parts = version
         .split(['-', '+'])
         .next()
         .unwrap_or("0.0.0")
