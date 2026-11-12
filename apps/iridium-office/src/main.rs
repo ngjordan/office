@@ -40,9 +40,8 @@ impl eframe::App for App {
         self.suite.save(storage);
     }
 
-    fn logic(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.suite.logic(ctx);
-        self.after_frame(ctx, frame);
     }
 
     fn raw_input_hook(&mut self, ctx: &egui::Context, raw: &mut egui::RawInput) {
