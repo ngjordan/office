@@ -120,6 +120,7 @@ impl Suite {
                 Kind::Cad => Box::new(modules::cad::Adapter::new(ctx, storage, files)),
                 Kind::Decks => Box::new(modules::decks::Adapter::new(ctx, storage, files)),
                 Kind::Pdf => Box::new(modules::pdf::Adapter::new(ctx, storage, files)),
+                Kind::Mail => Box::new(modules::mail::Adapter::new(ctx, storage, files)),
             };
             self.activate_module(kind, module, ctx);
         }

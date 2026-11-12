@@ -6,7 +6,7 @@
 //! to look at.
 //!
 //! So every panic is written to a log file next to the app's settings, and on Windows it is
-//! also shown in a message box. The four of the five apps this suite merges already install a
+//! also shown in a message box. The other apps this suite merges already install a
 //! hook like this; the suite is where it was missing.
 
 use std::path::PathBuf;

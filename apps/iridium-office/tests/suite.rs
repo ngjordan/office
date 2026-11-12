@@ -1,8 +1,8 @@
-//! Phase 2b: the suite switches between the five apps in one window, and the
+//! Phase 2b: the suite switches between the apps in one window, and the
 //! active module's look is restored on every switch.
 //!
 //! This is the acceptance test for the suite itself. The Phase 0 test
-//! (`five_in_one`) stays the regression gate that the five apps can share a process.
+//! (`five_in_one`) stays the regression gate that the apps can share a process.
 
 use iridium_office::suite::Suite;
 
@@ -67,8 +67,10 @@ fn opens_an_app_and_switches_between_them() {
             "{kind:?} painted nothing"
         );
     }
-    // All five are started now, and the switch back to the first still works.
-    assert_eq!(s.started_len(), 5, "all five modules should be started");
+    // Every kind is started now, and the switch back to the first still works. The count
+    // comes from the kinds themselves: it did not change when a sixth app was added.
+    let all = iridium_office::module::Kind::ALL;
+    assert_eq!(s.started_len(), all.len(), "every module should be started");
     let first = iridium_office::module::Kind::ALL[0];
     s.activate(first, &ctx, None);
     assert_eq!(s.active(), Some(first));

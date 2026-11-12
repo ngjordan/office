@@ -69,7 +69,7 @@ jobs:
       - name: Check out the apps
         run: |
           set -euo pipefail
-          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft; do
+          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft mail:mc-mailcraft; do
             name="${pair%%:*}"; dir="${pair##*:}"
             git clone --depth 1 "https://github.com/ngjordan/$name.git" "../$dir"
           done
@@ -179,7 +179,7 @@ jobs:
           $parent = Split-Path $env:GITHUB_WORKSPACE -Parent
           foreach ($pair in @(
             @('sheets','gc-gridcraft'), @('docs','wc-wordcraft'), @('cad','cc-cadcraft'),
-            @('decks','dc-deckcraft'), @('pdf','pdfcraft'))) {
+            @('decks','dc-deckcraft'), @('pdf','pdfcraft'), @('mail','mc-mailcraft'))) {
             git clone --depth 1 "https://github.com/ngjordan/$($pair[0]).git" (Join-Path $parent $pair[1])
           }
 
@@ -204,7 +204,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path $vendor | Out-Null
           foreach ($pair in @(
             @('sheets','gc-gridcraft'), @('docs','wc-wordcraft'), @('cad','cc-cadcraft'),
-            @('decks','dc-deckcraft'), @('pdf','pdfcraft'))) {
+            @('decks','dc-deckcraft'), @('pdf','pdfcraft'), @('mail','mc-mailcraft'))) {
             $link = Join-Path $vendor $pair[0]
             if (Test-Path $link) { Remove-Item -Recurse -Force $link }
             New-Item -ItemType Junction -Path $link -Target (Join-Path $parent $pair[1]) | Out-Null
@@ -320,9 +320,13 @@ jobs:
         with:
           persist-credentials: false
 
+      # Only the finished artifacts. The Windows job also uploads the UNSIGNED ones for
+      # SignPath to sign, and downloading everything would merge the unsigned copy over
+      # the signed one - same file names, last one wins.
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           path: artifacts
+          pattern: "windows-*,macos"
           merge-multiple: true
 
       - name: Draft the release

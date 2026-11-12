@@ -1,4 +1,4 @@
-//! The five adapters, one per app.
+//! The adapters, one per app.
 //!
 //! Each owns its app's `Shell` and forwards the trait's methods to it. The only work
 //! here is reconciling the small differences between the apps:
@@ -136,5 +136,20 @@ adapter!(
     |files| iridium_pdf_shell::Launch {
         files,
         ..Default::default()
+    }
+);
+
+adapter!(
+    mail,
+    Kind::Mail,
+    iridium_mail_shell::Shell,
+    iridium_mail_shell::Launch,
+    |files| iridium_mail_shell::Launch {
+        files,
+        profile: None,
+        store: None,
+        sample: false,
+        control_port: None,
+        mailto: None,
     }
 );

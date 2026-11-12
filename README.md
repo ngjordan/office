@@ -1,8 +1,8 @@
 # Office suite
 
-One window, one egui context, five apps: **Sheets**, **Docs**, **Cad**, **Decks**, **PDF**.
+One window, one egui context, six apps: **Sheets**, **Docs**, **Cad**, **Decks**, **PDF**, **Mail**.
 
-This repository holds the Office host only. The five apps stay in their own repositories
+This repository holds the Office host only. The six apps stay in their own repositories
 and are pulled in as path dependencies, so the standalone apps keep shipping on their own.
 
 | App | Repository | Branch | Path (relative to this repo) |
@@ -12,8 +12,9 @@ and are pulled in as path dependencies, so the standalone apps keep shipping on 
 | Cad | `ngjordan/cad` | `feature/cad-shell-library` | `../cc-cadcraft` |
 | Decks | `ngjordan/decks` | `feature/decks-shell-library` | `../dc-deckcraft` |
 | PDF | `ngjordan/pdf` | `feature/pdf-shell-library` | `../pdfcraft` |
+| Mail | `ngjordan/mail` | `feature/mail-shell` | `../mc-mailcraft` |
 
-Cloning this repo alone does **not** build: clone the five app repositories as siblings
+Cloning this repo alone does **not** build: clone the six app repositories as siblings
 of this directory, on the branches above.
 
 ## Build and test
@@ -37,7 +38,7 @@ to `CARGO_BUILD_JOBS` of them at once — concurrent links get the build OOM-kil
 
 | Test | What it holds down |
 |---|---|
-- `tests/five_in_one.rs` — Phase 0 regression gate: all five apps construct, paint and share one egui context.
+- `tests/five_in_one.rs` — Phase 0 regression gate: all the apps construct, paint and share one egui context.
 - `tests/suite.rs` — Phase 2b: the switcher, file routing, and the look rules across a switch.
 - `src/suite.rs` unit tests — the per-module look (style, zoom, fonts), using a fake module that owns its look.
 

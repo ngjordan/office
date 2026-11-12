@@ -13,11 +13,19 @@ pub enum Kind {
     Cad,
     Decks,
     Pdf,
+    Mail,
 }
 
 impl Kind {
     /// Every kind, in the order the rail shows them.
-    pub const ALL: [Kind; 5] = [Kind::Sheets, Kind::Docs, Kind::Cad, Kind::Decks, Kind::Pdf];
+    pub const ALL: [Kind; 6] = [
+        Kind::Sheets,
+        Kind::Docs,
+        Kind::Cad,
+        Kind::Decks,
+        Kind::Pdf,
+        Kind::Mail,
+    ];
 
     /// The product name, as the apps brand themselves.
     pub fn label(self) -> &'static str {
@@ -27,6 +35,7 @@ impl Kind {
             Kind::Cad => "Cad",
             Kind::Decks => "Decks",
             Kind::Pdf => "PDF",
+            Kind::Mail => "Mail",
         }
     }
 
@@ -38,6 +47,7 @@ impl Kind {
             Kind::Cad => "Drawings",
             Kind::Decks => "Presentations",
             Kind::Pdf => "PDF",
+            Kind::Mail => "Mail",
         }
     }
 }

@@ -86,6 +86,36 @@
           </Extension>
         </ProgId>
 
+        <RegistryKey Root="HKCR" Key="Office.Message">
+          <RegistryValue Type="string" Value="Office Mail Message" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Mailbox">
+          <RegistryValue Type="string" Value="Office Mailbox" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Calendar">
+          <RegistryValue Type="string" Value="Office Calendar" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.Contact">
+          <RegistryValue Type="string" Value="Office Contact" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.OutlookMessage">
+          <RegistryValue Type="string" Value="Office Outlook Message" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="Office.OutlookDataFile">
+          <RegistryValue Type="string" Value="Office Outlook Data File" />
+          <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
+          <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" />
+        </RegistryKey>
         <RegistryKey Root="HKCR" Key="Office.BinarySpreadsheet">
           <RegistryValue Type="string" Value="Office Spreadsheet" />
           <RegistryValue Key="DefaultIcon" Type="string" Value="&quot;[#OfficeExe]&quot;,0" />
@@ -203,6 +233,12 @@
         </RegistryKey>
 
         <!-- "Open with": the type appears in the list, but nothing is taken over. -->
+        <RegistryValue Root="HKCR" Key=".eml\OpenWithProgids" Name="Office.Message" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mbox\OpenWithProgids" Name="Office.Mailbox" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".ics\OpenWithProgids" Name="Office.Calendar" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".vcf\OpenWithProgids" Name="Office.Contact" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".msg\OpenWithProgids" Name="Office.OutlookMessage" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pst\OpenWithProgids" Name="Office.OutlookDataFile" Type="string" Value="" />
         <RegistryValue Root="HKCR" Key=".csv\OpenWithProgids" Name="Office.Csv" Type="string" Value="" />
         <RegistryValue Root="HKCR" Key=".doc\OpenWithProgids" Name="Office.OldDocument" Type="string" Value="" />
         <RegistryValue Root="HKCR" Key=".docm\OpenWithProgids" Name="Office.MacroDocument" Type="string" Value="" />
@@ -239,6 +275,12 @@
         <RegistryKey Root="HKMU" Key="Software\Office\Capabilities">
           <RegistryValue Name="ApplicationName" Type="string" Value="Office" />
           <RegistryValue Name="ApplicationDescription" Type="string" Value="Office suite" />
+          <RegistryValue Key="FileAssociations" Name=".eml" Type="string" Value="Office.Message" />
+          <RegistryValue Key="FileAssociations" Name=".mbox" Type="string" Value="Office.Mailbox" />
+          <RegistryValue Key="FileAssociations" Name=".ics" Type="string" Value="Office.Calendar" />
+          <RegistryValue Key="FileAssociations" Name=".vcf" Type="string" Value="Office.Contact" />
+          <RegistryValue Key="FileAssociations" Name=".msg" Type="string" Value="Office.OutlookMessage" />
+          <RegistryValue Key="FileAssociations" Name=".pst" Type="string" Value="Office.OutlookDataFile" />
           <RegistryValue Key="FileAssociations" Name=".csv" Type="string" Value="Office.Csv" />
           <RegistryValue Key="FileAssociations" Name=".doc" Type="string" Value="Office.OldDocument" />
           <RegistryValue Key="FileAssociations" Name=".docm" Type="string" Value="Office.MacroDocument" />
@@ -277,6 +319,12 @@
              ShellExecute; this is what puts the suite in the Open with menu. -->
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe" Name="FriendlyAppName" Value="Office" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\shell\open\command" Value="&quot;[#OfficeExe]&quot; &quot;%1&quot;" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".eml" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".mbox" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".ics" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".vcf" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".msg" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".pst" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".csv" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".doc" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\iridium-office.exe\SupportedTypes" Name=".docm" Value="" Type="string" />

@@ -1,4 +1,4 @@
-//! The suite binary: one window, five apps.
+//! The suite binary: one window, six apps.
 //!
 //! eframe 0.37's `App` trait splits the frame into `logic(ctx, frame)` and `ui(ui, frame)`,
 //! so the suite's own frame order is:
@@ -8,7 +8,7 @@
 //! 3. the rail and the active module's `ui`.
 
 // A Windows release build is a GUI app: without this the .exe gets a console window
-// behind the app window. The same attribute the five apps carry.
+// behind the app window. The same attribute the apps carry.
 #![cfg_attr(
     all(target_os = "windows", not(debug_assertions)),
     windows_subsystem = "windows"

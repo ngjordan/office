@@ -12,6 +12,7 @@
 //! - Cad:    `ph.cad.desktop` + `ph.cad.mime.xml` -> dwg, dxf
 //! - Decks:  `ph.decks.desktop` + `ph.decks.mime.xml` -> iridium-decks, potx, ppsx, pptx
 //! - PDF:    `ph.pdf.desktop` -> pdf
+//! - Mail:   `ph.mail.desktop` -> eml, mbox, ics, vcf (and the Outlook formats msg, pst)
 
 use crate::module::Kind;
 
@@ -24,6 +25,7 @@ const DOCS: &[&str] = &[
 const CAD: &[&str] = &["dwg", "dxf"];
 const DECKS: &[&str] = &["iridium-decks", "potx", "ppsx", "pptx"];
 const PDF: &[&str] = &["pdf"];
+const MAIL: &[&str] = &["eml", "mbox", "ics", "vcf", "msg", "pst"];
 
 /// Every extension any app registers, with its owner.
 pub fn table() -> Vec<(&'static str, Kind)> {
@@ -42,6 +44,9 @@ pub fn table() -> Vec<(&'static str, Kind)> {
     }
     for e in PDF {
         v.push((*e, Kind::Pdf));
+    }
+    for e in MAIL {
+        v.push((*e, Kind::Mail));
     }
     v
 }
@@ -105,6 +110,9 @@ mod tests {
         assert_eq!(kind_for_str("a.pptx"), Some(Kind::Decks));
         assert_eq!(kind_for_str("a.pdf"), Some(Kind::Pdf));
         assert_eq!(kind_for_str("a.IRIDIUM-DECKS"), Some(Kind::Decks));
+        assert_eq!(kind_for_str("a.eml"), Some(Kind::Mail));
+        assert_eq!(kind_for_str("a.MBOX"), Some(Kind::Mail));
+        assert_eq!(kind_for_str("a.pst"), Some(Kind::Mail));
     }
 
     #[test]

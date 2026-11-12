@@ -20,6 +20,8 @@ iridium-cad-engine = { path = "../office-vendor/cad/crates/engine" }
 iridium-decks-ui-egui = { path = "../office-vendor/decks/crates/ui-egui" }
 iridium-decks-engine = { path = "../office-vendor/decks/crates/engine" }
 iridium-pdf-ui-egui = { path = "../office-vendor/pdf/crates/ui-egui" }
+iridium-mail-ui-egui = { path = "../office-vendor/mail/crates/ui-egui" }
+iridium-mail-engine = { path = "../office-vendor/mail/crates/engine" }
 
 egui = "0.37"
 eframe = { version = "0.37", default-features = false, features = ["default_fonts", "wgpu", "glow", "accesskit", "persistence"] }
@@ -30,6 +32,7 @@ iridium-docs-shell = { path = "../office-vendor/docs/crates/docs-shell" }
 iridium-cad-shell = { path = "../office-vendor/cad/crates/cad-shell" }
 iridium-decks-shell = { path = "../office-vendor/decks/crates/decks-shell" }
 iridium-pdf-shell = { path = "../office-vendor/pdf/crates/pdf-shell" }
+iridium-mail-shell = { path = "../office-vendor/mail/crates/mail-shell" }
 
 [patch.crates-io]
 ecolor = { git = "https://github.com/ngjordan/egui.git", rev = "faf1ced22250c509636bff2578731a0be86a69ac" }

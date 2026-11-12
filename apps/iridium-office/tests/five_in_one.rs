@@ -1,4 +1,4 @@
-//! Phase 0: the five apps' UI crates run in one process on one egui::Context.
+//! Phase 0: the apps' UI crates run in one process on one egui::Context.
 use eframe::App as _;
 
 #[test]
@@ -21,6 +21,9 @@ fn five_in_one() {
         iridium_decks_ui_egui::Services::default(),
     );
     let mut pdf = iridium_pdf_ui_egui::PdfApp::new();
+    let mut mail = iridium_mail_ui_egui::App::new(iridium_mail_engine::sample::sample_session_at(
+        iridium_mail_engine::model::DateTime::now_utc(),
+    ));
     let mut frame = eframe::Frame::_new_kittest();
 
     let mut total_shapes = 0;
@@ -37,6 +40,9 @@ fn five_in_one() {
         cad.raw_input_hook(&ctx, &mut raw);
         decks.raw_input_hook(&ctx, &mut raw);
         pdf.raw_input_hook(&ctx, &mut raw);
+        // Mail has no raw input hook of its own; the suite's adapter calls the same
+        // nothing, so the gate calls it too.
+        let _ = &mail;
         let mut out = ctx.run_ui(raw, |root| {
             let ctx = root.ctx().clone();
             let ctx = &ctx;
@@ -45,6 +51,7 @@ fn five_in_one() {
             cad.logic(ctx);
             decks.logic(ctx);
             pdf.logic(ctx, &mut frame);
+            mail.poll_sync(ctx);
             egui::CentralPanel::default().show(root, |ui| {
                 let size = ui.available_size();
                 macro_rules! region {
@@ -60,6 +67,7 @@ fn five_in_one() {
                 region!("cad", |ui: &mut egui::Ui| cad.ui(ui));
                 region!("decks", |ui: &mut egui::Ui| decks.ui(ui));
                 region!("pdf", |ui: &mut egui::Ui| pdf.ui(ui, &mut frame));
+                region!("mail", |ui: &mut egui::Ui| mail.ui_root(ui));
             });
         });
         total_shapes += out.shapes.len();

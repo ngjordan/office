@@ -15,6 +15,7 @@ iridium-docs-shell = { workspace = true }
 iridium-cad-shell = { workspace = true }
 iridium-decks-shell = { workspace = true }
 iridium-pdf-shell = { workspace = true }
+iridium-mail-shell = { workspace = true }
 iridium-ui-egui = { workspace = true }
 iridium-engine = { workspace = true }
 iridium-docs-ui-egui = { workspace = true }
@@ -24,6 +25,8 @@ iridium-cad-engine = { workspace = true }
 iridium-decks-ui-egui = { workspace = true }
 iridium-decks-engine = { workspace = true }
 iridium-pdf-ui-egui = { workspace = true }
+iridium-mail-ui-egui = { workspace = true }
+iridium-mail-engine = { workspace = true }
 egui = { workspace = true }
 eframe = { workspace = true }
 serde_json = "1"
