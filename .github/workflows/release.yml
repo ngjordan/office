@@ -364,5 +364,7 @@ jobs:
             echo "release v$TAG exists: uploading the assets to it"
             gh release upload "v$TAG" "${assets[@]}" --clobber
           else
-            gh release create "v$TAG" "${assets[@]}" --title "$TAG" --notes "$NOTES" --draft
+            # Published, not a draft: a draft has no download link, and the release is
+            # the deliverable.
+            gh release create "v$TAG" "${assets[@]}" --title "$TAG" --notes "$NOTES"
           fi
