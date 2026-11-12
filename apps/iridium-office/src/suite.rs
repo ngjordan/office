@@ -40,6 +40,9 @@ pub struct Suite {
     open_documents: Vec<(Kind, String)>,
     /// Whether egui has drawn a pass yet. The context's fonts cannot be read before that.
     saw_ui: bool,
+    /// Whether the suite held the window's close this frame because a module has unsaved
+    /// work. That decision wins over an app asking to quit.
+    close_held: bool,
     /// The module that drew last frame. The context holds ITS look, so what the context
     /// holds is attributed to it and not to the module that is active now.
     last_drawn: Option<Kind>,
@@ -59,6 +62,8 @@ impl Suite {
             pending: files,
             open_documents,
             saw_ui: false,
+            // Whether the close was held this frame.
+            close_held: false,
             // The module that drew last frame.
             last_drawn: None,
         }
@@ -136,7 +141,9 @@ impl Suite {
     fn activate_module(&mut self, kind: Kind, module: Box<dyn Module>, ctx: &egui::Context) {
         // The module installed its own look into the context as it was built: capture
         // it, so the suite has something to put back.
-        let look = Look::capture(ctx, module.fonts());
+        let mut look = Look::capture(ctx, module.fonts());
+        // The context still holds the app that was showing: the module states its own.
+        look.zoom = module.zoom();
         self.started.push((kind, module));
         self.looks.push((kind, look));
     }
@@ -229,6 +236,7 @@ impl Suite {
                 self.active = Some(kind);
             }
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            self.close_held = true;
         }
 
         // What the context holds now is the module that drew last frame.
@@ -399,6 +407,12 @@ impl Suite {
 
     /// The apps that draw their dialogs after the frame, and the ones that ask to quit.
     pub fn after_pass(&mut self, frame: &eframe::Frame) -> bool {
+        if self.close_held {
+            // The suite held the close because a module has unsaved work. The user must
+            // not lose it because an app asked to quit in the same frame.
+            self.close_held = false;
+            return false;
+        }
         let mut quit = false;
         for (_, m) in &mut self.started {
             quit |= m.after_pass(frame);

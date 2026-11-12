@@ -92,6 +92,14 @@ pub trait Module {
         false
     }
 
+    /// The zoom this module uses.
+    ///
+    /// egui applies a zoom on the NEXT pass, so the context still holds the previous
+    /// app's zoom when a module is built. The module states its own.
+    fn zoom(&self) -> f32 {
+        1.0
+    }
+
     /// The font set this module installed.
     ///
     /// The suite reads the style and the zoom from the context itself (it captures the
