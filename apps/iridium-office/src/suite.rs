@@ -59,7 +59,7 @@ impl Suite {
             pending: files,
             open_documents,
             saw_ui: false,
-            /// The module that drew last frame.
+            // The module that drew last frame.
             last_drawn: None,
         }
     }
