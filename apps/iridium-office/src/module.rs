@@ -78,6 +78,20 @@ pub trait Module {
     /// Whether the module is safe to close.
     fn can_close(&self) -> bool;
 
+    /// Persist what the module keeps in eframe's storage.
+    ///
+    /// eframe calls this on its autosave timer and at exit. It is NOT the exit path:
+    /// `save_state` is. Calling `save_state` here made the suite quit by itself, because
+    /// eframe autosaves every 30 seconds and Mail's `save_state` runs `file.exit`.
+    fn save(&mut self, _storage: &mut dyn eframe::Storage) {}
+
+    /// Called after the frame, for apps whose dialogs or quit handling need the frame.
+    ///
+    /// True means the app wants the suite to close.
+    fn after_pass(&mut self, _frame: &eframe::Frame) -> bool {
+        false
+    }
+
     /// The font set this module installed.
     ///
     /// The suite reads the style and the zoom from the context itself (it captures the

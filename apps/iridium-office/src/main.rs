@@ -33,12 +33,16 @@ struct App {
 }
 
 impl eframe::App for App {
-    fn save(&mut self, _storage: &mut dyn eframe::Storage) {
-        self.suite.save_state();
+    fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        // eframe's autosave, not the exit path. `save_state` is the exit path, and
+        // calling it here made the suite quit by itself: eframe autosaves every 30
+        // seconds, and Mail's `save_state` runs `file.exit`.
+        self.suite.save(storage);
     }
 
-    fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn logic(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         self.suite.logic(ctx);
+        self.after_frame(ctx, frame);
     }
 
     fn raw_input_hook(&mut self, ctx: &egui::Context, raw: &mut egui::RawInput) {
@@ -49,10 +53,20 @@ impl eframe::App for App {
         // `Frame::storage()` is public, so a module started later still gets the
         // frame's storage -- the reason `CreationContext` could not be stored.
         self.suite.ui(ui, frame.storage());
+        self.after_frame(ui.ctx(), frame);
     }
 
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
         self.suite.save_state();
+    }
+}
+
+impl App {
+    /// The apps that draw their dialogs after the frame, and the ones that ask to quit.
+    fn after_frame(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+        if self.suite.after_pass(frame) {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+        }
     }
 }
 

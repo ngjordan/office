@@ -113,11 +113,13 @@ impl Look {
         ctx.fonts(|f| f.definitions().clone())
     }
 
-    /// Whether `sig` holds every face this look has.
+    /// Whether `sig` still holds every face this look has, and may hold more.
     ///
     /// The app may have ADDED faces since (PDF's document faces), which is how the app's
-    /// own additions are told apart from another app's set.
+    /// own additions are told apart from another app's set. The check was the other way
+    /// round, so a face the app added while drawing was dropped again and a face it had
+    /// lost was kept.
     pub fn covers(&self, sig: &FontSig) -> bool {
-        sig.0.iter().all(|name| self.font_sig.0.contains(name))
+        self.font_sig.0.iter().all(|name| sig.0.contains(name))
     }
 }

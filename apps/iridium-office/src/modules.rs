@@ -12,6 +12,9 @@ use crate::module::{Kind, Module};
 
 macro_rules! adapter {
     ($mod_name:ident, $kind:expr, $shell:ty, $launch:ty, $doc:expr) => {
+        adapter!($mod_name, $kind, $shell, $launch, $doc,);
+    };
+    ($mod_name:ident, $kind:expr, $shell:ty, $launch:ty, $doc:expr, $($extra:tt)*) => {
         pub mod $mod_name {
             use super::*;
 
@@ -62,6 +65,7 @@ macro_rules! adapter {
                 fn install_native_menu(&mut self) {
                     self.shell.install_native_menu();
                 }
+                $($extra)*
             }
         }
     };
@@ -99,6 +103,20 @@ adapter!(
         window_builder: egui::ViewportBuilder::default(),
         #[cfg(target_os = "macos")]
         apple_events: fmv_macos_events::Inbox::default(),
+    },
+    /// The Open and Save As dialogs are drawn after the frame, and the quit flag has
+    /// to be taken or the app cancels every close of the window.
+    fn after_pass(&mut self, frame: &eframe::Frame) -> bool {
+        self.shell.show_file_dialogs(frame);
+        // The quit flag is macOS-only.
+        #[cfg(target_os = "macos")]
+        {
+            self.shell.take_quit()
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            false
+        }
     }
 );
 
@@ -110,6 +128,10 @@ adapter!(
     |files: Vec<String>| iridium_cad_shell::Launch {
         files: files.into_iter().map(std::path::PathBuf::from).collect(),
         ..Default::default()
+    },
+    /// The preferences are kept in eframe's storage, so the host has to save them.
+    fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        self.shell.save_prefs(storage);
     }
 );
 
@@ -136,6 +158,10 @@ adapter!(
     |files| iridium_pdf_shell::Launch {
         files,
         ..Default::default()
+    },
+    /// The preferences are kept in eframe's storage, so the host has to save them.
+    fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        eframe::App::save(&mut self.shell, storage);
     }
 );
 

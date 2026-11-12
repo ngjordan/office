@@ -40,6 +40,9 @@ pub struct Suite {
     open_documents: Vec<(Kind, String)>,
     /// Whether egui has drawn a pass yet. The context's fonts cannot be read before that.
     saw_ui: bool,
+    /// The module that drew last frame. The context holds ITS look, so what the context
+    /// holds is attributed to it and not to the module that is active now.
+    last_drawn: Option<Kind>,
 }
 
 impl Suite {
@@ -56,6 +59,8 @@ impl Suite {
             pending: files,
             open_documents,
             saw_ui: false,
+            /// The module that drew last frame.
+            last_drawn: None,
         }
     }
 
@@ -178,9 +183,14 @@ impl Suite {
     /// one. The applied fonts may also hold faces the active module added while it drew
     /// (PDF's document faces), which the next restore must not throw away.
     fn adopt(&mut self, ctx: &egui::Context) {
-        let Some(active) = self.active else { return };
+        // The context holds the look of the module that drew last frame. After a switch
+        // that is the app the user just left, not the one now active: attributing its
+        // zoom to the new app made the new app's zoom wrong for good.
+        let Some(drawn) = self.last_drawn.or(self.active) else {
+            return;
+        };
         let zoom = ctx.zoom_factor();
-        if let Some((_, look)) = self.looks.iter_mut().find(|(k, _)| *k == active) {
+        if let Some((_, look)) = self.looks.iter_mut().find(|(k, _)| *k == drawn) {
             look.zoom = zoom;
         }
         if !self.saw_ui {
@@ -188,15 +198,15 @@ impl Suite {
         }
         let fonts = Look::fonts_now(ctx);
         let sig = Look::sig_of(&fonts);
-        // Another module's set, not the active module's additions.
+        // Another module's set, not this module's additions.
         let owned_by_other = self
             .looks
             .iter()
-            .any(|(k, l)| *k != active && l.font_sig == sig);
+            .any(|(k, l)| *k != drawn && l.font_sig == sig);
         if owned_by_other {
             return;
         }
-        if let Some((_, look)) = self.looks.iter_mut().find(|(k, _)| *k == active)
+        if let Some((_, look)) = self.looks.iter_mut().find(|(k, _)| *k == drawn)
             && sig != look.font_sig
             && look.covers(&sig)
         {
@@ -207,7 +217,21 @@ impl Suite {
 
     /// Background work for every started module.
     pub fn logic(&mut self, ctx: &egui::Context) {
-        // What the context holds now is the active module's look from last frame.
+        // A module with unsaved work has to be asked before the window closes: bring it
+        // up so the prompt is drawn, and hold the close.
+        if ctx.input(|i| i.viewport().close_requested()) && !self.can_close() {
+            if let Some(kind) = self
+                .started
+                .iter()
+                .find(|(_, m)| !m.can_close())
+                .map(|(k, _)| *k)
+            {
+                self.active = Some(kind);
+            }
+            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+        }
+
+        // What the context holds now is the module that drew last frame.
         self.adopt(ctx);
 
         // The background modules first, the active one last: its look is then the one in
@@ -237,9 +261,20 @@ impl Suite {
 
     /// Raw input for every started module.
     pub fn raw_input_hook(&mut self, ctx: &egui::Context, raw: &mut egui::RawInput) {
-        for (_, m) in &mut self.started {
+        // A dropped file belongs to the app that owns it. Handing every drop to every
+        // app meant a .pdf ended up in a spreadsheet.
+        let dropped = std::mem::take(&mut raw.dropped_files);
+        for (kind, m) in &mut self.started {
+            let mine: Vec<std::sync::Arc<dyn egui::DroppedFile + Send + Sync>> = dropped
+                .iter()
+                .filter(|f| crate::route::kind_for(f.path()) == Some(*kind))
+                .cloned()
+                .collect();
+            let saved = std::mem::replace(&mut raw.dropped_files, mine);
             m.raw_input_hook(ctx, raw);
+            raw.dropped_files = saved;
         }
+        raw.dropped_files = dropped;
     }
 
     /// The rail, and the active module's UI.
@@ -259,7 +294,7 @@ impl Suite {
         egui::Panel::top("tabs").show(ui, |ui| {
             ui.horizontal(|ui| {
                 for (i, (kind, path)) in self.open_documents.iter().enumerate() {
-                    let name = path.rsplit('/').next().unwrap_or(path);
+                    let name = path.rsplit(['/', '\\']).next().unwrap_or(path).to_string();
                     ui.horizontal(|ui| {
                         if ui
                             .button(format!("{} \u{2014} {name}", kind.label()))
@@ -274,8 +309,10 @@ impl Suite {
                 }
             });
         });
-        if let Some((kind, path)) = chosen_doc {
-            self.open_document(kind, &path, &ctx, storage);
+        if let Some((kind, _path)) = chosen_doc {
+            // The document is already open: clicking its tab only brings its app up.
+            // Opening it again imported it a second time.
+            self.activate(kind, &ctx, storage);
         }
         if let Some(i) = closed {
             self.open_documents.remove(i);
@@ -317,6 +354,7 @@ impl Suite {
             return;
         };
         ui.push_id(active, |ui| m.ui(ui));
+        self.last_drawn = Some(active);
     }
 
     /// The home screen: one button per app.
@@ -348,6 +386,24 @@ impl Suite {
     /// Whether every started module is safe to close.
     pub fn can_close(&self) -> bool {
         self.started.iter().all(|(_, m)| m.can_close())
+    }
+
+    /// Persist what the modules keep in eframe's storage.
+    ///
+    /// This is eframe's autosave, not the exit path: `save_state` is the exit path.
+    pub fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        for (_, m) in &mut self.started {
+            m.save(storage);
+        }
+    }
+
+    /// The apps that draw their dialogs after the frame, and the ones that ask to quit.
+    pub fn after_pass(&mut self, frame: &eframe::Frame) -> bool {
+        let mut quit = false;
+        for (_, m) in &mut self.started {
+            quit |= m.after_pass(frame);
+        }
+        quit
     }
 
     /// Persist every started module's state.
