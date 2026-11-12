@@ -21,7 +21,7 @@ Nothing else is signed. The macOS and Linux artifacts are signed with a Develope
 certificate and an App Store Connect API key, which are not SignPath Foundation's business
 and are not covered by this policy.
 
-The five applications this suite embeds live in their own repositories and are not signed
+The six applications this suite embeds live in their own repositories and are not signed
 with this certificate.
 
 ## Who may approve a release

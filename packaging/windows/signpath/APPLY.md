@@ -14,7 +14,7 @@ in this repository is already in place; what follows is what happens on signpath
 | The code signing policy | `README.md` and `CODE_SIGNING.md` |
 | The artifact configuration | `packaging/windows/signpath/office-suite.xml` |
 | The CI integration | `.github/workflows/release.yml`, the *Sign with SignPath* step |
-| No proprietary component | the five apps are MIT/Apache, the assets are OFL/Apache |
+| No proprietary component | the six apps are MIT/Apache, the assets are OFL/Apache |
 | A privacy policy | `CODE_SIGNING.md`: the suite collects nothing and phones nowhere |
 
 ## On signpath.org
