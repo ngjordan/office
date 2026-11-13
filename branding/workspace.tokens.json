@@ -1,0 +1,127 @@
+{
+  "brand": {
+    "name": "Workspace",
+    "tagline": "One place. Every kind of work.",
+    "version": "1.2"
+  },
+  "color": {
+    "teal": "#087E8B",
+    "ink": "#152A2D",
+    "paper": "#F7F8F4",
+    "white": "#FFFFFF",
+    "muted": "#5B6A6C",
+    "line": "#D8E2DE",
+    "tint": "#E9F4F3",
+    "dark": "#11272B",
+    "aqua": "#6ED0CF"
+  },
+  "tools": {
+    "Sheets": {
+      "foreground": "#18794E",
+      "surface": "#E8F4ED",
+      "object": "Spreadsheet"
+    },
+    "Docs": {
+      "foreground": "#245FC5",
+      "surface": "#EDF2FD",
+      "object": "Document"
+    },
+    "CAD": {
+      "foreground": "#7653B5",
+      "surface": "#F2EDFA",
+      "object": "Drawing"
+    },
+    "Email": {
+      "foreground": "#087E8B",
+      "surface": "#E9F4F3",
+      "object": "Message"
+    },
+    "Presentations": {
+      "foreground": "#B95718",
+      "surface": "#FCF0E7",
+      "object": "Presentation"
+    },
+    "Browser": {
+      "foreground": "#50627A",
+      "surface": "#EDF1F6",
+      "object": "Web page"
+    },
+    "PDF Editor": {
+      "foreground": "#B83244",
+      "surface": "#FBEDEF",
+      "object": "PDF"
+    },
+    "Photo Editor": {
+      "foreground": "#A23A90",
+      "surface": "#F9EDF6",
+      "object": "Photo"
+    },
+    "Video Editor": {
+      "foreground": "#8C6800",
+      "surface": "#FAF3DA",
+      "object": "Video"
+    }
+  },
+  "semantic": {
+    "success": "#18794E",
+    "warning": "#925000",
+    "error": "#B42318",
+    "info": "#245FC5"
+  },
+  "font": {
+    "family": "Open Sans",
+    "fallback": "system-ui, sans-serif",
+    "weights": {
+      "regular": 400,
+      "semibold": 600,
+      "bold": 700
+    },
+    "sizes_px": {
+      "caption": 12,
+      "ui": 14,
+      "body": 16,
+      "h3": 24,
+      "h2": 32,
+      "h1": 48
+    }
+  },
+  "spacing_px": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48,
+    64
+  ],
+  "radius_px": {
+    "control": 8,
+    "card": 12,
+    "tool_tile": 16
+  },
+  "icon": {
+    "grid_px": 24,
+    "stroke_px": 1.75
+  },
+  "themes": {
+    "light": {
+      "background": "#F7F8F4",
+      "surface": "#FFFFFF",
+      "text": "#152A2D",
+      "muted": "#5B6A6C",
+      "action": "#087E8B",
+      "on_action": "#FFFFFF",
+      "border": "#D8E2DE"
+    },
+    "dark": {
+      "background": "#11272B",
+      "surface": "#19363B",
+      "text": "#EFF6F4",
+      "muted": "#B3C5C3",
+      "action": "#6ED0CF",
+      "on_action": "#11272B",
+      "border": "#466165"
+    }
+  }
+}

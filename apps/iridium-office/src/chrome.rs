@@ -16,6 +16,15 @@ use egui::{
 
 /// The chrome's font family name, registered once at startup.
 pub const FONT_FAMILY: &str = "workspace-ui";
+/// The semibold face, for headings.
+pub const FONT_SEMIBOLD: &str = "workspace-ui-semibold";
+/// The bold face.
+pub const FONT_BOLD: &str = "workspace-ui-bold";
+
+// Open Sans (Apache-2.0, see NOTICE), embedded so the chrome never depends on system fonts.
+const OPEN_SANS_REGULAR: &[u8] = include_bytes!("../assets/fonts/OpenSans-Regular.ttf");
+const OPEN_SANS_SEMIBOLD: &[u8] = include_bytes!("../assets/fonts/OpenSans-Semibold.ttf");
+const OPEN_SANS_BOLD: &[u8] = include_bytes!("../assets/fonts/OpenSans-Bold.ttf");
 
 /// Spacing scale, in points.
 pub mod space {
@@ -31,22 +40,40 @@ pub mod space {
     pub const XL: f32 = 24.0;
     /// 32 points.
     pub const XXL: f32 = 32.0;
+    /// 48 points.
+    pub const XXXL: f32 = 48.0;
+    /// 64 points.
+    pub const HUGE: f32 = 64.0;
 }
 
-/// Type scale, in points.
+/// Corner radii from the brand kit, in points.
+pub mod radius {
+    /// Buttons, tabs, rail items, focus rings.
+    pub const CONTROL: u8 = 8;
+    /// Cards.
+    pub const CARD: u8 = 12;
+    /// A tool tile.
+    pub const TILE: u8 = 16;
+}
+
+/// Type scale from the brand kit, in points.
 pub mod text {
-    /// The window and app title.
-    pub const TITLE: f32 = 20.0;
-    /// A section heading.
-    pub const HEADING: f32 = 18.0;
-    /// A document tab's filename.
-    pub const TAB: f32 = 13.0;
+    /// h1.
+    pub const H1: f32 = 48.0;
+    /// h2.
+    pub const H2: f32 = 32.0;
+    /// The window and app title (h3).
+    pub const TITLE: f32 = 24.0;
+    /// A section heading (body size, semibold in use).
+    pub const HEADING: f32 = 16.0;
     /// Body text.
-    pub const BODY: f32 = 14.0;
+    pub const BODY: f32 = 16.0;
+    /// A document tab's filename, and other UI text.
+    pub const TAB: f32 = 14.0;
     /// A rail label, a caption, a status line.
     pub const SMALL: f32 = 12.0;
     /// The product monogram.
-    pub const MONOGRAM: f32 = 18.0;
+    pub const MONOGRAM: f32 = 16.0;
 }
 
 /// The colours the chrome draws with.
@@ -85,43 +112,46 @@ pub struct Chrome {
 }
 
 impl Chrome {
+    // Source of truth: branding/workspace.tokens.json (themes.light / themes.dark).
+    // Values marked "derived" are blends of two tokens for states the kit does not name.
+
     /// The light theme.
     pub fn light() -> Self {
         Self {
-            brand: rgb(0x0B6E4F),
-            accent: rgb(0x2F6FEB),
-            window: rgb(0xF5F6F8),
-            rail: rgb(0xEEF1F4),
-            selected: rgb(0xE1EEE8),
-            strip: rgb(0xE9EDF1),
-            tab: rgb(0xFFFFFF),
-            canvas: rgb(0xFFFFFF),
-            hover: rgb(0xE2E7EC),
-            pressed: rgb(0xD5DDE5),
-            separator: rgb(0xC7D0D8),
-            text: rgb(0x1E2933),
-            muted: rgb(0x52616D),
-            on_accent: rgb(0xFFFFFF),
+            brand: rgb(0x087E8B),     // color.teal / action
+            accent: rgb(0x087E8B),    // action
+            window: rgb(0xF7F8F4),    // background
+            rail: rgb(0xFFFFFF),      // surface
+            selected: rgb(0xE9F4F3),  // color.tint
+            strip: rgb(0xE9F4F3),     // color.tint
+            tab: rgb(0xFFFFFF),       // surface
+            canvas: rgb(0xFFFFFF),    // surface
+            hover: rgb(0xDCEDEB),     // derived: tint toward teal
+            pressed: rgb(0xD8E2DE),   // border
+            separator: rgb(0xD8E2DE), // border
+            text: rgb(0x152A2D),      // text
+            muted: rgb(0x5B6A6C),     // muted
+            on_accent: rgb(0xFFFFFF), // on_action
         }
     }
 
     /// The dark theme.
     pub fn dark() -> Self {
         Self {
-            brand: rgb(0x4FB389),
-            accent: rgb(0x8BB4FF),
-            window: rgb(0x171B20),
-            rail: rgb(0x11161B),
-            selected: rgb(0x20382F),
-            strip: rgb(0x14191F),
-            tab: rgb(0x252D35),
-            canvas: rgb(0x1C2229),
-            hover: rgb(0x2A3440),
-            pressed: rgb(0x344252),
-            separator: rgb(0x3B4754),
-            text: rgb(0xE8EDF2),
-            muted: rgb(0xAAB6C2),
-            on_accent: rgb(0x10251C),
+            brand: rgb(0x6ED0CF),     // color.aqua / action
+            accent: rgb(0x6ED0CF),    // action
+            window: rgb(0x11272B),    // background
+            rail: rgb(0x11272B),      // background
+            selected: rgb(0x234549),  // derived: surface toward aqua
+            strip: rgb(0x11272B),     // background
+            tab: rgb(0x19363B),       // surface
+            canvas: rgb(0x19363B),    // surface
+            hover: rgb(0x1F4247),     // derived
+            pressed: rgb(0x28494E),   // derived
+            separator: rgb(0x466165), // border
+            text: rgb(0xEFF6F4),      // text
+            muted: rgb(0xB3C5C3),     // muted
+            on_accent: rgb(0x11272B), // on_action
         }
     }
 
@@ -149,8 +179,16 @@ impl Chrome {
         visuals.selection.stroke = Stroke::new(1.0, self.brand);
         visuals.override_text_color = Some(self.text);
         visuals.hyperlink_color = self.accent;
-        visuals.warn_fg_color = rgb(0x92601B);
-        visuals.error_fg_color = rgb(0xB63743);
+        visuals.warn_fg_color = if self.is_dark() {
+            rgb(0xE5A04D)
+        } else {
+            rgb(0x925000)
+        }; // semantic.warning
+        visuals.error_fg_color = if self.is_dark() {
+            rgb(0xF2877C)
+        } else {
+            rgb(0xB42318)
+        }; // semantic.error
         visuals.widgets.noninteractive.bg_fill = self.window;
         visuals.widgets.noninteractive.weak_bg_fill = self.window;
         visuals.widgets.noninteractive.bg_stroke = Stroke::new(1.0, self.separator);
@@ -211,24 +249,118 @@ pub fn install_font(ctx: &egui::Context) {
             .font_data
             .insert(format!("workspace/{name}"), data.clone());
     }
-    let chain = base.families[&FontFamily::Proportional]
+    // egui's built-in faces stay in the chain as the fallback for glyphs Open Sans lacks
+    // (and for everything if the embedded face were missing).
+    let fallback: Vec<String> = base.families[&FontFamily::Proportional]
         .iter()
         .map(|name| format!("workspace/{name}"))
         .collect();
+    for (key, bytes) in [
+        (FONT_FAMILY, OPEN_SANS_REGULAR),
+        (FONT_SEMIBOLD, OPEN_SANS_SEMIBOLD),
+    ] {
+        let data = format!("workspace/open-sans/{key}");
+        chrome.font_data.insert(
+            data.clone(),
+            std::sync::Arc::new(egui::FontData::from_static(bytes)),
+        );
+        let mut chain = vec![data];
+        chain.extend(fallback.iter().cloned());
+        chrome.families.insert(FontFamily::Name(key.into()), chain);
+    }
+    chrome.font_data.insert(
+        "workspace/open-sans/bold".into(),
+        std::sync::Arc::new(egui::FontData::from_static(OPEN_SANS_BOLD)),
+    );
+    let mut bold = vec!["workspace/open-sans/bold".to_string()];
+    bold.extend(fallback);
     chrome
         .families
-        .insert(FontFamily::Name(FONT_FAMILY.into()), chain);
+        .insert(FontFamily::Name(FONT_BOLD.into()), bold);
     ctx.add_font_provider(std::sync::Arc::new(chrome));
 }
 
-/// A solid app-identity tile with a two-letter mark.
+/// A brand tool icon: its glyph (a white PNG rendered from the kit's SVG, tinted at paint time),
+/// the kit's foreground and surface colours, and a mark that keys it.
+struct Tool {
+    mark: &'static str,
+    png: &'static [u8],
+    foreground: u32,
+    surface: u32,
+}
+
+macro_rules! tool {
+    ($mark:expr, $file:expr, $fg:expr, $surface:expr) => {
+        Tool {
+            mark: $mark,
+            png: include_bytes!(concat!("../assets/tools/", $file)),
+            foreground: $fg,
+            surface: $surface,
+        }
+    };
+}
+
+/// Keyed by `Kind::mark()`. Light reuses the Photo Editor glyph: the kit has no RAW-tool icon, and
+/// the rail's text label is what tells the two apart. Colours: tokens `tools.*`.
+const TOOLS: [Tool; 9] = [
+    tool!("Sh", "sheets.png", 0x18794E, 0xE8F4ED),
+    tool!("Do", "docs.png", 0x245FC5, 0xEDF2FD),
+    tool!("Ca", "cad.png", 0x7653B5, 0xF2EDFA),
+    tool!("De", "presentations.png", 0xB95718, 0xFCF0E7),
+    tool!("PF", "pdf_editor.png", 0xB83244, 0xFBEDEF),
+    tool!("Ma", "email.png", 0x087E8B, 0xE9F4F3),
+    tool!("Ph", "photo_editor.png", 0xA23A90, 0xF9EDF6),
+    tool!("Fi", "video_editor.png", 0x8C6800, 0xFAF3DA),
+    tool!("Li", "photo_editor.png", 0xA23A90, 0xF9EDF6),
+];
+
+/// The tool glyph as a texture, decoded once per context.
+fn glyph(ctx: &egui::Context, tool: &Tool) -> Option<egui::TextureHandle> {
+    let id = Id::unique(("workspace-glyph", tool.mark));
+    if let Some(texture) = ctx.data(|d| d.get_temp::<egui::TextureHandle>(id)) {
+        return Some(texture);
+    }
+    let image = image::load_from_memory(tool.png).ok()?.to_rgba8();
+    let size = [image.width() as usize, image.height() as usize];
+    let color = egui::ColorImage::from_rgba_unmultiplied(size, image.as_raw());
+    let texture = ctx.load_texture(
+        format!("glyph-{}", tool.mark),
+        color,
+        egui::TextureOptions::LINEAR,
+    );
+    ctx.data_mut(|d| d.insert_temp(id, texture.clone()));
+    Some(texture)
+}
+
+/// An app-identity tile: the kit's tool glyph on its surface colour (light theme), or the glyph in
+/// the app's accent on a tint of it (dark theme). Falls back to the two-letter mark for an unknown
+/// mark. The text label next to the tile is always drawn too: colour never stands alone.
 pub fn accent_tile(painter: &Painter, rect: Rect, mark: &str, accent: Color32, on_accent: Color32) {
-    painter.rect_filled(rect, CornerRadius::same(6), accent);
+    let radius = CornerRadius::same(radius::CONTROL);
+    let tool = TOOLS.iter().find(|t| t.mark == mark);
+    let dark = on_accent == Chrome::dark().on_accent;
+    if let (Some(tool), Some(texture)) = (tool, tool.and_then(|t| glyph(painter.ctx(), t))) {
+        let (fill, tint) = if dark {
+            (accent.gamma_multiply(0.22), accent)
+        } else {
+            (rgb(tool.surface), rgb(tool.foreground))
+        };
+        painter.rect_filled(rect, radius, fill);
+        let glyph_rect = rect.shrink(rect.width() * 0.18);
+        painter.image(
+            texture.id(),
+            glyph_rect,
+            Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)),
+            tint,
+        );
+        return;
+    }
+    painter.rect_filled(rect, radius, accent);
     painter.text(
         rect.center(),
         Align2::CENTER_CENTER,
         mark,
-        font(12.0),
+        font(text::SMALL),
         on_accent,
     );
 }
@@ -237,7 +369,7 @@ pub fn accent_tile(painter: &Painter, rect: Rect, mark: &str, accent: Color32, o
 pub fn focus_ring(painter: &Painter, rect: Rect, color: Color32) {
     painter.rect_stroke(
         rect.shrink(1.0),
-        CornerRadius::same(8),
+        CornerRadius::same(radius::CONTROL),
         Stroke::new(2.0, color),
         StrokeKind::Inside,
     );
@@ -270,7 +402,7 @@ pub fn rail_item(
     } else {
         Color32::TRANSPARENT
     };
-    painter.rect_filled(rect, CornerRadius::same(10), fill);
+    painter.rect_filled(rect, CornerRadius::same(radius::CONTROL), fill);
 
     if active {
         // The brand-coloured bar that says which app this is.
@@ -352,8 +484,8 @@ pub fn document_tab(
     painter.rect_filled(
         rect,
         CornerRadius {
-            nw: 8,
-            ne: 8,
+            nw: radius::CONTROL,
+            ne: radius::CONTROL,
             sw: 0,
             se: 0,
         },
@@ -444,10 +576,10 @@ pub fn app_card(
     } else {
         chrome.tab
     };
-    painter.rect_filled(rect, CornerRadius::same(12), fill);
+    painter.rect_filled(rect, CornerRadius::same(radius::CARD), fill);
     painter.rect_stroke(
         rect,
-        CornerRadius::same(12),
+        CornerRadius::same(radius::CARD),
         Stroke::new(1.0, chrome.separator),
         StrokeKind::Inside,
     );
@@ -503,11 +635,25 @@ mod tests {
         }
     }
 
+    /// Every tool glyph decodes, and the embedded fonts are real TrueType data.
+    #[test]
+    fn assets_are_embedded() {
+        for tool in &TOOLS {
+            let image = image::load_from_memory(tool.png)
+                .expect(tool.mark)
+                .to_rgba8();
+            assert_eq!((image.width(), image.height()), (96, 96), "{}", tool.mark);
+        }
+        for font in [OPEN_SANS_REGULAR, OPEN_SANS_SEMIBOLD, OPEN_SANS_BOLD] {
+            assert_eq!(&font[..4], &[0, 1, 0, 0], "TrueType header");
+        }
+    }
+
     /// The light and dark themes are genuinely different themes.
     #[test]
     fn the_themes_differ() {
         assert_ne!(Chrome::light().window, Chrome::dark().window);
-        assert!(Chrome::light().is_dark() == false);
+        assert!(!Chrome::light().is_dark());
         assert!(Chrome::dark().is_dark());
     }
 

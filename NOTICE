@@ -18,3 +18,17 @@ Version 2.0, at your option.
 The shared libraries this application links (craft-libs, craft-i18n and their
 dependencies) carry their own notices; see ATTRIBUTION.md for the full list of
 assets, fonts, translations and the licences that cover them.
+
+Workspace brand kit (v1.2): the app icon, tool icons, colour and type tokens
+(branding/workspace.tokens.json) and the Open Sans fonts were delivered with the Workspace
+brand kit. The icons and tokens are Workspace brand assets (Iridium Technologies, Inc.).
+This is a working identity; the kit does not include trademark or name clearance.
+
+Open Sans (Regular, Semibold, Bold) is embedded in the application
+(apps/iridium-office/assets/fonts/). It is not our work.
+  Digitized data copyright (c) 2010-2011, Google Corporation.
+  Packaging copyright (c) 2017, Gregor Riepl <onitake@gmail.com>.
+  Licensed under the Apache License, Version 2.0 (LICENSE-APACHE;
+  http://www.apache.org/licenses/LICENSE-2.0). The fonts are unmodified and are distributed
+  "AS IS", without warranties or conditions of any kind. Upstream: https://www.opensans.com/
+  The kit's original notice is kept verbatim in apps/iridium-office/assets/fonts/FONT_LICENSE.txt.
