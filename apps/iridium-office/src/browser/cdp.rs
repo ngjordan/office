@@ -31,6 +31,9 @@ const CALL_TIMEOUT: Duration = Duration::from_secs(30);
 /// have its command written out.
 const READ_TIMEOUT: Duration = Duration::from_millis(20);
 
+/// How long the WebSocket handshake may take.
+const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(30);
+
 // The browser's debugging endpoint is plain `ws://` on the loopback
 // interface, so the socket needs no TLS: `WebSocket<TcpStream>`.
 
@@ -77,14 +80,20 @@ impl Cdp {
 
         let stream = std::net::TcpStream::connect((host.as_str(), port))
             .map_err(|e| format!("cannot reach the browser: {e}"))?;
-        // The owner does everything, so it must come back for work now and
-        // then. A short timeout does that; tungstenite keeps the half-read
-        // frame, so nothing is lost.
+        // The handshake gets a generous timeout: it is one exchange, and a
+        // busy host can take a moment to answer it.
         stream
+            .set_read_timeout(Some(HANDSHAKE_TIMEOUT))
+            .map_err(|e| format!("cannot set the read timeout: {e}"))?;
+        let (mut socket, _) = tungstenite::client::client_with_config(request, stream, None)
+            .map_err(|e| format!("cannot reach the browser: {e}"))?;
+        // Now the short timeout: the owner does everything, so it must come
+        // back for work now and then. Tungstenite keeps the half-read frame,
+        // so nothing is lost.
+        socket
+            .get_mut()
             .set_read_timeout(Some(READ_TIMEOUT))
             .map_err(|e| format!("cannot set the read timeout: {e}"))?;
-        let (socket, _) = tungstenite::client::client_with_config(request, stream, None)
-            .map_err(|e| format!("cannot reach the browser: {e}"))?;
 
         let (commands, inbox) = channel();
         let session: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
