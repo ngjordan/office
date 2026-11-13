@@ -62,21 +62,21 @@ winit = { git = "https://github.com/ngjordan/winit.git", rev = "a517b3846ee8457d
 # asserts backend::CRAFT_UNWIND_POISONING / CRAFT_PRINT_COLOR / CRAFT_OPTIONAL_CONTENT, which
 # stock crates.io krilla 0.8.2 does not have.
 krilla = { git = "https://github.com/ngjordan/craft-libs", rev = "92d392cff132eaf53e13afff77f38b5c11b73aa0" }
-hayro-interpret = { path = "../office-vendor/hayro-vendor/hayro-interpret" }
-hayro = { path = "../office-vendor/hayro-vendor/hayro" }
-hayro-syntax = { path = "../office-vendor/hayro-vendor/hayro-syntax" }
-hayro-cmap = { path = "../office-vendor/hayro-vendor/hayro-cmap" }
-hayro-postscript = { path = "../office-vendor/hayro-vendor/hayro-postscript" }
-hayro-jbig2 = { path = "../office-vendor/hayro-vendor/hayro-jbig2" }
-lopdf = { path = "../office-vendor/hayro-vendor/lopdf" }
-vello_common = { path = "../office-vendor/hayro-vendor/vello_common" }
-vello_cpu = { path = "../office-vendor/hayro-vendor/vello_cpu" }
+hayro-interpret = { path = "../office-vendor/pdf/vendor/hayro-interpret" }
+hayro = { path = "../office-vendor/pdf/vendor/hayro" }
+hayro-syntax = { path = "../office-vendor/pdf/vendor/hayro-syntax" }
+hayro-cmap = { path = "../office-vendor/pdf/vendor/hayro-cmap" }
+hayro-postscript = { path = "../office-vendor/pdf/vendor/hayro-postscript" }
+hayro-jbig2 = { path = "../office-vendor/pdf/vendor/hayro-jbig2" }
+lopdf = { path = "../office-vendor/pdf/vendor/lopdf" }
+vello_common = { path = "../office-vendor/pdf/vendor/vello_common" }
+vello_cpu = { path = "../office-vendor/pdf/vendor/vello_cpu" }
 
 # craft-pdf is vendored so it can point at craft-libs' OWN hayro tree (DecodeLimits +
 # Cancellation) while pdfcraft's crates keep pdfcraft's tree. The two hayro families
 # coexist because their versions differ; merging them into one tree does not compile.
 [patch."https://github.com/storytold/craft-libs"]
-craft-pdf = { path = "../office-vendor/craft-pdf" }
+craft-pdf = { path = "third-party/craft-pdf" }
 
 [profile.release]
 # The symbol table is half the binary and carries upstream crate and file names.

@@ -1,0 +1,31 @@
+[package]
+name = "craft-pdf"
+description = "Shared PDF reading, rendering and optional writing for Craft apps"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+# Vendored from craft-libs @ 6e03f65 (crates/pdf) so this crate can point at
+# craft-libs' OWN vendored hayro tree (DecodeLimits + Cancellation) instead of
+# the office's single patched tree, which pdfcraft's crates need in its own
+# (different) shape. Two hayro families coexist because their versions differ;
+# merging them into one tree does not compile.
+[features]
+default = []
+read = ["dep:hayro-syntax", "dep:thiserror"]
+interpret = ["read", "dep:hayro-interpret"]
+raster = ["interpret", "dep:hayro", "dep:bytemuck"]
+write = ["dep:krilla", "dep:thiserror"]
+write-pdf = ["write", "krilla/pdf"]
+write-simple-text = ["write", "krilla/simple-text"]
+
+[dependencies]
+hayro-syntax = { path = "../hayro-craftlib/hayro-syntax", version = "0.7.3", default-features = false, features = ["std"], optional = true }
+hayro-interpret = { path = "../hayro-craftlib/hayro-interpret", version = "0.7.1", default-features = false, features = ["embed-fonts", "embed-cmaps"], optional = true }
+hayro = { path = "../hayro-craftlib/hayro", version = "0.7.2", default-features = false, optional = true }
+bytemuck = { version = "1", optional = true }
+krilla = { version = "=0.8.2", default-features = false, features = ["raster-images"], optional = true }
+thiserror = { version = "2", optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "0.3"
