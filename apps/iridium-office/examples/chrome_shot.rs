@@ -80,10 +80,74 @@ fn shot(
     }
 }
 
+/// Render one real browser page through the frame pipeline, and save the pixels.
+///
+/// This is the whole path: a real Chromium paints a page, the screencast
+/// carries it, the worker decodes it, and the result is the picture.
+fn shot_browser(dir: &std::path::Path) {
+    use iridium_office::browser::Engine;
+
+    if iridium_office::browser::launch::find_browser().is_none() {
+        eprintln!("no Chromium-family browser installed; skipping the browser shot");
+        return;
+    }
+    let profile = iridium_office::browser::launch::private_profile_dir("chrome-shot")
+        .expect("profile");
+    let mut engine = match Engine::start_in(Some(profile)) {
+        Ok(engine) => engine,
+        Err(e) => {
+            eprintln!("the browser did not start: {e}");
+            return;
+        }
+    };
+    engine
+        .call(
+            headless_chrome::protocol::cdp::Page::Navigate {
+                url: "data:text/html,<body style='margin:0;font:600 42px system-ui;background:%230B6E4F;color:white;padding:40px'>Workspace</body>".to_string(),
+                referrer: None,
+                transition_Type: None,
+                frame_id: None,
+                referrer_policy: None,
+            },
+        )
+        .expect("navigate");
+    std::thread::sleep(std::time::Duration::from_secs(2));
+    engine
+        .start_screencast(
+            iridium_office::browser::frame::FrameFormat::Jpeg,
+            900,
+            500,
+        )
+        .expect("the screencast starts");
+
+    let mut frame = None;
+    for _ in 0..60 {
+        if let Some(f) = engine.take_frame() {
+            frame = Some(f);
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(100));
+    }
+    let Some(frame) = frame else {
+        eprintln!("no frame arrived");
+        return;
+    };
+    // The frame's pixels become a PNG, exactly as the suite would draw them.
+    // The pixels are RGBA, four bytes each.
+    let image = image::RgbaImage::from_raw(frame.width, frame.height, frame.pixels.clone())
+        .map(|rgba| image::DynamicImage::ImageRgba8(rgba))
+        .expect("the frame's size matches its pixels");
+    let path = dir.join("browser-frame.png");
+    image.save(&path).expect("save png");
+    println!("{}", path.display());
+}
+
 fn main() {
     let dir = out_dir();
     std::fs::create_dir_all(&dir).expect("output directory");
     let (w, h) = (1440.0, 900.0);
+
+    shot_browser(&dir);
 
     for (dark, suffix) in [(false, "light"), (true, "dark")] {
         shot(

@@ -22,7 +22,9 @@ use headless_chrome::protocol::cdp::Target;
 use headless_chrome::protocol::cdp::Target::TargetInfo;
 use headless_chrome::protocol::cdp::types::Event;
 
-mod launch;
+pub mod frame;
+pub mod launch;
+pub mod screencast;
 
 use launch::{BrowserError, Launched};
 
@@ -38,6 +40,8 @@ pub struct Engine {
     session: headless_chrome::browser::transport::SessionId,
     /// The page's target id.
     target_id: String,
+    /// The frames coming from the browser, if the screencast is running.
+    screencast: Option<screencast::Screencast>,
 }
 
 impl Engine {
@@ -133,6 +137,7 @@ impl Engine {
             transport,
             session: headless_chrome::browser::transport::SessionId::from(attached.session_id),
             target_id: created.target_id,
+            screencast: None,
         })
     }
 
@@ -208,6 +213,57 @@ impl Engine {
         &self.target_id
     }
 
+    /// Start sending the page as frames.
+    ///
+    /// The frames are decoded on a worker thread, so the UI thread is never
+    /// held up by a page that is changing fast.
+    pub fn start_screencast(
+        &mut self,
+        format: frame::FrameFormat,
+        max_width: u32,
+        max_height: u32,
+    ) -> Result<(), BrowserError> {
+        // One event channel for the page. The screencast takes it over.
+        let events = self.transport.listen_to_target_events(self.session.clone());
+        let cast = screencast::Screencast::start(
+            self.transport.clone(),
+            self.session.clone(),
+            events,
+            format,
+            max_width,
+            max_height,
+        )
+        .map_err(BrowserError::Cdp)?;
+        self.screencast = Some(cast);
+        Ok(())
+    }
+
+    /// The newest frame from the page, if one has arrived.
+    pub fn take_frame(&self) -> Option<frame::Frame> {
+        self.screencast.as_ref()?.take_frame()
+    }
+
+    /// Whether frames are arriving.
+    pub fn has_frame(&self) -> bool {
+        self.screencast
+            .as_ref()
+            .map(|c| c.frames.has_frame())
+            .unwrap_or(false)
+    }
+
+    /// Stop sending frames.
+    ///
+    /// A browser that is not on screen should not be painting frames.
+    pub fn stop_screencast(&mut self) {
+        if let Some(mut cast) = self.screencast.take() {
+            cast.stop();
+        }
+        let _ = self.transport.call_method_on_target(
+            self.session.clone(),
+            headless_chrome::protocol::cdp::Page::StopScreencast(None),
+        );
+    }
+
     /// The `TargetInfo` of the attached page.
     pub fn target_info(&self) -> Result<TargetInfo, BrowserError> {
         let targets = self
@@ -241,6 +297,60 @@ pub fn elapsed_since(start: Instant) -> Duration {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A real browser produces a real frame that decodes to real pixels.
+    ///
+    /// This is the whole frame pipeline: the browser paints, the screencast
+    /// carries it, the worker decodes it, and the slot holds it.
+    #[test]
+    fn a_real_browser_produces_a_frame() {
+        if crate::browser::launch::find_browser().is_none() {
+            eprintln!("no Chromium-family browser installed; skipping");
+            return;
+        }
+        let profile = crate::browser::launch::private_profile_dir(&format!(
+            "frame-test-{}",
+            std::process::id()
+        ))
+        .expect("profile");
+        let mut engine = Engine::start_in(Some(profile)).expect("engine starts");
+
+        // A page with something on it, so the frame is not blank.
+        engine
+            .call(
+                headless_chrome::protocol::cdp::Page::Navigate {
+                    url: "data:text/html,<body style='background:%23c00'>x</body>".to_string(),
+                    referrer: None,
+                    transition_Type: None,
+                    frame_id: None,
+                    referrer_policy: None,
+                },
+            )
+            .expect("navigate");
+        std::thread::sleep(std::time::Duration::from_secs(2));
+
+        engine
+            .start_screencast(super::frame::FrameFormat::Jpeg, 640, 480)
+            .expect("the screencast starts");
+
+        // Wait for a frame to arrive and be decoded.
+        let mut frame = None;
+        for _ in 0..100 {
+            if let Some(f) = engine.take_frame() {
+                frame = Some(f);
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(100));
+        }
+        let frame = frame.expect("a frame arrives");
+        assert!(frame.width > 0 && frame.height > 0, "the frame has a size");
+        assert_eq!(
+            frame.pixels.len(),
+            (frame.width * frame.height * 4) as usize,
+            "RGBA, four bytes a pixel"
+        );
+        engine.stop_screencast();
+    }
 
     /// The engine starts, opens a tab, and shuts down. Skipped when no
     /// browser is installed, which is a supported state, not a failure.
