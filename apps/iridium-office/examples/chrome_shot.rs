@@ -95,13 +95,8 @@ fn shot_browser(dir: &std::path::Path) {
     };
     engine
         .call(
-            headless_chrome::protocol::cdp::Page::Navigate {
-                url: "data:text/html,<body style='margin:0;font:600 42px system-ui;background:%230B6E4F;color:white;padding:40px'>Workspace</body>".to_string(),
-                referrer: None,
-                transition_Type: None,
-                frame_id: None,
-                referrer_policy: None,
-            },
+            "Page.navigate",
+            serde_json::json!({ "url": "data:text/html,<body style='margin:0;font:600 42px system-ui;background:%230B6E4F;color:white;padding:40px'>Workspace</body>" }),
         )
         .expect("navigate");
     std::thread::sleep(std::time::Duration::from_secs(2));

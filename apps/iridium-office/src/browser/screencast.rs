@@ -10,10 +10,9 @@
 use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
 
-use headless_chrome::browser::transport::{SessionId, Transport};
-use headless_chrome::protocol::cdp::types::Event;
-use headless_chrome::protocol::cdp::{Page, Page::StartScreencastFormatOption};
+use serde_json::{Value, json};
 
+use super::cdp::Cdp;
 use super::frame::{Frame, FrameFormat, FrameSlot};
 
 /// How the screencast runs.
@@ -33,29 +32,24 @@ impl Screencast {
     /// page down to fit, so a small cap costs sharpness and a large one costs
     /// memory and decoding time.
     pub fn start(
-        transport: Arc<Transport>,
-        session: SessionId,
-        events: Receiver<Event>,
+        cdp: Arc<Cdp>,
+        events: Receiver<Value>,
         format: FrameFormat,
         max_width: u32,
         max_height: u32,
     ) -> Result<Self, String> {
         // The browser must be told to start before the frames arrive.
-        transport
-            .call_method_on_target(
-                session.clone(),
-                Page::StartScreencast {
-                    format: Some(match format {
-                        FrameFormat::Jpeg => StartScreencastFormatOption::Jpeg,
-                        FrameFormat::Png => StartScreencastFormatOption::Png,
-                    }),
-                    quality: Some(80),
-                    max_width: Some(max_width),
-                    max_height: Some(max_height),
-                    every_nth_frame: Some(1),
-                },
-            )
-            .map_err(|e| format!("cannot start the screencast: {e}"))?;
+        cdp.call_page(
+            "Page.startScreencast",
+            json!({
+                "format": format.as_protocol(),
+                "quality": 80,
+                "maxWidth": max_width,
+                "maxHeight": max_height,
+                "everyNthFrame": 1,
+            }),
+        )
+        .map_err(|e| format!("cannot start the screencast: {e}"))?;
 
         let frames = FrameSlot::new();
         let stopped: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
@@ -66,19 +60,23 @@ impl Screencast {
             .name("workspace-browser-frames".into())
             .spawn(move || {
                 while let Ok(event) = events.recv() {
-                    let Event::PageScreencastFrame(frame) = event else {
+                    if event.get("method").and_then(Value::as_str) != Some("Page.screencastFrame") {
+                        continue;
+                    }
+                    let Some(params) = event.get("params") else {
                         continue;
                     };
                     // Every frame must be acknowledged, or the browser stops
                     // sending them. This happens even for a frame we drop.
-                    let _ = transport.call_method_on_target(
-                        session.clone(),
-                        Page::ScreencastFrameAck {
-                            session_id: frame.params.session_id,
-                        },
-                    );
+                    if let Some(id) = params.get("sessionId").and_then(Value::as_i64) {
+                        let _ =
+                            cdp.call_page("Page.screencastFrameAck", json!({ "sessionId": id }));
+                    }
                     // A frame that is too big is dropped, not drawn.
-                    if let Some(decoded) = super::frame::decode(&frame.params.data, format) {
+                    let Some(data) = params.get("data").and_then(Value::as_str) else {
+                        continue;
+                    };
+                    if let Some(decoded) = super::frame::decode(data, format) {
                         worker_frames.put(decoded);
                     }
                 }
@@ -131,15 +129,15 @@ mod tests {
     /// The screencast reports why it stopped, so the UI can say so.
     #[test]
     fn a_stopped_screencast_says_why() {
-        let (tx, rx) = std::sync::mpsc::channel();
+        let (tx, rx) = std::sync::mpsc::channel::<Value>();
         let stopped: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
         let worker_stopped = stopped.clone();
         let worker = std::thread::spawn(move || {
             while let Ok(event) = rx.recv() {
-                let Event::PageScreencastFrame(frame) = event else {
+                if event.get("method").and_then(Value::as_str) != Some("Page.screencastFrame") {
                     continue;
-                };
-                let _ = frame;
+                }
+                let _ = event;
             }
             *worker_stopped.lock().unwrap() = Some("the browser connection closed".into());
         });
