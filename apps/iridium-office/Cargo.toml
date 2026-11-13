@@ -8,6 +8,9 @@ rust-version.workspace = true
 repository.workspace = true
 
 [dependencies]
+iridium-light-shell = { workspace = true }
+iridium-film-shell = { workspace = true }
+iridium-photos-shell = { workspace = true }
 # Already in the lockfile through the app crates: decoding the window icon.
 image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
 iridium-sheets-shell = { workspace = true }

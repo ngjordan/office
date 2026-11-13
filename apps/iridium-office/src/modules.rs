@@ -182,3 +182,37 @@ adapter!(
         mailto: None,
     }
 );
+
+adapter!(
+    photos,
+    Kind::Photos,
+    iridium_photos_shell::Shell,
+    iridium_photos_shell::Launch,
+    |files| iridium_photos_shell::Launch { files }
+);
+
+adapter!(
+    film,
+    Kind::Film,
+    iridium_film_shell::Shell,
+    iridium_film_shell::Launch,
+    |files| iridium_film_shell::Launch {
+        files,
+        ..Default::default()
+    }
+);
+
+adapter!(
+    light,
+    Kind::Light,
+    iridium_light_shell::Shell,
+    iridium_light_shell::Launch,
+    |files| iridium_light_shell::Launch {
+        files,
+        ..Default::default()
+    },
+    /// The GPU thread must not outlive the process: the driver is torn down under it.
+    fn shutdown(&mut self) {
+        self.shell.shutdown();
+    }
+);

@@ -14,17 +14,23 @@ pub enum Kind {
     Decks,
     Pdf,
     Mail,
+    Photos,
+    Film,
+    Light,
 }
 
 impl Kind {
     /// Every kind, in the order the rail shows them.
-    pub const ALL: [Kind; 6] = [
+    pub const ALL: [Kind; 9] = [
         Kind::Sheets,
         Kind::Docs,
         Kind::Cad,
         Kind::Decks,
         Kind::Pdf,
         Kind::Mail,
+        Kind::Photos,
+        Kind::Film,
+        Kind::Light,
     ];
 
     /// The product name, as the apps brand themselves.
@@ -36,6 +42,9 @@ impl Kind {
             Kind::Decks => "Decks",
             Kind::Pdf => "PDF",
             Kind::Mail => "Mail",
+            Kind::Photos => "Photos",
+            Kind::Film => "Film",
+            Kind::Light => "Light",
         }
     }
 
@@ -51,6 +60,9 @@ impl Kind {
             Kind::Decks => "De",
             Kind::Pdf => "PF",
             Kind::Mail => "Ma",
+            Kind::Photos => "Ph",
+            Kind::Film => "Fi",
+            Kind::Light => "Li",
         }
     }
 
@@ -67,6 +79,9 @@ impl Kind {
             Kind::Decks => egui::Color32::from_rgb(0xA3, 0x4E, 0x16),
             Kind::Pdf => egui::Color32::from_rgb(0xB6, 0x37, 0x43),
             Kind::Mail => egui::Color32::from_rgb(0x92, 0x60, 0x1B),
+            Kind::Photos => egui::Color32::from_rgb(0xB0, 0x3A, 0x62),
+            Kind::Film => egui::Color32::from_rgb(0x4A, 0x5B, 0xA8),
+            Kind::Light => egui::Color32::from_rgb(0x0F, 0x6E, 0x78),
         }
     }
 
@@ -79,6 +94,9 @@ impl Kind {
             Kind::Decks => egui::Color32::from_rgb(0xEF, 0xA4, 0x6E),
             Kind::Pdf => egui::Color32::from_rgb(0xF1, 0x8C, 0x96),
             Kind::Mail => egui::Color32::from_rgb(0xDD, 0xB6, 0x6E),
+            Kind::Photos => egui::Color32::from_rgb(0xF0, 0x9A, 0xBC),
+            Kind::Film => egui::Color32::from_rgb(0xA3, 0xB1, 0xF0),
+            Kind::Light => egui::Color32::from_rgb(0x72, 0xC8, 0xD3),
         }
     }
 
@@ -91,6 +109,9 @@ impl Kind {
             Kind::Decks => "Presentations",
             Kind::Pdf => "PDF",
             Kind::Mail => "Mail",
+            Kind::Photos => "Photos",
+            Kind::Film => "Film",
+            Kind::Light => "Light",
         }
     }
 }
@@ -120,6 +141,13 @@ pub trait Module {
 
     /// Whether the module is safe to close.
     fn can_close(&self) -> bool;
+
+    /// Called when the process is about to end.
+    ///
+    /// An app whose background work must not outlive the process — a thread inside a
+    /// graphics driver — quiesces here, so the driver is not torn down under it. The
+    /// default is nothing to do.
+    fn shutdown(&mut self) {}
 
     /// Persist what the module keeps in eframe's storage.
     ///

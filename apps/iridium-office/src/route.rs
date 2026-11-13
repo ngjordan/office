@@ -13,6 +13,16 @@
 //! - Decks:  `ph.decks.desktop` + `ph.decks.mime.xml` -> iridium-decks, potx, ppsx, pptx
 //! - PDF:    `ph.pdf.desktop` -> pdf
 //! - Mail:   `ph.mail.desktop` -> eml, mbox, ics, vcf (and the Outlook formats msg, pst)
+//! - Photos: `ph.photos.desktop` -> the raster and painting formats (see PHOTOS)
+//! - Film:   `ph.film.desktop` -> the video and audio formats (see FILM)
+//! - Light:  `ph.light.desktop` -> the camera RAW formats and the presets (see LIGHT)
+//!
+//! **Photos and Light both open ordinary photographs.** One app must own each
+//! extension, so the two are split by what they are FOR: Photos is the raster
+//! editor (Photoshop's job) and Light is the camera workflow (Lightroom's job).
+//! A plain `jpg` is a picture to edit, so Photos owns it; a `cr2` is a camera
+//! negative, so Light owns it. Light still opens plain photographs from inside
+//! its own library, which is where that workflow belongs.
 
 use crate::module::Kind;
 
@@ -26,6 +36,77 @@ const CAD: &[&str] = &["dwg", "dxf"];
 const DECKS: &[&str] = &["iridium-decks", "potx", "ppsx", "pptx"];
 const PDF: &[&str] = &["pdf"];
 const MAIL: &[&str] = &["eml", "mbox", "ics", "vcf", "msg", "pst"];
+
+/// Photos: the raster and painting editor.
+///
+/// From the app's own source: `crates/io/src/lib.rs:499` (PSD_EXTS), the
+/// `pcraft` project format, and the painting formats its `crates/io` decodes.
+const PHOTOS: &[&str] = &[
+    // The Photoshop family and the app's own project format.
+    "pcraft", "psd", "psb", "psdt", // Painting and raster formats.
+    "pdn", "kra", "krz", "pcx", "pbm", "pgm", "ppm", "pam", "xbm", "xpm", "sgi", "tga", "targa",
+    "icb", "vda", "vst", "pix", "ani", "cur", "pcx2",
+    // Ordinary pictures, which this app edits.
+    "png", "jpg", "jpeg", "jfif", "jpe", "gif", "bmp", "tif", "tiff", "webp", "avif", "qoi", "exr",
+    "hdr", "pic", "dib",
+];
+
+/// Film: the video editor.
+///
+/// From the app's own source: `crates/media/src/lib.rs:267-271` — STILL, AUDIO
+/// and VIDEO_EXTENSIONS — plus the `fcproj` project format.
+const FILM: &[&str] = &[
+    // The project format.
+    "fcproj", // Video.
+    "mp4", "m4v", "mov", "mkv", "webm", "avi", "mxf", "mts", "m2ts", "m2t", "ts", "mpg", "mpeg",
+    "vob", "mod", "tod", "m2v", "m1v", "mpv", "3gp", "y4m", "apv", // Audio.
+    "wav", "wave", "bwf", "aif", "aiff", "mp3", "mp2", "m4a", "aac", "flac", "ogg", "opus",
+    // Sequences: the editor imports stills as a timeline.
+    "dpx", "r3d",
+];
+
+/// Light: the camera workflow.
+///
+/// From the app's own source: `crates/raw` style RAW handling and the presets
+/// in `crates/ui-egui/src/pick.rs:61` (PRESET_EXTENSIONS).
+const LIGHT: &[&str] = &[
+    // Camera negatives.
+    "dng",
+    "cr2",
+    "cr3",
+    "nef",
+    "nrw",
+    "arw",
+    "srf",
+    "sr2",
+    "pef",
+    "orf",
+    "rw2",
+    "raf",
+    "3fr",
+    "fff",
+    "raw",
+    "erf",
+    "mrw",
+    "mos",
+    "x3f",
+    "dcr",
+    "kdc",
+    "srw",
+    // HEIF, which is a camera format before it is a picture.
+    "heic",
+    "heif",
+    // Presets, sidecars and the catalogue.
+    "lcpreset",
+    "xmp",
+    "lrtemplate",
+    "lccurve",
+    "lmp",
+    "mplumpack",
+    "cube",
+    "dcp",
+    "lceffect",
+];
 
 /// Every extension any app registers, with its owner.
 pub fn table() -> Vec<(&'static str, Kind)> {
@@ -47,6 +128,15 @@ pub fn table() -> Vec<(&'static str, Kind)> {
     }
     for e in MAIL {
         v.push((*e, Kind::Mail));
+    }
+    for e in PHOTOS {
+        v.push((*e, Kind::Photos));
+    }
+    for e in FILM {
+        v.push((*e, Kind::Film));
+    }
+    for e in LIGHT {
+        v.push((*e, Kind::Light));
     }
     v
 }

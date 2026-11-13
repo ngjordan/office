@@ -2,13 +2,13 @@
 Type=Application
 Name=Workspace
 GenericName=Workspace suite
-Comment=Spreadsheets, documents, drawings, presentations, PDF and mail in one window
+Comment=Spreadsheets, documents, drawings, presentations, PDF, mail, photos, film and raw photography in one window
 Exec=iridium-office %F
 TryExec=iridium-office
 Icon=ph.office
 Terminal=false
 StartupNotify=true
 StartupWMClass=ph.office
-Categories=Office;Spreadsheet;WordProcessor;Graphics;Presentation;
-MimeType=application/mbox;message/rfc822;text/calendar;text/vcard;application/acad;application/msword;application/msword-template;application/pdf;application/rtf;application/vnd.ms-excel.sheet.binary.macroEnabled.12;application/vnd.ms-outlook;application/vnd.ms-excel.sheet.macroEnabled.12;application/vnd.ms-word.document.macroEnabled.12;application/vnd.ms-word.template.macroEnabled.12;application/vnd.oasis.opendocument.spreadsheet;application/vnd.oasis.opendocument.text;application/vnd.openxmlformats-officedocument.presentationml.presentation;application/vnd.openxmlformats-officedocument.presentationml.slideshow;application/vnd.openxmlformats-officedocument.presentationml.template;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.openxmlformats-officedocument.wordprocessingml.template;application/x-dxf;application/x-iridium-decks;image/vnd.dwg;image/vnd.dxf;text/csv;text/html;text/markdown;text/rtf;text/tab-separated-values;text/x-tex;
-Keywords=office;spreadsheet;document;drawing;presentation;pdf;mail;xlsx;docx;dwg;pptx;eml;
+Categories=Office;Spreadsheet;WordProcessor;Graphics;Presentation;Photograph;Video;Audio;
+MimeType=application/acad;application/mbox;application/msword;application/msword-template;application/mxf;application/pdf;application/rtf;application/vnd.ms-excel.sheet.binary.macroEnabled.12;application/vnd.ms-excel.sheet.macroEnabled.12;application/vnd.ms-outlook;application/vnd.ms-word.document.macroEnabled.12;application/vnd.ms-word.template.macroEnabled.12;application/vnd.oasis.opendocument.spreadsheet;application/vnd.oasis.opendocument.text;application/vnd.openxmlformats-officedocument.presentationml.presentation;application/vnd.openxmlformats-officedocument.presentationml.slideshow;application/vnd.openxmlformats-officedocument.presentationml.template;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.openxmlformats-officedocument.wordprocessingml.template;application/x-dxf;application/x-iridium-decks;application/x-krita;image/avif;image/heic;image/openraster;image/qoi;image/vnd.adobe.photoshop;image/vnd.dwg;image/vnd.dxf;image/vnd.microsoft.icon;image/vnd.radiance;image/x-adobe-dng;image/x-canon-cr2;image/x-canon-cr3;image/x-dds;image/x-exr;image/x-fuji-raf;image/x-nikon-nef;image/x-olympus-orf;image/x-paintnet;image/x-panasonic-rw;image/x-panasonic-rw2;image/x-pentax-pef;image/x-portable-anymap;image/x-portable-bitmap;image/x-portable-graymap;image/x-portable-pixmap;image/x-psb;image/x-psd;image/x-sony-arw;image/x-tga;message/rfc822;text/calendar;text/csv;text/html;text/markdown;text/rtf;text/tab-separated-values;text/vcard;text/x-tex;video/3gpp;video/mp2t;video/mp4;video/mpeg;video/quicktime;video/vnd.avi;video/webm;video/x-m4v;video/x-matroska;video/x-msvideo;
+Keywords=office;spreadsheet;document;drawing;presentation;pdf;mail;xlsx;docx;dwg;pptx;eml;photo;image;raw;video;film;

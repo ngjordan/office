@@ -85,6 +85,9 @@
             <Verb Id="open" Command="Open" TargetFile="OfficeExe" Argument="&quot;%1&quot;" />
           </Extension>
         </ProgId>
+        <ProgId Id="Office.Photos" Description="Workspace Photos" />
+        <ProgId Id="Office.Film" Description="Workspace Film" />
+        <ProgId Id="Office.Light" Description="Workspace Light" />
 
         <RegistryKey Root="HKCR" Key="Office.Message">
           <RegistryValue Type="string" Value="Office Mail Message" />
@@ -270,6 +273,116 @@
         <RegistryValue Root="HKCR" Key=".xlsb\OpenWithProgids" Name="Office.BinarySpreadsheet" Type="string" Value="" />
         <RegistryValue Root="HKCR" Key=".xlsm\OpenWithProgids" Name="Office.MacroSpreadsheet" Type="string" Value="" />
         <RegistryValue Root="HKCR" Key=".xlsx\OpenWithProgids" Name="Office.Spreadsheet" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".ani\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".avif\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".bmp\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".cur\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".dib\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".exr\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".gif\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".hdr\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".icb\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".jfif\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".jpe\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".jpeg\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".jpg\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".kra\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".krz\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pam\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pbm\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pcraft\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pcx\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pcx2\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pdn\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pgm\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pic\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pix\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".png\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".ppm\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".psb\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".psd\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".psdt\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".qoi\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".sgi\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".targa\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".tga\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".tif\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".tiff\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".vda\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".vst\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".webp\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".xbm\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".xpm\OpenWithProgids" Name="Office.Photos" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".3gp\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".aac\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".aif\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".aiff\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".apv\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".avi\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".bwf\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".dpx\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".fcproj\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".flac\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".m1v\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".m2t\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".m2ts\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".m2v\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".m4a\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".m4v\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mkv\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mod\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mov\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mp2\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mp3\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mp4\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mpeg\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mpg\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mpv\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mts\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mxf\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".ogg\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".opus\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".r3d\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".tod\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".ts\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".vob\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".wav\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".wave\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".webm\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".y4m\OpenWithProgids" Name="Office.Film" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".3fr\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".arw\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".cr2\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".cr3\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".cube\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".dcp\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".dcr\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".dng\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".erf\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".fff\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".heic\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".heif\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".kdc\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".lccurve\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".lceffect\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".lcpreset\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".lmp\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".lrtemplate\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mos\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mplumpack\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".mrw\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".nef\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".nrw\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".orf\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".pef\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".raf\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".raw\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".rw2\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".sr2\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".srf\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".srw\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".x3f\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
+        <RegistryValue Root="HKCR" Key=".xmp\OpenWithProgids" Name="Office.Light" Type="string" Value="" />
 
         <!-- Settings > Default apps: the user can pick the suite per type. -->
         <RegistryKey Root="HKMU" Key="Software\Office\Capabilities">

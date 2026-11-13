@@ -186,7 +186,8 @@ jobs:
           $parent = Split-Path $env:GITHUB_WORKSPACE -Parent
           foreach ($pair in @(
             @('sheets','gc-gridcraft'), @('docs','wc-wordcraft'), @('cad','cc-cadcraft'),
-            @('decks','dc-deckcraft'), @('pdf','pdfcraft'), @('mail','mc-mailcraft'))) {
+            @('decks','dc-deckcraft'), @('pdf','pdfcraft'), @('mail','mc-mailcraft'),
+            @('photos','pc-photocraft'), @('film','fc-filmcraft'), @('light','lc-lightcraft'))) {
             git clone --depth 1 "https://github.com/ngjordan/$($pair[0]).git" (Join-Path $parent $pair[1])
           }
 
@@ -211,7 +212,8 @@ jobs:
           New-Item -ItemType Directory -Force -Path $vendor | Out-Null
           foreach ($pair in @(
             @('sheets','gc-gridcraft'), @('docs','wc-wordcraft'), @('cad','cc-cadcraft'),
-            @('decks','dc-deckcraft'), @('pdf','pdfcraft'), @('mail','mc-mailcraft'))) {
+            @('decks','dc-deckcraft'), @('pdf','pdfcraft'), @('mail','mc-mailcraft'),
+            @('photos','pc-photocraft'), @('film','fc-filmcraft'), @('light','lc-lightcraft'))) {
             $link = Join-Path $vendor $pair[0]
             if (Test-Path $link) { Remove-Item -Recurse -Force $link }
             New-Item -ItemType Junction -Path $link -Target (Join-Path $parent $pair[1]) | Out-Null

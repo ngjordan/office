@@ -295,3 +295,42 @@ fn every_progid_the_policy_names_is_one_the_installer_defines() {
         );
     }
 }
+
+/// One extension, one owning app.
+///
+/// The suite routes a file to the app that owns it, so an extension claimed by
+/// two apps is ambiguous: the first match in the table wins, and the other app
+/// becomes unreachable for that format. Photos and Light both work on ordinary
+/// photographs, so this is a real conflict, not a theoretical one.
+#[test]
+fn no_extension_is_owned_by_two_apps() {
+    let mut owner: std::collections::HashMap<&str, iridium_office::module::Kind> =
+        std::collections::HashMap::new();
+    let mut clashes: Vec<(String, String)> = Vec::new();
+    for (ext, kind) in iridium_office::route::table() {
+        if let Some(previous) = owner.insert(ext, kind) {
+            clashes.push((ext.to_string(), format!("{previous:?} and {kind:?}")));
+        }
+    }
+    assert!(
+        clashes.is_empty(),
+        "an extension is owned by two apps: {clashes:?}"
+    );
+}
+
+/// Every app in the rail can own a file, or the suite has an app that can
+/// only be started empty.
+#[test]
+fn every_app_owns_at_least_one_extension() {
+    let mut kinds: std::collections::HashSet<iridium_office::module::Kind> =
+        std::collections::HashSet::new();
+    for (_, kind) in iridium_office::route::table() {
+        kinds.insert(kind);
+    }
+    for kind in iridium_office::module::Kind::ALL {
+        assert!(
+            kinds.contains(&kind),
+            "{kind:?} owns no file extension, so it can only be started empty"
+        );
+    }
+}

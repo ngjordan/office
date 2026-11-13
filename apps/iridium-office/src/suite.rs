@@ -140,6 +140,9 @@ impl Suite {
                 Kind::Decks => Box::new(modules::decks::Adapter::new(ctx, storage, files)),
                 Kind::Pdf => Box::new(modules::pdf::Adapter::new(ctx, storage, files)),
                 Kind::Mail => Box::new(modules::mail::Adapter::new(ctx, storage, files)),
+                Kind::Photos => Box::new(modules::photos::Adapter::new(ctx, storage, files)),
+                Kind::Film => Box::new(modules::film::Adapter::new(ctx, storage, files)),
+                Kind::Light => Box::new(modules::light::Adapter::new(ctx, storage, files)),
             };
             self.activate_module(kind, module, ctx);
         }
@@ -339,7 +342,7 @@ impl Suite {
                                     path.rsplit(['/', '\\']).next().unwrap_or(path).to_string();
                                 let (body, close) = crate::chrome::document_tab(
                                     ui,
-                                    ui.id().with(("doc", i)),
+                                    ui.scope_id().with(("doc", i)),
                                     &name,
                                     path,
                                     kind.mark(),
@@ -395,7 +398,7 @@ impl Suite {
                         let selected = active == kind;
                         let response = crate::chrome::rail_item(
                             ui,
-                            ui.id().with(("app", kind)),
+                            ui.scope_id().with(("app", kind)),
                             kind.label(),
                             kind.mark(),
                             if dark {
@@ -471,7 +474,7 @@ impl Suite {
                                         for (i, kind) in Kind::ALL.into_iter().enumerate() {
                                             let response = crate::chrome::app_card(
                                                 ui,
-                                                ui.id().with(("home", kind)),
+                                                ui.scope_id().with(("home", kind)),
                                                 kind.label(),
                                                 kind.mark(),
                                                 if dark {
@@ -549,6 +552,22 @@ impl Suite {
         for (_, m) in &mut self.started {
             m.save_state();
         }
+    }
+
+    /// Let every started module quiesce before the process ends.
+    pub fn shutdown(&mut self) {
+        for (_, m) in &mut self.started {
+            m.shutdown();
+        }
+    }
+}
+
+/// The suite is dropped when the process ends, so this is the last chance to let an app's
+/// background work finish: a thread still inside a graphics driver crashes there when the
+/// driver is torn down (Light's issue #620).
+impl Drop for Suite {
+    fn drop(&mut self) {
+        self.shutdown();
     }
 }
 
