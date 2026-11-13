@@ -258,6 +258,9 @@ pub fn launch_in(profile: Option<PathBuf>) -> Result<Launched, BrowserError> {
                  because that was explicitly allowed"
             );
             // The first child is already dead; replace it, do not keep it.
+            // The replacement reuses the profile, so the lock the dead
+            // browser may have left behind goes too.
+            clear_stale_lock(&profile);
             let (retry, port) = start(&exe, &profile, true)?;
             child = retry;
             port?

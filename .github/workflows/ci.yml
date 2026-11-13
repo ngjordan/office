@@ -99,6 +99,13 @@ jobs:
         run: cargo deny check
 
       - name: Tests
+        # The runner is a container: Ubuntu 24.04 blocks unprivileged user
+        # namespaces through AppArmor, so Chromium aborts at startup with "No
+        # usable sandbox". The browser drops its sandbox only when the
+        # operator allows it, which is what this variable does. A desktop user
+        # never needs it.
+        env:
+          IRIDIUM_OFFICE_BROWSER_NO_SANDBOX: "1"
         run: cargo test -p iridium-office -j 1
 
   # The Linux gate does not compile the Windows-only code: a cfg(target_os = "windows")
