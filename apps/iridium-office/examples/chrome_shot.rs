@@ -36,7 +36,7 @@ fn suite_with_documents() -> Suite {
 }
 
 /// Render one view and save it.
-fn shot(name: &str, dark: bool, mut suite: Suite, w: f32, h: f32, dir: &std::path::Path) {
+fn shot(name: &str, dark: bool, suite: Suite, w: f32, h: f32, dir: &std::path::Path) {
     let theme = if dark {
         egui::Theme::Dark
     } else {
@@ -124,7 +124,7 @@ fn shot_browser(dir: &std::path::Path) {
     // The frame's pixels become a PNG, exactly as the suite would draw them.
     // The pixels are RGBA, four bytes each.
     let image = image::RgbaImage::from_raw(frame.width, frame.height, frame.pixels.clone())
-        .map(|rgba| image::DynamicImage::ImageRgba8(rgba))
+        .map(image::DynamicImage::ImageRgba8)
         .expect("the frame's size matches its pixels");
     let path = dir.join("browser-frame.png");
     image.save(&path).expect("save png");

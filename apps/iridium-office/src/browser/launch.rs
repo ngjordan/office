@@ -177,8 +177,6 @@ impl std::error::Error for BrowserError {}
 pub struct Launched {
     /// The child process.
     child: Child,
-    /// The profile directory we own. Removed on drop.
-    profile: PathBuf,
     /// The port the browser chose. Kept for the log line and for tests.
     port: u16,
     /// The browser's WebSocket endpoint.
@@ -277,7 +275,6 @@ pub fn launch_in(profile: Option<PathBuf>) -> Result<Launched, BrowserError> {
 
     Ok(Launched {
         child,
-        profile,
         port,
         ws_url,
         product,
@@ -334,17 +331,17 @@ fn sandbox_unavailable() -> bool {
     #[cfg(target_os = "linux")]
     {
         // The kernel setting that AppArmor's restriction follows.
-        if let Ok(value) = std::fs::read_to_string("/proc/sys/kernel/unprivileged_userns_clone") {
-            if value.trim() == "0" {
-                return true;
-            }
+        if let Ok(value) = std::fs::read_to_string("/proc/sys/kernel/unprivileged_userns_clone")
+            && value.trim() == "0"
+        {
+            return true;
         }
         // AppArmor's own switch, when the kernel exposes it.
         let path = "/proc/sys/kernel/apparmor_restrict_unprivileged_userns";
-        if let Ok(value) = std::fs::read_to_string(path) {
-            if value.trim() == "1" {
-                return true;
-            }
+        if let Ok(value) = std::fs::read_to_string(path)
+            && value.trim() == "1"
+        {
+            return true;
         }
         // Old kernels have neither file; the namespace is available there.
         false
@@ -427,16 +424,14 @@ fn wait_for_port(
                 format!("the browser exited with {status} before it was ready")
             }));
         }
-        if let Ok(text) = std::fs::read_to_string(&port_file) {
-            if let Some(port) = text
+        if let Ok(text) = std::fs::read_to_string(&port_file)
+            && let Some(port) = text
                 .lines()
                 .next()
                 .and_then(|l| l.trim().parse::<u16>().ok())
-            {
-                if port > 0 {
-                    return Ok(port);
-                }
-            }
+            && port > 0
+        {
+            return Ok(port);
         }
         std::thread::sleep(Duration::from_millis(50));
     }
