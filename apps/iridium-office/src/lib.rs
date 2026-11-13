@@ -16,6 +16,8 @@ pub fn brand(key: &str) -> &'static str {
         .unwrap_or_default()
 }
 
+pub mod browser;
+pub mod chrome;
 pub mod look;
 pub mod module;
 pub mod modules;

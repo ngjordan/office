@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
-Name=Office
-GenericName=Office suite
+Name=Workspace
+GenericName=Workspace suite
 Comment=Spreadsheets, documents, drawings, presentations, PDF and mail in one window
 Exec=iridium-office %F
 TryExec=iridium-office

@@ -39,6 +39,49 @@ impl Kind {
         }
     }
 
+    /// The two-letter mark that identifies this app.
+    ///
+    /// Two letters, not an icon: the suite ships no per-app artwork, and a mark
+    /// that needs no asset still tells the apps apart at a glance.
+    pub fn mark(self) -> &'static str {
+        match self {
+            Kind::Sheets => "Sh",
+            Kind::Cad => "Ca",
+            Kind::Docs => "Do",
+            Kind::Decks => "De",
+            Kind::Pdf => "PF",
+            Kind::Mail => "Ma",
+        }
+    }
+
+    /// This app's accent colour, in the light theme.
+    ///
+    /// Each app keeps its own identity colour. It tints the rail tile and the
+    /// document tab, so a user can tell which app owns a document without
+    /// reading the name.
+    pub fn accent(self) -> egui::Color32 {
+        match self {
+            Kind::Sheets => egui::Color32::from_rgb(0x0B, 0x6E, 0x4F),
+            Kind::Cad => egui::Color32::from_rgb(0x6D, 0x4B, 0xC3),
+            Kind::Docs => egui::Color32::from_rgb(0x24, 0x5D, 0xB5),
+            Kind::Decks => egui::Color32::from_rgb(0xA3, 0x4E, 0x16),
+            Kind::Pdf => egui::Color32::from_rgb(0xB6, 0x37, 0x43),
+            Kind::Mail => egui::Color32::from_rgb(0x92, 0x60, 0x1B),
+        }
+    }
+
+    /// This app's accent colour, in the dark theme.
+    pub fn accent_dark(self) -> egui::Color32 {
+        match self {
+            Kind::Sheets => egui::Color32::from_rgb(0x70, 0xC7, 0xA3),
+            Kind::Cad => egui::Color32::from_rgb(0xBC, 0xA2, 0xF2),
+            Kind::Docs => egui::Color32::from_rgb(0x91, 0xB8, 0xFF),
+            Kind::Decks => egui::Color32::from_rgb(0xEF, 0xA4, 0x6E),
+            Kind::Pdf => egui::Color32::from_rgb(0xF1, 0x8C, 0x96),
+            Kind::Mail => egui::Color32::from_rgb(0xDD, 0xB6, 0x6E),
+        }
+    }
+
     /// A short description for the home screen.
     pub fn blurb(self) -> &'static str {
         match self {

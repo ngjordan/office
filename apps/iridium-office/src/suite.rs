@@ -46,6 +46,11 @@ pub struct Suite {
     /// The module that drew last frame. The context holds ITS look, so what the context
     /// holds is attributed to it and not to the module that is active now.
     last_drawn: Option<Kind>,
+    /// Which document is showing. The tab strip marks this one, not the active app:
+    /// several documents can belong to the same app, and only one of them is open.
+    active_document: Option<String>,
+    /// Whether the chrome's own font family has been registered with the context.
+    chrome_font_installed: bool,
 }
 
 impl Suite {
@@ -66,6 +71,10 @@ impl Suite {
             close_held: false,
             // The module that drew last frame.
             last_drawn: None,
+            // Which document is showing.
+            active_document: None,
+            // Whether the chrome's font family is registered.
+            chrome_font_installed: false,
         }
     }
 
@@ -287,67 +296,115 @@ impl Suite {
 
     /// The rail, and the active module's UI.
     pub fn ui(&mut self, ui: &mut egui::Ui, storage: Option<&dyn eframe::Storage>) {
-        self.saw_ui = true;
         let ctx = ui.ctx().clone();
+        // The chrome has its own font family, registered once, so an app that
+        // swaps its fonts at runtime cannot change the suite's own type.
+        if !self.chrome_font_installed {
+            crate::chrome::install_font(&ctx);
+            self.chrome_font_installed = true;
+        }
+        self.saw_ui = true;
+        let chrome = crate::chrome::Chrome::for_theme(ctx.theme() == egui::Theme::Dark);
+        let dark = ctx.theme() == egui::Theme::Dark;
+
         let Some(active) = self.active else {
-            self.home(ui, storage, &ctx);
+            self.home(ui, storage, &ctx, &chrome);
             return;
         };
 
-        // The tab strip: one tab per open document. The click is collected and acted on
-        // after the panel closes, so the borrow of `self` inside the panel does not
-        // overlap the switch.
+        // The tab strip and the rail are the suite's own chrome: they draw in
+        // the chrome's style, not in the active module's theme.
+        //
+        // The click is collected and acted on after the panel closes, so the
+        // borrow of `self` inside the panel does not overlap the switch.
         let mut chosen_doc: Option<(Kind, String)> = None;
         let mut closed: Option<usize> = None;
-        egui::Panel::top("tabs").show(ui, |ui| {
-            ui.horizontal(|ui| {
-                for (i, (kind, path)) in self.open_documents.iter().enumerate() {
-                    let name = path.rsplit(['/', '\\']).next().unwrap_or(path).to_string();
-                    ui.horizontal(|ui| {
-                        if ui
-                            .button(format!("{} \u{2014} {name}", kind.label()))
-                            .clicked()
-                        {
-                            chosen_doc = Some((*kind, path.clone()));
-                        }
-                        if ui.small_button("\u{2715}").clicked() {
-                            closed = Some(i);
-                        }
+        ui.scope(|chrome_ui| {
+            chrome_ui.set_style(std::sync::Arc::new(chrome.style()));
+            egui::Panel::top("tabs")
+                .exact_size(44.0)
+                .frame(
+                    egui::Frame::new()
+                        .fill(chrome.strip)
+                        .inner_margin(egui::Margin::symmetric(8, 4)),
+                )
+                .show(chrome_ui, |ui| {
+                    // The tabs sit side by side. A horizontal scroll area only
+                    // enables the scrollbar; the layout inside it is still
+                    // vertical, so the row layout is set here.
+                    egui::ScrollArea::horizontal().show(ui, |ui| {
+                        ui.horizontal(|ui| {
+                            for (i, (kind, path)) in self.open_documents.iter().enumerate() {
+                                let name =
+                                    path.rsplit(['/', '\\']).next().unwrap_or(path).to_string();
+                                let (body, close) = crate::chrome::document_tab(
+                                    ui,
+                                    ui.id().with(("doc", i)),
+                                    &name,
+                                    path,
+                                    kind.mark(),
+                                    if dark { kind.accent_dark() } else { kind.accent() },
+                                    self.active_document.as_deref() == Some(path.as_str()),
+                                    200.0,
+                                    &chrome,
+                                );
+                                if body.clicked() {
+                                    chosen_doc = Some((*kind, path.clone()));
+                                }
+                                if close.clicked() {
+                                    closed = Some(i);
+                                }
+                            }
+                        });
                     });
-                }
-            });
+                });
         });
         if let Some((kind, _path)) = chosen_doc {
             // The document is already open: clicking its tab only brings its app up.
             // Opening it again imported it a second time.
+            self.active_document = Some(_path);
             self.activate(kind, &ctx, storage);
         }
         if let Some(i) = closed {
-            self.open_documents.remove(i);
+            let path = self.open_documents.remove(i).1;
+            if self.active_document.as_deref() == Some(path.as_str()) {
+                self.active_document = None;
+            }
         }
 
         // The rail. The click is collected and acted on after the panel closes, so
         // the borrow of `self` inside the panel does not overlap the switch.
         let mut chosen = None;
-        egui::Panel::left("rail")
-            .default_size(84.0)
-            .resizable(false)
-            .show(ui, |ui| {
-                for kind in Kind::ALL {
-                    let started = self.started.iter().any(|(k, _)| *k == kind);
-                    let selected = active == kind;
-                    let mut label = egui::RichText::new(kind.label());
-                    if selected {
-                        label = label.strong();
-                    } else if !started {
-                        label = label.weak();
+        ui.scope(|chrome_ui| {
+            chrome_ui.set_style(std::sync::Arc::new(chrome.style()));
+            egui::Panel::left("rail")
+                .default_size(84.0)
+                .resizable(false)
+                .frame(
+                    egui::Frame::new()
+                        .fill(chrome.rail)
+                        .inner_margin(egui::Margin::symmetric(8, 8)),
+                )
+                .show(chrome_ui, |ui| {
+                    for kind in Kind::ALL {
+                        let running = self.started.iter().any(|(k, _)| *k == kind);
+                        let selected = active == kind;
+                        let response = crate::chrome::rail_item(
+                            ui,
+                            ui.id().with(("app", kind)),
+                            kind.label(),
+                            kind.mark(),
+                            if dark { kind.accent_dark() } else { kind.accent() },
+                            selected,
+                            running,
+                            &chrome,
+                        );
+                        if response.clicked() {
+                            chosen = Some(kind);
+                        }
                     }
-                    if ui.add(egui::Button::new(label)).clicked() {
-                        chosen = Some(kind);
-                    }
-                    ui.add_space(4.0);
-                }
-            });
+                });
+        });
         if let Some(kind) = chosen {
             self.activate(kind, &ctx, storage);
             return;
@@ -365,30 +422,84 @@ impl Suite {
         self.last_drawn = Some(active);
     }
 
-    /// The home screen: one button per app.
+    /// The home screen: a grid of app cards.
     fn home(
         &mut self,
         ui: &mut egui::Ui,
         storage: Option<&dyn eframe::Storage>,
         ctx: &egui::Context,
+        chrome: &crate::chrome::Chrome,
     ) {
+        let dark = ctx.theme() == egui::Theme::Dark;
         let mut chosen = None;
-        egui::CentralPanel::default().show(ui, |ui| {
-            ui.vertical_centered(|ui| {
-                ui.add_space(40.0);
-                ui.heading("Office");
-                ui.add_space(20.0);
-                for kind in Kind::ALL {
-                    if ui.button(kind.label()).clicked() {
-                        chosen = Some(kind);
-                    }
-                    ui.add_space(4.0);
-                }
-            });
+        ui.scope(|chrome_ui| {
+            chrome_ui.set_style(std::sync::Arc::new(chrome.style()));
+            egui::CentralPanel::default()
+                .frame(egui::Frame::new().fill(chrome.window))
+                .show(chrome_ui, |ui| {
+                    ui.vertical_centered(|ui| {
+                        ui.allocate_ui_with_layout(
+                            egui::vec2(960.0, 0.0),
+                            egui::Layout::top_down(egui::Align::Center),
+                            |ui| {
+                                ui.add_space(crate::chrome::space::XXL);
+                                ui.painter().text(
+                                    ui.available_rect_before_wrap().left_center(),
+                                    egui::Align2::LEFT_CENTER,
+                                    crate::brand("APP_NAME"),
+                                    crate::chrome::font(crate::chrome::text::TITLE),
+                                    chrome.text,
+                                );
+                                ui.add_space(crate::chrome::space::XL);
+
+                                // A grid of cards, as many columns as fit, four at most.
+                                let columns = ((ui.available_width() - 32.0) / 176.0)
+                                    .floor()
+                                    .clamp(1.0, 4.0) as usize;
+                                egui::Grid::new("home-apps")
+                                    .spacing([crate::chrome::space::L, crate::chrome::space::L])
+                                    .show(ui, |ui| {
+                                        for (i, kind) in Kind::ALL.into_iter().enumerate() {
+                                            let response = crate::chrome::app_card(
+                                                ui,
+                                                ui.id().with(("home", kind)),
+                                                kind.label(),
+                                                kind.mark(),
+                                                if dark { kind.accent_dark() } else { kind.accent() },
+                                                chrome,
+                                            );
+                                            if response.clicked() {
+                                                chosen = Some(kind);
+                                            }
+                                            if (i + 1) % columns == 0 {
+                                                ui.end_row();
+                                            }
+                                        }
+                                    });
+                            },
+                        );
+                    });
+                });
         });
         if let Some(kind) = chosen {
             self.activate(kind, ctx, storage);
         }
+    }
+
+    /// Record an open document without starting its app.
+    ///
+    /// For the screenshot harness and the tests: the real path opens the file
+    /// through the app, which needs a real file.
+    pub fn open_for_test(&mut self, kind: Kind, path: &str) {
+        self.open_documents.push((kind, path.to_string()));
+    }
+
+    /// Show a module without starting a real app.
+    ///
+    /// For the screenshot harness: the tab strip only appears once an app is
+    /// showing, and a picture of the chrome needs one.
+    pub fn show_for_test(&mut self, kind: Kind) {
+        self.active = Some(kind);
     }
 
     /// Whether every started module is safe to close.
