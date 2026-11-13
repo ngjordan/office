@@ -1,17 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Office icon: a page with a folded corner, lines and a small chart, on Iridium green. -->
   <defs>
-    <linearGradient id="g-office" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0B6E4F"/>
-      <stop offset="1" stop-color="#074C36"/>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B6E4F"/><stop offset="1" stop-color="#074C36"/>
     </linearGradient>
   </defs>
-  <rect x="32" y="32" width="448" height="448" rx="100" fill="url(#g-office)"/>
-  <path d="M148 112h144l74 74v214a28 28 0 0 1-28 28H148a28 28 0 0 1-28-28V140a28 28 0 0 1 28-28Z" fill="#fff"/>
-  <path d="M292 112v56a18 18 0 0 0 18 18h56Z" fill="#4FB389"/>
-  <path d="M156 230h200" stroke="#0B6E4F" stroke-width="17" stroke-linecap="round"/>
-  <path d="M156 278h200" stroke="#0B6E4F" stroke-width="17" stroke-linecap="round"/>
-  <path d="M156 326h108" stroke="#0B6E4F" stroke-width="17" stroke-linecap="round"/>
-  <rect x="278" y="310" width="32" height="32" rx="6" fill="#0B6E4F"/>
-  <rect x="318" y="290" width="32" height="52" rx="6" fill="#0B6E4F"/>
+  <rect x="32" y="32" width="448" height="448" rx="100" fill="url(#g)"/>
+  <!-- the window -->
+  <rect x="88" y="104" width="336" height="304" rx="34" fill="#FFFFFF"/>
+  <!-- the rail down the left -->
+  <path d="M88 138a34 34 0 0 1 34-34h44v304h-44a34 34 0 0 1-34-34Z" fill="#0B6E4F"/>
+  <!-- the tab strip across the top -->
+  <path d="M122 104h268a34 34 0 0 1 34 34v30H122Z" fill="#4FB389"/>
+  <!-- the open documents, in the colour of the app that owns each -->
+  <rect x="188" y="164" width="86" height="26" rx="13" fill="#0B6E4F"/>
+  <rect x="286" y="164" width="86" height="26" rx="13" fill="#245DB5"/>
+  <!-- the app tiles in the rail, in the app colours -->
+  <rect x="104" y="150" width="48" height="48" rx="14" fill="#4FB389"/>
+  <rect x="104" y="216" width="48" height="48" rx="14" fill="#245DB5"/>
+  <rect x="104" y="282" width="48" height="48" rx="14" fill="#6D4BC3"/>
+  <rect x="104" y="348" width="48" height="48" rx="14" fill="#A34E16"/>
+  <!-- the document in the content area -->
+  <rect x="188" y="236" width="196" height="16" rx="8" fill="#E2E7EC"/>
+  <rect x="188" y="272" width="150" height="16" rx="8" fill="#E2E7EC"/>
+  <rect x="188" y="308" width="176" height="16" rx="8" fill="#E2E7EC"/>
 </svg>
