@@ -74,7 +74,7 @@ jobs:
       - name: Check out the apps
         run: |
           set -euo pipefail
-          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft mail:mc-mailcraft; do
+          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft mail:mc-mailcraft photos:pc-photocraft film:fc-filmcraft light:lc-lightcraft; do
             name="${pair%%:*}"; dir="${pair##*:}"
             git clone --depth 1 "https://github.com/ngjordan/$name.git" "../$dir"
           done
@@ -187,6 +187,7 @@ jobs:
           foreach ($pair in @(
             @('sheets','gc-gridcraft'), @('docs','wc-wordcraft'), @('cad','cc-cadcraft'),
             @('decks','dc-deckcraft'), @('pdf','pdfcraft'), @('mail','mc-mailcraft'),
+            @('photos','pc-photocraft'), @('film','fc-filmcraft'), @('light','lc-lightcraft'),
             @('photos','pc-photocraft'), @('film','fc-filmcraft'), @('light','lc-lightcraft'))) {
             git clone --depth 1 "https://github.com/ngjordan/$($pair[0]).git" (Join-Path $parent $pair[1])
           }
@@ -213,6 +214,7 @@ jobs:
           foreach ($pair in @(
             @('sheets','gc-gridcraft'), @('docs','wc-wordcraft'), @('cad','cc-cadcraft'),
             @('decks','dc-deckcraft'), @('pdf','pdfcraft'), @('mail','mc-mailcraft'),
+            @('photos','pc-photocraft'), @('film','fc-filmcraft'), @('light','lc-lightcraft'),
             @('photos','pc-photocraft'), @('film','fc-filmcraft'), @('light','lc-lightcraft'))) {
             $link = Join-Path $vendor $pair[0]
             if (Test-Path $link) { Remove-Item -Recurse -Force $link }

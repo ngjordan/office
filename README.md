@@ -1,8 +1,9 @@
 # Office suite
 
-One window, one egui context, six apps: **Sheets**, **Docs**, **Cad**, **Decks**, **PDF**, **Mail**.
+One window, one egui context, nine apps: **Sheets**, **Docs**, **Cad**, **Decks**, **PDF**,
+**Mail**, **Photos**, **Film**, **Light**.
 
-This repository holds the Office host only. The six apps stay in their own repositories
+This repository holds the Office host only. The nine apps stay in their own repositories
 and are pulled in as path dependencies, so the standalone apps keep shipping on their own.
 
 | App | Repository | Branch | Path (relative to this repo) |
@@ -13,8 +14,11 @@ and are pulled in as path dependencies, so the standalone apps keep shipping on 
 | Decks | `ngjordan/decks` | `main` | `../dc-deckcraft` |
 | PDF | `ngjordan/pdf` | `main` | `../pdfcraft` |
 | Mail | `ngjordan/mail` | `main` | `../mc-mailcraft` |
+| Photos | `ngjordan/photos` | `main` | `../pc-photocraft` |
+| Film | `ngjordan/film` | `main` | `../fc-filmcraft` |
+| Light | `ngjordan/light` | `main` | `../lc-lightcraft` |
 
-Cloning this repo alone does **not** build: clone the six app repositories as siblings
+Cloning this repo alone does **not** build: clone the nine app repositories as siblings
 of this directory, on the branches above.
 
 ## Build and test
@@ -210,7 +214,7 @@ has to rebuild it from zero every time.
 ## CI and the dependency policy
 
 `.github/workflows/ci.yml` runs the same gate locally: format, clippy, dependency policy
-(`deny.toml`), and the tests. It checks the six apps out as siblings, so it needs a PAT
+(`deny.toml`), and the tests. It checks the nine apps out as siblings, so it needs a PAT
 with `repo` scope in the repository secret **`OFFICE_TOKEN`** — the default `GITHUB_TOKEN`
 cannot read the app repositories.
 
@@ -227,7 +231,7 @@ cannot read the app repositories.
 
 ## How the look works
 
-The six apps share ONE egui context, and each replaces that context's fonts, style and
+The nine apps share ONE egui context, and each replaces that context's fonts, style and
 zoom with its own. Each app decides whether to re-install its look against **its own**
 memory, not against the context — so an app that has already installed its look will not
 install it again, and would otherwise draw in whatever look the previous app left behind.

@@ -1,6 +1,6 @@
 name: CI
 
-# Gate for the Office host: the merged workspace that runs the five apps in one
+# Gate for the Office host: the merged workspace that runs the nine apps in one
 # window. The apps themselves are gated in their own repositories; this workflow
 # checks the host against them.
 on:
@@ -35,12 +35,12 @@ jobs:
         with:
           persist-credentials: false
 
-      # The five apps live in their own public repositories and come in as path
+      # The nine apps live in their own public repositories and come in as path
       # dependencies, so they clone anonymously: no long-lived token in this repository.
       - name: Check out the apps
         run: |
           set -euo pipefail
-          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft mail:mc-mailcraft; do
+          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft mail:mc-mailcraft photos:pc-photocraft film:fc-filmcraft light:lc-lightcraft; do
             name="${pair%%:*}"; dir="${pair##*:}"
             git clone --depth 1 "https://github.com/ngjordan/$name.git" "../$dir"
           done

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Create the vendor tree the workspace's path dependencies point at.
 #
-# The six apps live in their own repositories and are checked out beside this one. The
+# The nine apps live in their own repositories and are checked out beside this one. The
 # workspace refers to them through ../office-vendor/<app>, a directory of symlinks, for two
 # reasons:
 #
@@ -17,7 +17,8 @@ ROOT="$(cd "$HERE/.." && pwd)"
 PARENT="${1:-$(dirname "$ROOT")}"
 
 # app name : the repository it comes from
-APPS=(sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft mail:mc-mailcraft)
+APPS=(sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft
+      mail:mc-mailcraft photos:pc-photocraft film:fc-filmcraft light:lc-lightcraft)
 VENDOR="$PARENT/office-vendor"
 mkdir -p "$VENDOR"
 for pair in "${APPS[@]}"; do
