@@ -36,14 +36,7 @@ fn suite_with_documents() -> Suite {
 }
 
 /// Render one view and save it.
-fn shot(
-    name: &str,
-    dark: bool,
-    mut suite: Suite,
-    w: f32,
-    h: f32,
-    dir: &std::path::Path,
-) {
+fn shot(name: &str, dark: bool, mut suite: Suite, w: f32, h: f32, dir: &std::path::Path) {
     let theme = if dark {
         egui::Theme::Dark
     } else {
@@ -91,8 +84,8 @@ fn shot_browser(dir: &std::path::Path) {
         eprintln!("no Chromium-family browser installed; skipping the browser shot");
         return;
     }
-    let profile = iridium_office::browser::launch::private_profile_dir("chrome-shot")
-        .expect("profile");
+    let profile =
+        iridium_office::browser::launch::private_profile_dir("chrome-shot").expect("profile");
     let mut engine = match Engine::start_in(Some(profile)) {
         Ok(engine) => engine,
         Err(e) => {
@@ -113,11 +106,7 @@ fn shot_browser(dir: &std::path::Path) {
         .expect("navigate");
     std::thread::sleep(std::time::Duration::from_secs(2));
     engine
-        .start_screencast(
-            iridium_office::browser::frame::FrameFormat::Jpeg,
-            900,
-            500,
-        )
+        .start_screencast(iridium_office::browser::frame::FrameFormat::Jpeg, 900, 500)
         .expect("the screencast starts");
 
     let mut frame = None;

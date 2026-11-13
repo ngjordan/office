@@ -47,7 +47,10 @@ pub struct Frame {
 impl Frame {
     /// The frame as an egui image.
     pub fn as_color_image(&self) -> ColorImage {
-        ColorImage::from_rgba_unmultiplied([self.width as usize, self.height as usize], &self.pixels)
+        ColorImage::from_rgba_unmultiplied(
+            [self.width as usize, self.height as usize],
+            &self.pixels,
+        )
     }
 }
 
@@ -94,7 +97,9 @@ pub fn decode(data: &str, format: FrameFormat) -> Option<Frame> {
     if data.len() > (MAX_FRAME_BYTES as usize) * 2 {
         return None;
     }
-    let bytes = base64::engine::general_purpose::STANDARD.decode(data).ok()?;
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(data)
+        .ok()?;
 
     let mut limits = image::Limits::default();
     limits.max_image_width = Some(MAX_FRAME_WIDTH);
@@ -102,14 +107,12 @@ pub fn decode(data: &str, format: FrameFormat) -> Option<Frame> {
     limits.max_alloc = Some(MAX_FRAME_BYTES);
 
     let mut reader = match format {
-        FrameFormat::Jpeg => image::ImageReader::with_format(
-            std::io::Cursor::new(&bytes),
-            image::ImageFormat::Jpeg,
-        ),
-        FrameFormat::Png => image::ImageReader::with_format(
-            std::io::Cursor::new(&bytes),
-            image::ImageFormat::Png,
-        ),
+        FrameFormat::Jpeg => {
+            image::ImageReader::with_format(std::io::Cursor::new(&bytes), image::ImageFormat::Jpeg)
+        }
+        FrameFormat::Png => {
+            image::ImageReader::with_format(std::io::Cursor::new(&bytes), image::ImageFormat::Png)
+        }
     };
     // The limits are set on the reader, not chained: `limits` takes `&mut self`.
     reader.limits(limits);
@@ -177,8 +180,16 @@ mod tests {
     #[test]
     fn only_the_newest_frame_is_kept() {
         let slot = FrameSlot::new();
-        slot.put(Frame { pixels: vec![1], width: 1, height: 1 });
-        slot.put(Frame { pixels: vec![2], width: 1, height: 1 });
+        slot.put(Frame {
+            pixels: vec![1],
+            width: 1,
+            height: 1,
+        });
+        slot.put(Frame {
+            pixels: vec![2],
+            width: 1,
+            height: 1,
+        });
         let frame = slot.take().expect("a frame");
         assert_eq!(frame.pixels, vec![2], "the newer frame wins");
     }

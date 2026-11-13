@@ -343,7 +343,11 @@ impl Suite {
                                     &name,
                                     path,
                                     kind.mark(),
-                                    if dark { kind.accent_dark() } else { kind.accent() },
+                                    if dark {
+                                        kind.accent_dark()
+                                    } else {
+                                        kind.accent()
+                                    },
                                     self.active_document.as_deref() == Some(path.as_str()),
                                     200.0,
                                     &chrome,
@@ -394,7 +398,11 @@ impl Suite {
                             ui.id().with(("app", kind)),
                             kind.label(),
                             kind.mark(),
-                            if dark { kind.accent_dark() } else { kind.accent() },
+                            if dark {
+                                kind.accent_dark()
+                            } else {
+                                kind.accent()
+                            },
                             selected,
                             running,
                             &chrome,
@@ -455,7 +463,8 @@ impl Suite {
                                 // A grid of cards, as many columns as fit, four at most.
                                 let columns = ((ui.available_width() - 32.0) / 176.0)
                                     .floor()
-                                    .clamp(1.0, 4.0) as usize;
+                                    .clamp(1.0, 4.0)
+                                    as usize;
                                 egui::Grid::new("home-apps")
                                     .spacing([crate::chrome::space::L, crate::chrome::space::L])
                                     .show(ui, |ui| {
@@ -465,7 +474,11 @@ impl Suite {
                                                 ui.id().with(("home", kind)),
                                                 kind.label(),
                                                 kind.mark(),
-                                                if dark { kind.accent_dark() } else { kind.accent() },
+                                                if dark {
+                                                    kind.accent_dark()
+                                                } else {
+                                                    kind.accent()
+                                                },
                                                 chrome,
                                             );
                                             if response.clicked() {

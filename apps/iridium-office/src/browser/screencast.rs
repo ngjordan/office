@@ -109,12 +109,7 @@ impl Screencast {
 
     /// Stop the screencast and end the worker.
     pub fn stop(&mut self) {
-        if let Some(worker) = self
-            .worker
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .take()
-        {
+        if let Some(worker) = self.worker.lock().unwrap_or_else(|e| e.into_inner()).take() {
             // The worker ends when the event channel closes, which happens when
             // the transport goes. Joining it here would wait for that, so the
             // thread is left to finish on its own.

@@ -17,10 +17,10 @@
 use std::time::{Duration, Instant};
 
 use headless_chrome::browser::transport::Transport;
-use headless_chrome::protocol::cdp::types::Method;
 use headless_chrome::protocol::cdp::Target;
 use headless_chrome::protocol::cdp::Target::TargetInfo;
 use headless_chrome::protocol::cdp::types::Event;
+use headless_chrome::protocol::cdp::types::Method;
 
 pub mod frame;
 pub mod launch;
@@ -76,7 +76,8 @@ impl Engine {
             Some(url) => {
                 let transport = std::sync::Arc::new(
                     Transport::new(
-                        url::Url::parse(url).map_err(|e| BrowserError::BadEndpoint(e.to_string()))?,
+                        url::Url::parse(url)
+                            .map_err(|e| BrowserError::BadEndpoint(e.to_string()))?,
                         None,
                         Duration::from_secs(20),
                         None,
@@ -153,7 +154,9 @@ impl Engine {
 
     /// Which browser this is.
     pub fn browser(&self) -> Option<String> {
-        self.launched.as_ref().map(|l| l.browser().label().to_string())
+        self.launched
+            .as_ref()
+            .map(|l| l.browser().label().to_string())
     }
 
     /// The port the browser's debugging endpoint is on.
@@ -317,15 +320,13 @@ mod tests {
 
         // A page with something on it, so the frame is not blank.
         engine
-            .call(
-                headless_chrome::protocol::cdp::Page::Navigate {
-                    url: "data:text/html,<body style='background:%23c00'>x</body>".to_string(),
-                    referrer: None,
-                    transition_Type: None,
-                    frame_id: None,
-                    referrer_policy: None,
-                },
-            )
+            .call(headless_chrome::protocol::cdp::Page::Navigate {
+                url: "data:text/html,<body style='background:%23c00'>x</body>".to_string(),
+                referrer: None,
+                transition_Type: None,
+                frame_id: None,
+                referrer_policy: None,
+            })
             .expect("navigate");
         std::thread::sleep(std::time::Duration::from_secs(2));
 
@@ -371,7 +372,10 @@ mod tests {
         assert!(!engine.target_id().is_empty());
         // A page-level call must answer on a live tab.
         let title = engine.evaluate("document.title").expect("evaluate answers");
-        assert!(title.is_empty() || title.len() < 200, "a page title, not a page of text");
+        assert!(
+            title.is_empty() || title.len() < 200,
+            "a page title, not a page of text"
+        );
         drop(engine);
     }
 }

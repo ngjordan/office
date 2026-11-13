@@ -10,8 +10,8 @@
 //! text boxes.
 
 use egui::{
-    Align2, Color32, CornerRadius, FontDefinitions, FontFamily, FontId, Id, Painter, Pos2, Rect, Response,
-    Sense, Stroke, StrokeKind, Style, Ui, Vec2, pos2, vec2,
+    Align2, Color32, CornerRadius, FontDefinitions, FontFamily, FontId, Id, Painter, Pos2, Rect,
+    Response, Sense, Stroke, StrokeKind, Style, Ui, Vec2, pos2, vec2,
 };
 
 /// The chrome's font family name, registered once at startup.
@@ -127,11 +127,7 @@ impl Chrome {
 
     /// The chrome colours for the context's current theme.
     pub fn for_theme(dark: bool) -> Self {
-        if dark {
-            Self::dark()
-        } else {
-            Self::light()
-        }
+        if dark { Self::dark() } else { Self::light() }
     }
 
     /// An egui style that draws the chrome, independent of the active module.
@@ -211,7 +207,9 @@ pub fn install_font(ctx: &egui::Context) {
     chrome.font_data.clear();
     chrome.families.clear();
     for (name, data) in &base.font_data {
-        chrome.font_data.insert(format!("workspace/{name}"), data.clone());
+        chrome
+            .font_data
+            .insert(format!("workspace/{name}"), data.clone());
     }
     let chain = base.families[&FontFamily::Proportional]
         .iter()
@@ -224,13 +222,7 @@ pub fn install_font(ctx: &egui::Context) {
 }
 
 /// A solid app-identity tile with a two-letter mark.
-pub fn accent_tile(
-    painter: &Painter,
-    rect: Rect,
-    mark: &str,
-    accent: Color32,
-    on_accent: Color32,
-) {
+pub fn accent_tile(painter: &Painter, rect: Rect, mark: &str, accent: Color32, on_accent: Color32) {
     painter.rect_filled(rect, CornerRadius::same(6), accent);
     painter.text(
         rect.center(),
@@ -266,9 +258,7 @@ pub fn rail_item(
     let (_, rect) = ui.allocate_space(vec2(68.0, 68.0));
     let response = ui.interact(rect, id, Sense::click());
 
-    response.widget_info(|| {
-        egui::WidgetInfo::selected(egui::Role::Tab, true, active, label)
-    });
+    response.widget_info(|| egui::WidgetInfo::selected(egui::Role::Tab, true, active, label));
 
     let painter = ui.painter();
     let fill = if response.is_pointer_button_down_on() {
@@ -334,14 +324,15 @@ pub fn document_tab(
 ) -> (Response, Response) {
     let (_, rect) = ui.allocate_space(vec2(width.clamp(160.0, 240.0), 36.0));
 
-    let close_rect = Rect::from_min_size(pos2(rect.right() - 30.0, rect.top() + 6.0), vec2(24.0, 24.0));
+    let close_rect = Rect::from_min_size(
+        pos2(rect.right() - 30.0, rect.top() + 6.0),
+        vec2(24.0, 24.0),
+    );
     let body_rect = Rect::from_min_max(rect.min, pos2(close_rect.left(), rect.bottom()));
     let body = ui.interact(body_rect, id, Sense::click());
     let close = ui.interact(close_rect, id.with("close"), Sense::click());
 
-    body.widget_info(|| {
-        egui::WidgetInfo::selected(egui::Role::Tab, true, active, filename)
-    });
+    body.widget_info(|| egui::WidgetInfo::selected(egui::Role::Tab, true, active, filename));
     close.widget_info(|| {
         egui::WidgetInfo::labeled(egui::Role::Button, true, format!("Close {filename}"))
     });
@@ -387,13 +378,15 @@ pub fn document_tab(
         rect.min + vec2(40.0, 0.0),
         pos2(close_rect.left() - 4.0, rect.bottom()),
     );
-    painter.with_clip_rect(text_rect.intersect(ui.clip_rect())).text(
-        text_rect.left_center(),
-        Align2::LEFT_CENTER,
-        filename,
-        font(text::TAB),
-        if active { chrome.text } else { chrome.muted },
-    );
+    painter
+        .with_clip_rect(text_rect.intersect(ui.clip_rect()))
+        .text(
+            text_rect.left_center(),
+            Align2::LEFT_CENTER,
+            filename,
+            font(text::TAB),
+            if active { chrome.text } else { chrome.muted },
+        );
 
     if close.hovered() || close.is_pointer_button_down_on() {
         painter.rect_filled(
@@ -410,7 +403,10 @@ pub fn document_tab(
     let center = close_rect.center();
     for direction in [-1.0_f32, 1.0_f32] {
         let delta = vec2(4.0, 4.0 * direction);
-        painter.line_segment([center - delta, center + delta], Stroke::new(1.5, chrome.muted));
+        painter.line_segment(
+            [center - delta, center + delta],
+            Stroke::new(1.5, chrome.muted),
+        );
     }
 
     if body.has_focus() {
@@ -491,10 +487,19 @@ mod tests {
     #[test]
     fn both_themes_have_readable_text() {
         for chrome in [Chrome::light(), Chrome::dark()] {
-            assert!(contrast(chrome.text, chrome.window) >= 4.5, "text on the window");
+            assert!(
+                contrast(chrome.text, chrome.window) >= 4.5,
+                "text on the window"
+            );
             assert!(contrast(chrome.text, chrome.tab) >= 4.5, "text on a tab");
-            assert!(contrast(chrome.muted, chrome.strip) >= 4.5, "muted text on the strip");
-            assert!(contrast(chrome.on_accent, chrome.brand) >= 4.5, "text on the brand");
+            assert!(
+                contrast(chrome.muted, chrome.strip) >= 4.5,
+                "muted text on the strip"
+            );
+            assert!(
+                contrast(chrome.on_accent, chrome.brand) >= 4.5,
+                "text on the brand"
+            );
         }
     }
 

@@ -52,10 +52,16 @@ impl Browser {
         match self {
             Browser::Brave => vec![
                 PathBuf::from("/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"),
-                PathBuf::from("/Applications/Brave Browser Beta.app/Contents/MacOS/Brave Browser Beta"),
-                PathBuf::from("/Applications/Brave Browser Nightly.app/Contents/MacOS/Brave Browser Nightly"),
+                PathBuf::from(
+                    "/Applications/Brave Browser Beta.app/Contents/MacOS/Brave Browser Beta",
+                ),
+                PathBuf::from(
+                    "/Applications/Brave Browser Nightly.app/Contents/MacOS/Brave Browser Nightly",
+                ),
                 home.join("Applications/Brave Browser.app/Contents/MacOS/Brave Browser"),
-                PathBuf::from(r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"),
+                PathBuf::from(
+                    r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe",
+                ),
                 PathBuf::from("/usr/bin/brave-browser"),
                 PathBuf::from("/usr/bin/brave"),
                 PathBuf::from("/snap/bin/brave"),
@@ -382,11 +388,7 @@ fn read_version(port: u16) -> Option<(String, String)> {
         .into_body();
     // The version payload is a few hundred bytes; cap the read so a
     // misbehaving endpoint cannot make us allocate without bound.
-    let response: String = body
-        .with_config()
-        .limit(64 * 1024)
-        .read_to_string()
-        .ok()?;
+    let response: String = body.with_config().limit(64 * 1024).read_to_string().ok()?;
     let value: serde_json::Value = serde_json::from_str(&response).ok()?;
     let url = value.get("webSocketDebuggerUrl")?.as_str()?;
     // Only ever talk to the browser we started, on the loopback interface.
@@ -426,7 +428,11 @@ fn wait_for_port(
             }));
         }
         if let Ok(text) = std::fs::read_to_string(&port_file) {
-            if let Some(port) = text.lines().next().and_then(|l| l.trim().parse::<u16>().ok()) {
+            if let Some(port) = text
+                .lines()
+                .next()
+                .and_then(|l| l.trim().parse::<u16>().ok())
+            {
                 if port > 0 {
                     return Ok(port);
                 }
@@ -555,7 +561,10 @@ mod tests {
     fn preference_order_and_candidates() {
         assert_eq!(PREFERENCE[0], Browser::Brave);
         for browser in PREFERENCE {
-            assert!(!browser.candidates().is_empty(), "{browser:?} has no candidates");
+            assert!(
+                !browser.candidates().is_empty(),
+                "{browser:?} has no candidates"
+            );
             assert!(!browser.label().is_empty());
         }
     }
@@ -563,10 +572,22 @@ mod tests {
     /// An override path is labelled correctly.
     #[test]
     fn override_is_labelled() {
-        assert_eq!(browser_for(Path::new("/usr/bin/brave-browser")), Browser::Brave);
-        assert_eq!(browser_for(Path::new("/usr/bin/microsoft-edge")), Browser::Edge);
-        assert_eq!(browser_for(Path::new("/opt/google/chrome/chrome")), Browser::Chrome);
-        assert_eq!(browser_for(Path::new("/usr/bin/chromium")), Browser::Chromium);
+        assert_eq!(
+            browser_for(Path::new("/usr/bin/brave-browser")),
+            Browser::Brave
+        );
+        assert_eq!(
+            browser_for(Path::new("/usr/bin/microsoft-edge")),
+            Browser::Edge
+        );
+        assert_eq!(
+            browser_for(Path::new("/opt/google/chrome/chrome")),
+            Browser::Chrome
+        );
+        assert_eq!(
+            browser_for(Path::new("/usr/bin/chromium")),
+            Browser::Chromium
+        );
     }
 
     /// Launching works when a browser is installed, and the child is cleaned up.
@@ -580,7 +601,8 @@ mod tests {
         };
         // Its own profile: another test may be running a browser at the same
         // time, and Chromium will not start twice on one profile.
-        let profile = private_profile_dir(&format!("test-{}", std::process::id())).expect("profile");
+        let profile =
+            private_profile_dir(&format!("test-{}", std::process::id())).expect("profile");
         let launched = launch_in(Some(profile)).expect("the browser starts");
         assert!(launched.port() > 0);
         assert!(launched.ws_url.contains("127.0.0.1"));
