@@ -1,4 +1,4 @@
-//! The Office suite: six apps in one window.
+//! The Office suite: nine apps in one window.
 //!
 //! The binary in `main.rs` is a thin wrapper over this library.
 

@@ -16,7 +16,7 @@ set -euo pipefail
 # shellcheck source=../env.sh
 . "$(dirname "${BASH_SOURCE[0]}")/../env.sh"
 HERE="$ROOT/packaging/macos"
-# The five apps come in through ../office-vendor; the script creates it if it is missing.
+# The nine apps come in through ../office-vendor; the script creates it if it is missing.
 "$ROOT/packaging/setup-vendor.sh"
 
 # The app's name and id live in one file, so renaming the suite does not touch this script.

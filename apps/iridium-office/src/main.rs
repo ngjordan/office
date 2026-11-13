@@ -1,4 +1,4 @@
-//! The suite binary: one window, six apps.
+//! The suite binary: one window, nine apps.
 //!
 //! eframe 0.37's `App` trait splits the frame into `logic(ctx, frame)` and `ui(ui, frame)`,
 //! so the suite's own frame order is:

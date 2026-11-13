@@ -5,7 +5,7 @@
 #   $DIST/iridium-office-<version>-linux-<arch>.rpm     Fedora, openSUSE, RHEL, ...
 #   $DIST/iridium-office-<version>-linux-<arch>.tar.gz  plain FHS-style tree (bin/, share/)
 #
-# The suite is one binary that hosts all five apps, so this is the PDF app's script with its
+# The suite is one binary that hosts all nine apps, so this is the PDF app's script with its
 # extra binaries and its own app id dropped.
 #
 # Usage: packaging/linux/package.sh [--skip-build] [--formats "deb rpm tar"]
@@ -17,7 +17,7 @@ set -euo pipefail
 # shellcheck source=../env.sh
 . "$(dirname "${BASH_SOURCE[0]}")/../env.sh"
 HERE="$ROOT/packaging/linux"
-# The five apps come in through ../office-vendor; the script creates it if it is missing.
+# The nine apps come in through ../office-vendor; the script creates it if it is missing.
 "$ROOT/packaging/setup-vendor.sh"
 # The app's name and id live in one file, so renaming the suite does not touch this script.
 # shellcheck source=../../branding/brand.env
