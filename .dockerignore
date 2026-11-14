@@ -1,0 +1,18 @@
+# The build context for the suite's container image.
+#
+# The image builds the wasm itself, so it needs the sources and nothing else.
+# Without this, the 53 GB target/ directory is uploaded to the daemon on every
+# build and the copy step takes forever.
+target/
+dist/
+.git/
+.github/
+
+# The vendor tree is a set of symlinks to the apps' own checkouts, which the
+# image clones for itself: a symlink into the build context would be broken
+# there.
+office-vendor/
+
+# Editor and OS noise.
+*.swp
+.DS_Store
