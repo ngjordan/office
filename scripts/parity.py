@@ -471,8 +471,14 @@ def measure(app: str, repo: Path) -> dict:
     tiers: dict[str, dict] = {}
     for row in catalogue:
         tier = str(row.get("tier") or "all").strip()
-        if tier in ("NA", "N/A"):
+        # The apps use "NA" and "N/A" for out-of-scope rows, and P3 for the
+        # lowest tier. Normalise the spelling so a row is never lost to a
+        # spelling difference: P3 is a tier like P2, and both spellings of NA
+        # mean out of scope.
+        if tier.upper() in ("NA", "N/A"):
             tier = "NA"
+        elif tier.upper() == "P3":
+            tier = "P2"
         bucket = tiers.setdefault(tier, {
             "applicable": 0, "works": 0, "partial": 0, "broken": 0,
             "unaudited": 0, "stale": 0, "wired": 0, "na": 0,
@@ -593,6 +599,32 @@ def orphans(app: str, repo: Path) -> tuple[list[dict], list[str]]:
             cited.add(str(cid))
     uncited = sorted(registry - cited) if registry else []
     return missing, uncited
+
+
+def absent_but_registered(app: str, repo: Path) -> list[tuple[str, str]]:
+    """Verdicts of ABSENT whose command id IS in the registry.
+
+    This is a WARNING, not an error. A registered command whose handler does
+    not do the work is exactly what ABSENT means: Docs' `references.researcher`
+    is registered and its handler only reports that Researcher needs an
+    online service. The registry proves registration, not behaviour — which
+    is the whole reason the verdict layer exists — so a row can be ABSENT and
+    registered at the same time.
+
+    It is worth surfacing because a registered id with an ABSENT verdict is
+    usually a stub, and a stub is work to do.
+    """
+    out = []
+    registry = load_registry(app, repo)
+    if not registry:
+        return out
+    for key, verdict in load_verdicts(app, repo).items():
+        if str(verdict.get("verdict", "")).upper() != "ABSENT":
+            continue
+        for cid in verdict.get("commands", []) or []:
+            if str(cid) in registry:
+                out.append((key, str(cid)))
+    return out
 
 
 def bad_evidence(app: str, repo: Path) -> list[tuple[str, str]]:
@@ -870,6 +902,10 @@ def main() -> int:
                     warnings.append(message + " (registry scan is not complete; not failing)")
             for key, path in bad_evidence(app, repo):
                 failures.append(f"{app}: verdict {key} cites {path}, which does not exist")
+            for key, cid in absent_but_registered(app, repo):
+                warnings.append(
+                    f"{app}: verdict {key} is ABSENT but {cid} is registered; "
+                    "that is a stub, and stubs are work to do")
             for hit in stray_percentages(repo):
                 failures.append(f"{app}: a parity number is typed at {hit}; the number belongs in the generated file")
 
