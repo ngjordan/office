@@ -9,9 +9,9 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 | **Sheets** | Excel (Microsoft 365) | 294 | 280 (95.2 %) | 6 (2.0 %) | 8 (2.7 %) | **0 (0.0 %)** | 278 (94.6 %) |
 | **Docs** | Word | 518 | 494 (95.4 %) | 9 (1.7 %) | 15 (2.9 %) | **0 (0.0 %)** | 505 (97.5 %) |
 | **Decks** | PowerPoint | 191 | 126 (66.0 %) | 57 (29.8 %) | 8 (4.2 %) | **0 (0.0 %)** | 152 (79.6 %) |
-| **PDF** | Acrobat Pro | 834 | 475 (57.0 %) | 163 (19.5 %) | 196 (23.5 %) | **0 (0.0 %)** | 433 (51.9 %) |
+| **PDF** | Acrobat Pro | 834 | 475 (57.0 %) | 164 (19.7 %) | 195 (23.4 %) | **0 (0.0 %)** | 433 (51.9 %) |
 | **CAD** | AutoCAD | 75 | 47 (62.7 %) | 17 (22.7 %) | 11 (14.7 %) | **0 (0.0 %)** | 55 (73.3 %) |
-| **Mail** | Outlook | 1569 | 1559 (99.4 %) | 10 (0.6 %) | 0 (0.0 %) | **0 (0.0 %)** | 1569 (100.0 %) |
+| **Mail** | Outlook | 1569 | 1560 (99.4 %) | 9 (0.6 %) | 0 (0.0 %) | **0 (0.0 %)** | 1569 (100.0 %) |
 | **Photos** | Photoshop | 50 | 26 (52.0 %) | 18 (36.0 %) | 6 (12.0 %) | **0 (0.0 %)** | 24 (48.0 %) |
 | **Film** | Premiere Pro | 125 | 82 (65.6 %) | 31 (24.8 %) | 12 (9.6 %) | **0 (0.0 %)** | 92 (73.6 %) |
 | **Light** | Lightroom | 546 | 419 (76.7 %) | 72 (13.2 %) | 55 (10.1 %) | **0 (0.0 %)** | 248 (45.4 %) |
@@ -64,10 +64,10 @@ Catalogue rows: 191. Verdicts recorded: 191. Registry ids: 427.
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 252 | 228 (90.5 %) | 22 (8.7 %) | 2 (0.8 %) | **0 (0.0 %)** | 181 (71.8 %) | 0 |
 | P1 | 335 | 193 (57.6 %) | 86 (25.7 %) | 56 (16.7 %) | **0 (0.0 %)** | 202 (60.3 %) | 0 |
-| P2 | 247 | 54 (21.9 %) | 55 (22.3 %) | 138 (55.9 %) | **0 (0.0 %)** | 50 (20.2 %) | 0 |
+| P2 | 247 | 54 (21.9 %) | 56 (22.7 %) | 137 (55.5 %) | **0 (0.0 %)** | 50 (20.2 %) | 0 |
 | NA | 0 | — | — | — | **—** | — | 0 |
 
-**Catalogue coverage:** 638 (76.5 %) of 834 rows are works or partial; 475 (57.0 %) works outright; **0 (0.0 %) unaudited**.
+**Catalogue coverage:** 639 (76.6 %) of 834 rows are works or partial; 475 (57.0 %) works outright; **0 (0.0 %) unaudited**.
 
 **Evidence:** 692 verdict(s) rest on a handler that was read; 142 rest on the command being registered only.
 
@@ -91,9 +91,9 @@ Catalogue rows: 75. Verdicts recorded: 75. Registry ids: 461.
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 224 | 224 (100.0 %) | 0 (0.0 %) | 0 (0.0 %) | **0 (0.0 %)** | 224 (100.0 %) | 0 |
 | P1 | 1025 | 1025 (100.0 %) | 0 (0.0 %) | 0 (0.0 %) | **0 (0.0 %)** | 1025 (100.0 %) | 0 |
-| P2 | 320 | 310 (96.9 %) | 10 (3.1 %) | 0 (0.0 %) | **0 (0.0 %)** | 320 (100.0 %) | 0 |
+| P2 | 320 | 311 (97.2 %) | 9 (2.8 %) | 0 (0.0 %) | **0 (0.0 %)** | 320 (100.0 %) | 0 |
 
-**Catalogue coverage:** 1569 (100.0 %) of 1569 rows are works or partial; 1559 (99.4 %) works outright; **0 (0.0 %) unaudited**.
+**Catalogue coverage:** 1569 (100.0 %) of 1569 rows are works or partial; 1560 (99.4 %) works outright; **0 (0.0 %) unaudited**.
 
 **Evidence:** 1569 verdict(s) rest on a handler that was read; 0 rest on the command being registered only.
 
