@@ -9,7 +9,7 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 | **Sheets** | Excel (Microsoft 365) | 294 | 272 (92.5 %) | 14 (4.8 %) | 8 (2.7 %) | **0 (0.0 %)** | 278 (94.6 %) |
 | **Docs** | Word | 518 | 492 (95.0 %) | 11 (2.1 %) | 15 (2.9 %) | **0 (0.0 %)** | 505 (97.5 %) |
 | **Decks** | PowerPoint | 191 | 126 (66.0 %) | 57 (29.8 %) | 8 (4.2 %) | **0 (0.0 %)** | 152 (79.6 %) |
-| **PDF** | Acrobat Pro | 834 | 468 (56.1 %) | 129 (15.5 %) | 46 (5.5 %) | **191 (22.9 %)** | 0 (0.0 %) |
+| **PDF** | Acrobat Pro | 834 | 473 (56.7 %) | 150 (18.0 %) | 175 (21.0 %) | **36 (4.3 %)** | 0 (0.0 %) |
 | **CAD** | AutoCAD | 75 | 47 (62.7 %) | 17 (22.7 %) | 11 (14.7 %) | **0 (0.0 %)** | 55 (73.3 %) |
 | **Mail** | Outlook | 1569 | 1559 (99.4 %) | 10 (0.6 %) | 0 (0.0 %) | **0 (0.0 %)** | 1569 (100.0 %) |
 | **Photos** | Photoshop | 50 | 26 (52.0 %) | 18 (36.0 %) | 6 (12.0 %) | **0 (0.0 %)** | 24 (48.0 %) |
@@ -62,14 +62,14 @@ Catalogue rows: 191. Verdicts recorded: 191. Registry ids: 427.
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P0 | 252 | 228 (90.5 %) | 21 (8.3 %) | 1 (0.4 %) | **2 (0.8 %)** | 0 (0.0 %) | 0 |
-| P1 | 335 | 193 (57.6 %) | 75 (22.4 %) | 24 (7.2 %) | **43 (12.8 %)** | 0 (0.0 %) | 0 |
-| P2 | 247 | 47 (19.0 %) | 33 (13.4 %) | 21 (8.5 %) | **146 (59.1 %)** | 0 (0.0 %) | 0 |
+| P0 | 252 | 228 (90.5 %) | 22 (8.7 %) | 1 (0.4 %) | **1 (0.4 %)** | 0 (0.0 %) | 0 |
+| P1 | 335 | 193 (57.6 %) | 81 (24.2 %) | 54 (16.1 %) | **7 (2.1 %)** | 0 (0.0 %) | 0 |
+| P2 | 247 | 52 (21.1 %) | 47 (19.0 %) | 120 (48.6 %) | **28 (11.3 %)** | 0 (0.0 %) | 0 |
 | NA | 0 | — | — | — | **—** | — | 0 |
 
-**Catalogue coverage:** 597 (71.6 %) of 834 rows are works or partial; 468 (56.1 %) works outright; **191 (22.9 %) unaudited**.
+**Catalogue coverage:** 623 (74.7 %) of 834 rows are works or partial; 473 (56.7 %) works outright; **36 (4.3 %) unaudited**.
 
-**Evidence:** 558 verdict(s) rest on a handler that was read; 276 rest on the command being registered only.
+**Evidence:** 669 verdict(s) rest on a handler that was read; 165 rest on the command being registered only.
 
 Catalogue rows: 857. Verdicts recorded: 857. Registry ids: 67.
 
