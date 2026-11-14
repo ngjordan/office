@@ -5,3 +5,7 @@
 # not part of it.
 vendor/
 /dist
+
+# Python bytecode: the local worker imports scripts/parity.py, which writes here.
+__pycache__/
+*.pyc
