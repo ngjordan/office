@@ -12,7 +12,7 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 | **PDF** | Acrobat Pro | 834 | 475 (57.0 %) | 164 (19.7 %) | 195 (23.4 %) | **0 (0.0 %)** | 433 (51.9 %) |
 | **CAD** | AutoCAD | 75 | 47 (62.7 %) | 17 (22.7 %) | 11 (14.7 %) | **0 (0.0 %)** | 55 (73.3 %) |
 | **Mail** | Outlook | 1569 | 1560 (99.4 %) | 9 (0.6 %) | 0 (0.0 %) | **0 (0.0 %)** | 1569 (100.0 %) |
-| **Photos** | Photoshop | 50 | 26 (52.0 %) | 18 (36.0 %) | 6 (12.0 %) | **0 (0.0 %)** | 24 (48.0 %) |
+| **Photos** | Photoshop | 49 | 26 (53.1 %) | 18 (36.7 %) | 5 (10.2 %) | **0 (0.0 %)** | 24 (49.0 %) |
 | **Film** | Premiere Pro | 125 | 84 (67.2 %) | 31 (24.8 %) | 10 (8.0 %) | **0 (0.0 %)** | 92 (73.6 %) |
 | **Light** | Lightroom | 546 | 420 (76.9 %) | 72 (13.2 %) | 54 (9.9 %) | **0 (0.0 %)** | 248 (45.4 %) |
 
@@ -103,11 +103,11 @@ Catalogue rows: 1698. Verdicts recorded: 1698. Registry ids: 1011.
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P2 | 50 | 26 (52.0 %) | 18 (36.0 %) | 6 (12.0 %) | **0 (0.0 %)** | 24 (48.0 %) | 0 |
+| P2 | 49 | 26 (53.1 %) | 18 (36.7 %) | 5 (10.2 %) | **0 (0.0 %)** | 24 (49.0 %) | 0 |
 
-**Catalogue coverage:** 44 (88.0 %) of 50 rows are works or partial; 26 (52.0 %) works outright; **0 (0.0 %) unaudited**.
+**Catalogue coverage:** 44 (89.8 %) of 49 rows are works or partial; 26 (53.1 %) works outright; **0 (0.0 %) unaudited**.
 
-**Evidence:** 50 verdict(s) rest on a handler that was read; 0 rest on the command being registered only.
+**Evidence:** 49 verdict(s) rest on a handler that was read; 0 rest on the command being registered only.
 
 Catalogue rows: 52. Verdicts recorded: 52. Registry ids: 862.
 
