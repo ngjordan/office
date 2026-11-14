@@ -32,12 +32,19 @@
     // The suite draws once it is ready; until then the page says what it is
     // waiting for. A browser whose WebGPU adapter will not start is retried
     // with WebGL2, which is what most browsers need.
+    // The module is tens of megabytes, so on a slow link it is still
+    // downloading long after the page has loaded. This message must not
+    // guess at a cause: the app hides it when it draws, and the app itself
+    // says what went wrong if it cannot start, so this only reports what
+    // is actually happening.
     window.addEventListener("load", function () {
       setTimeout(function () {
         var el = document.getElementById("workspace_status");
         // textContent, not innerHTML: the message is a fixed string, and
         // there is no reason to hand the page a parser.
-        if (el) el.textContent = "Loading Workspace. If this stays here, the browser could not start WebGPU. Add ?webgl to the URL.";
+        if (el && !el.hasAttribute("hidden")) {
+          el.textContent = "Still downloading Workspace… it is a large download, so this can take a few minutes on a slow connection.";
+        }
       }, 8000);
     });
   </script>
