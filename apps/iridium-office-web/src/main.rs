@@ -1,28 +1,13 @@
-//! Workspace in the browser.
+//! Workspace in the browser: the desktop stub.
 //!
-//! The same suite as the desktop app: nine apps in one window. It runs on
-//! eframe's web runner (wgpu: WebGPU where available, WebGL2 otherwise).
-//! Build with `trunk build --release` from this directory; the site lands in
-//! `dist/web`.
-//!
-//! What differs from the desktop app, and why:
-//!
-//! - The embedded browser is not there. It drives an installed Chromium over
-//!   the DevTools Protocol, which needs a child process and a WebSocket; a
-//!   browser tab cannot spawn either. The rail shows the eight editors.
-//! - Files come from the browser's file picker and go back as downloads. The
-//!   desktop suite reads and writes the file system directly; here the same
-//!   engine sits behind the app's own file service, so the apps that already
-//!   have a web build (Docs, Film) keep their behaviour and the others open
-//!   an empty document until they are given one.
-//! - Preferences live in `localStorage`.
-
-#[cfg(target_arch = "wasm32")]
-mod web;
+//! The browser build is the library's `#[wasm_bindgen(start)]` function,
+//! which wasm-bindgen calls when the module is instantiated. This binary
+//! exists because Trunk builds a named binary target, and it calls the same
+//! entry point so there is one place that starts the suite.
 
 #[cfg(target_arch = "wasm32")]
 fn main() {
-    web::start();
+    iridium_office_web::start();
 }
 
 #[cfg(not(target_arch = "wasm32"))]

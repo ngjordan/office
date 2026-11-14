@@ -9,6 +9,16 @@ publish = false
 [lints]
 workspace = true
 
+# A cdylib, not a binary: wasm-bindgen calls the `#[wasm_bindgen(start)]`
+# function when the module is instantiated. A binary exports `main` but
+# nothing calls it, so the suite would never start in the browser.
+[lib]
+name = "iridium_office_web"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+# Trunk builds a named binary target, and the binary calls the library's
+# entry point, so the suite is started in one place.
 [[bin]]
 name = "iridium-office-web"
 path = "src/main.rs"
