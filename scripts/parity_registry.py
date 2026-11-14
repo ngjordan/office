@@ -71,6 +71,19 @@ APPS = {
 # found — inside a registration call — not on the strength of its shape.
 ID = re.compile(r"^-?[A-Za-z0-9][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)*$")
 
+# The extensions a fixture or a document name ends in. A command id never
+# ends in one of these: the namespaced form is `area.action`.
+FILE_EXTENSIONS = {
+    "pdf", "xml", "json", "csv", "tsv", "txt", "html", "htm", "png", "jpg",
+    "jpeg", "gif", "svg", "webp", "bmp", "tif", "tiff", "zip", "gz", "tar",
+    "pdfa", "docx", "doc", "xlsx", "xls", "pptx", "ppt", "odt", "ods", "odp",
+    "xfdf", "jpg2", "jp2", "jfif", "heic", "heif", "avif", "dcm", "ini",
+    "cfg", "conf", "yaml", "yml", "toml", "log", "md", "rtf", "eml", "mbox",
+    "icc", "icm", "cur", "dsf", "psd", "psb", "indd", "cr2", "cr3", "nef",
+    "arw", "dng", "raf", "orf", "rw2", "pef", "srw", "gifv", "m4a", "m4v",
+    "mp3", "mp4", "mov", "wav", "aif", "aiff", "mkv", "webm", "avi", "flv",
+}
+
 # An id with a dot is namespaced and is certainly a command id.
 
 # A bare word that also has to look like a command rather than a file, for
@@ -113,6 +126,12 @@ PATTERNS = (
 # itself and only those calls are matched.
 CLOSURE = re.compile(r"\blet\s+([a-z_][a-z0-9_]*)\s*=\s*\|[^|]*\bid\b[^|]*\|")
 
+# A builder written as a function rather than a closure:
+#     const fn c(id: &'static str, label: &'static str, ...) -> CommandSpec
+CONST_FN = re.compile(
+    r"\bconst\s+fn\s+([a-z_][a-z0-9_]*)\s*\(\s*id\s*:\s*&"
+)
+
 # Files that hold no registry: tests, benches, examples.
 SKIP = re.compile(
     r"(^|/)(tests?|benches|examples|fixtures?)/|_test\.rs$|/tests\.rs$|test_[^/]*\.rs$"
@@ -133,7 +152,14 @@ def looks_like_an_id(value: str, strict: bool = True) -> bool:
     # command names are longer than that.
     if len(value) < 3 and "." not in value:
         return False
-    if "." in value or "-" in value:
+    # A namespaced id is certainly a command id -- but only if the last
+    # segment is not a file extension. "a.pdf", "camera.jpg" and "l1.xml" are
+    # fixtures, not commands, and a registry full of them is worse than no
+    # registry: every lookup misses and the row looks broken.
+    if "." in value:
+        tail = value.rsplit(".", 1)[1].lower()
+        return tail not in FILE_EXTENSIONS
+    if "-" in value:
         return True
     if not strict:
         return True
@@ -157,6 +183,16 @@ def collect(repo: Path) -> list[str]:
 
         patterns = list(PATTERNS)
         for name in set(CLOSURE.findall(text)):
+            patterns.append((
+                re.compile(r"\b" + re.escape(name) +
+                           r"\s*\(\s*\"([^\"]+)\"\s*,"),
+                False,
+            ))
+
+        # A `const fn` builder takes its id as the first string argument, the
+        # same way a closure does. Find the builders by their own signature
+        # and match the calls.
+        for name in set(CONST_FN.findall(text)):
             patterns.append((
                 re.compile(r"\b" + re.escape(name) +
                            r"\s*\(\s*\"([^\"]+)\"\s*,"),

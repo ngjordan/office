@@ -9,7 +9,7 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 | **Sheets** | Excel (Microsoft 365) | 294 | 272 (92.5 %) | 14 (4.8 %) | 8 (2.7 %) | **0 (0.0 %)** | 278 (94.6 %) |
 | **Docs** | Word | 518 | 492 (95.0 %) | 11 (2.1 %) | 15 (2.9 %) | **0 (0.0 %)** | 505 (97.5 %) |
 | **Decks** | PowerPoint | 191 | 126 (66.0 %) | 57 (29.8 %) | 8 (4.2 %) | **0 (0.0 %)** | 152 (79.6 %) |
-| **PDF** | Acrobat Pro | 834 | 475 (57.0 %) | 163 (19.5 %) | 196 (23.5 %) | **0 (0.0 %)** | 0 (0.0 %) |
+| **PDF** | Acrobat Pro | 834 | 475 (57.0 %) | 163 (19.5 %) | 196 (23.5 %) | **0 (0.0 %)** | 433 (51.9 %) |
 | **CAD** | AutoCAD | 75 | 47 (62.7 %) | 17 (22.7 %) | 11 (14.7 %) | **0 (0.0 %)** | 55 (73.3 %) |
 | **Mail** | Outlook | 1569 | 1559 (99.4 %) | 10 (0.6 %) | 0 (0.0 %) | **0 (0.0 %)** | 1569 (100.0 %) |
 | **Photos** | Photoshop | 50 | 26 (52.0 %) | 18 (36.0 %) | 6 (12.0 %) | **0 (0.0 %)** | 24 (48.0 %) |
@@ -28,7 +28,7 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 
 **Evidence:** 262 verdict(s) rest on a handler that was read; 32 rest on the command being registered only.
 
-Catalogue rows: 302. Verdicts recorded: 302. Registry ids: 403.
+Catalogue rows: 302. Verdicts recorded: 302. Registry ids: 402.
 
 ### Docs — vs Word
 
@@ -42,7 +42,7 @@ Catalogue rows: 302. Verdicts recorded: 302. Registry ids: 403.
 
 **Evidence:** 518 verdict(s) rest on a handler that was read; 0 rest on the command being registered only.
 
-Catalogue rows: 520. Verdicts recorded: 520. Registry ids: 677.
+Catalogue rows: 520. Verdicts recorded: 520. Registry ids: 895.
 
 ### Decks — vs PowerPoint
 
@@ -62,16 +62,16 @@ Catalogue rows: 191. Verdicts recorded: 191. Registry ids: 427.
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P0 | 252 | 228 (90.5 %) | 22 (8.7 %) | 2 (0.8 %) | **0 (0.0 %)** | 0 (0.0 %) | 0 |
-| P1 | 335 | 193 (57.6 %) | 86 (25.7 %) | 56 (16.7 %) | **0 (0.0 %)** | 0 (0.0 %) | 0 |
-| P2 | 247 | 54 (21.9 %) | 55 (22.3 %) | 138 (55.9 %) | **0 (0.0 %)** | 0 (0.0 %) | 0 |
+| P0 | 252 | 228 (90.5 %) | 22 (8.7 %) | 2 (0.8 %) | **0 (0.0 %)** | 181 (71.8 %) | 0 |
+| P1 | 335 | 193 (57.6 %) | 86 (25.7 %) | 56 (16.7 %) | **0 (0.0 %)** | 202 (60.3 %) | 0 |
+| P2 | 247 | 54 (21.9 %) | 55 (22.3 %) | 138 (55.9 %) | **0 (0.0 %)** | 50 (20.2 %) | 0 |
 | NA | 0 | — | — | — | **—** | — | 0 |
 
 **Catalogue coverage:** 638 (76.5 %) of 834 rows are works or partial; 475 (57.0 %) works outright; **0 (0.0 %) unaudited**.
 
 **Evidence:** 692 verdict(s) rest on a handler that was read; 142 rest on the command being registered only.
 
-Catalogue rows: 857. Verdicts recorded: 857. Registry ids: 67.
+Catalogue rows: 857. Verdicts recorded: 857. Registry ids: 225.
 
 ### CAD — vs AutoCAD
 
@@ -83,7 +83,7 @@ Catalogue rows: 857. Verdicts recorded: 857. Registry ids: 67.
 
 **Evidence:** 28 verdict(s) rest on a handler that was read; 47 rest on the command being registered only.
 
-Catalogue rows: 75. Verdicts recorded: 75. Registry ids: 463.
+Catalogue rows: 75. Verdicts recorded: 75. Registry ids: 461.
 
 ### Mail — vs Outlook
 
@@ -97,7 +97,7 @@ Catalogue rows: 75. Verdicts recorded: 75. Registry ids: 463.
 
 **Evidence:** 1569 verdict(s) rest on a handler that was read; 0 rest on the command being registered only.
 
-Catalogue rows: 1698. Verdicts recorded: 1698. Registry ids: 971.
+Catalogue rows: 1698. Verdicts recorded: 1698. Registry ids: 1011.
 
 ### Photos — vs Photoshop
 
@@ -109,7 +109,7 @@ Catalogue rows: 1698. Verdicts recorded: 1698. Registry ids: 971.
 
 **Evidence:** 50 verdict(s) rest on a handler that was read; 0 rest on the command being registered only.
 
-Catalogue rows: 52. Verdicts recorded: 52. Registry ids: 867.
+Catalogue rows: 52. Verdicts recorded: 52. Registry ids: 862.
 
 ### Film — vs Premiere Pro
 
@@ -124,7 +124,7 @@ Catalogue rows: 52. Verdicts recorded: 52. Registry ids: 867.
 
 **Evidence:** 104 verdict(s) rest on a handler that was read; 21 rest on the command being registered only.
 
-Catalogue rows: 127. Verdicts recorded: 127. Registry ids: 695.
+Catalogue rows: 127. Verdicts recorded: 127. Registry ids: 693.
 
 ### Light — vs Lightroom
 
@@ -139,4 +139,4 @@ Catalogue rows: 127. Verdicts recorded: 127. Registry ids: 695.
 
 **Evidence:** 546 verdict(s) rest on a handler that was read; 0 rest on the command being registered only.
 
-Catalogue rows: 581. Verdicts recorded: 581. Registry ids: 443.
+Catalogue rows: 581. Verdicts recorded: 581. Registry ids: 435.
