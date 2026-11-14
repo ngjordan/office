@@ -20,11 +20,6 @@ pub fn start() {
         return;
     }
 
-    let Some(canvas) = canvas() else {
-        log::error!("no <canvas id=\"{CANVAS_ID}\"> on the page");
-        return;
-    };
-
     let mut web_options = eframe::WebOptions::default();
     // `?webgl` forces WebGL2 for a browser whose WebGPU adapter will not
     // start. The page reloads with it when the first attempt fails.
@@ -41,6 +36,18 @@ pub fn start() {
     // inside the task: it has to outlive the start, and the future borrows
     // it.
     wasm_bindgen_futures::spawn_local(async move {
+        // The page's canvas may not exist yet: Trunk puts the module script
+        // in the head, so the module is instantiated before the body has
+        // been parsed. Waiting for the DOM is what makes the lookup work.
+        wait_for_dom().await;
+        let Some(canvas) = canvas() else {
+            log::error!("no <canvas id=\"{CANVAS_ID}\"> on the page");
+            if let Some(el) = status_element() {
+                el.set_text_content(Some("The page has no canvas for the suite to draw on."));
+            }
+            return;
+        };
+
         let runner = eframe::WebRunner::new();
         let start = runner.start(
             canvas,
@@ -107,6 +114,24 @@ impl eframe::App for App {
     fn on_exit(&mut self) {
         self.suite.save_state();
     }
+}
+
+/// Wait until the page's body is parsed.
+///
+/// Trunk puts the module script in the head, so the module is instantiated
+/// while the body is still empty and the canvas is not there yet.
+async fn wait_for_dom() {
+    let Some(window) = web_sys::window() else { return };
+    let Some(document) = window.document() else { return };
+    if document.ready_state() != "loading" {
+        return;
+    }
+    // The window's load event fires when the document has been parsed.
+    let promise = js_sys::Promise::new(&mut |resolve, _reject| {
+        let _ = window.set_onload(Some(&resolve));
+    });
+    let _ = wasm_bindgen_futures::JsFuture::from(promise).await;
+    let _ = window.set_onload(None);
 }
 
 /// The canvas the page made for us.
