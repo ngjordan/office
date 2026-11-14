@@ -42,7 +42,16 @@ WORKDIR /src
 # The deployment sends only this Dockerfile: the build context is empty, so
 # there is nothing to copy. That also keeps the build small: the workspace's
 # own tree is 53 GB with its build cache, and none of it belongs in an image.
-RUN git clone --depth 1 https://github.com/ngjordan/office.git /src
+#
+# The commit is an ARGUMENT, and that matters: a layer is cached by its
+# command and the tree before it, so a fixed branch name would be cached for
+# ever and every deployment would serve the build from whenever it was first
+# made. The argument makes the layer change with the commit.
+ARG COMMIT=HEAD
+RUN git clone --depth 1 https://github.com/ngjordan/office.git /src \
+    && cd /src \
+    && git fetch --depth 1 origin "$COMMIT" \
+    && git checkout FETCH_HEAD
 
 # The apps are cloned beside the suite, and the vendor tree points at them.
 # The clone list is the one in packaging/setup-vendor.sh.

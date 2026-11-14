@@ -52,27 +52,61 @@ pub fn start() {
             return;
         };
 
+        // WebGPU where the browser has a GPU, WebGL2 where it does not.
+        //
+        // The retry is not only for a browser without WebGPU at all: a
+        // browser can have it and still fail to get an adapter (Linux
+        // Chrome without Vulkan), and the app must start either way.
         let runner = eframe::WebRunner::new();
-        let start = runner.start(
-            canvas,
-            web_options,
-            Box::new(move |cc| {
-                Ok(Box::new(App {
-                    suite: Suite::new(Vec::new()),
-                    _cc: cc.egui_ctx.clone(),
-                    drawn: false,
-                }))
-            }),
-        );
+        let start = runner.start(canvas.clone(), web_options, Box::new(make_app));
         if let Err(e) = start.await {
-            log::error!("the suite did not start: {e:?}");
-            if let Some(el) = status_element() {
-                el.set_text_content(Some(
-                    "The suite did not start in this browser. Try Chrome, Edge or Firefox with WebGPU, or add ?webgl to the URL.",
-                ));
+            log::warn!("WebGPU did not start ({e:?}); trying WebGL2");
+            // A canvas holds one context type for ever, and the failed
+            // attempt has already taken this one, so the fallback draws on
+            // a new element.
+            let Some(canvas) = fresh_canvas() else {
+                log::error!("no canvas to fall back to");
+                return;
+            };
+            let mut options = eframe::WebOptions::default();
+            if let eframe::egui_wgpu::WgpuSetup::CreateNew(c) = &mut options.wgpu_options.wgpu_setup {
+                c.instance_descriptor.backends = eframe::wgpu::Backends::GL;
+            }
+            let runner = eframe::WebRunner::new();
+            if let Err(e) = runner.start(canvas, options, Box::new(make_app)).await {
+                log::error!("the suite did not start: {e:?}");
+                if let Some(el) = status_element() {
+                    el.set_text_content(Some(
+                        "The suite did not start in this browser. It needs WebGPU or WebGL2.",
+                    ));
+                }
             }
         }
     });
+}
+
+/// The app the runner owns.
+///
+/// A function, not a closure, so the WebGL2 fallback can have its own.
+fn make_app(
+    cc: &eframe::CreationContext<'_>,
+) -> Result<Box<dyn eframe::App>, Box<dyn std::error::Error + Send + Sync>> {
+    Ok(Box::new(App {
+        suite: Suite::new(Vec::new()),
+        _cc: cc.egui_ctx.clone(),
+        drawn: false,
+    }))
+}
+
+/// A new canvas to draw on, in place of the one the failed attempt took.
+fn fresh_canvas() -> Option<web_sys::HtmlCanvasElement> {
+    use wasm_bindgen::JsCast as _;
+    let old = canvas()?;
+    // A shallow copy: the canvas has no children, and the attributes (the
+    // id, the style) are what the app needs.
+    let new: web_sys::HtmlCanvasElement = old.clone_node().ok()?.dyn_into().ok()?;
+    old.parent_node()?.replace_child(&new, &old).ok()?;
+    Some(new)
 }
 
 /// The suite's own state, owned by eframe.
