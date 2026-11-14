@@ -342,9 +342,12 @@ This is the same list `parity.py --check` prints as "ABSENT but ... is registere
 
 Step 2. For EACH candidate (at most 15 per run; leave the rest for the next run and say so):
 0. Read the verdict's `title` and `note` FIRST and write down the SPECIFIC thing it says is missing. You cannot judge the row without that. The note is a CLAIM; the code is the EVIDENCE. Judge the code against the specific item, not against the command's name.
-1. Take the first evidence entry, split `path:line`. If it has no line, search the file for the command id: `grep -n "<commandId>" <path>`.
+1. Take the first entry of the verdict's **`evidence` field**, split `path:line`. If it has no line, search THAT file for the command id: `grep -n "<commandId>" <path>`.
+   - The **`evidence` field is the only source of the file:line.** The `note` often quotes a gap document (`docs/gaps.md:237`), which is prose ABOUT the gap, not the handler. If the path you are about to open starts with `docs/`, you took it from the note: take the `evidence` field's path instead. A row whose evidence is `crates/engine/src/masks.rs:209` is judged at `masks.rs:209`, whatever the note says.
+   - The note is for WHAT is missing (step 0), never for WHERE to look.
 2. Check the file exists (`os.path.exists`). If not, mark the candidate `evidence missing` and move on.
 3. Read about 30 lines around that line with `read_file` (offset = line - 10, limit = 30). Read the handler only. Do not follow imports.
+   - Judge the LINE, not the doc comment above it. A function whose doc comment says "decoders" can contain an encoder registration (`filmcraft_export::register_encoder(nvenc::export::factory)` inside `register()`); the code at the cited line is what counts.
 4. Decide with this table and nothing else:
    - Handler body only prints/returns a hint string, "not available", "not implemented", "needs an online service", `todo!()`, or does nothing: CONFIRMED STUB. Write one line saying what it does instead (quote the string or action).
    - Handler does real work BUT NOT the thing the verdict is about: NOT a false positive. The verdict stays ABSENT. Read the verdict's `title` and `note` first and name the SPECIFIC missing item; then read the handler and ask whether it does THAT. Examples from this suite: a row about "Camera metadata (XDCAM/P2 sidecars)" cites `metadata.get`, but that handler returns the clip's own fields, which is not a camera sidecar. A row about "Object Mask (AI masking)" cites `masks.add`, but that handler builds a manual ellipse/polygon, which is not AI selection. Both rows are correctly ABSENT.
@@ -352,6 +355,7 @@ Step 2. For EACH candidate (at most 15 per run; leave the rest for the next run 
    - Rule to remember: a REGISTERED command proves WIRING, not BEHAVIOUR. Never call a verdict wrong just because the command runs. Ask what the command does, then ask whether that is the feature the row is about.
    - Handler is not at the cited line, or delegates to a helper you did not open: UNCONFIRMED. Write "unconfirmed: <reason>". Do not guess.
 5. A candidate you did not open goes under "Not yet checked", never under "Confirmed".
+6. A candidate you judged "the handler does real work but not THIS feature" goes under "Correctly ABSENT". It is not a stub and not a false positive, so it must not be dropped: the row is still ABSENT and that is a finding.
 
 Step 3. Write `/opt/hermes-agent/workspace/reports/telegram/parity-stub-list.md`, replacing it:
 
@@ -363,6 +367,10 @@ Generated <date> by the Qwen standing brief, Job D. Registry is a source scan (c
 Order: tier P0, then P1, then P2; within a tier, more registered ids first.
 | # | App | Tier | Command id(s) | file:line | What it does instead |
 |--:|---|---|---|---|---|
+
+## Correctly ABSENT (the handler does real work, but not the feature the row is about)
+The verdict stands. One line per row: the app, the slug, the command, the file:line, and what the handler actually does.
+- <app> <slug> <command> <file:line>: <what it really does>
 
 ## False positives (the handler does the SPECIFIC thing the note says is missing)
 - <app> <slug> <command> <file:line>: <one line>
