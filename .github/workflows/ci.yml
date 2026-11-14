@@ -108,6 +108,20 @@ jobs:
           IRIDIUM_OFFICE_BROWSER_NO_SANDBOX: "1"
         run: cargo test -p iridium-office -j 1
 
+      - name: Parity measurement
+        # The parity number lives in one generated file per app, and the
+        # apps' own docs point at it. This step fails when a parity number
+        # is typed into a hand-written file again, when a verdict cites a
+        # file that does not exist, or when a catalogue row cites a command
+        # the registry does not have.
+        #
+        # It does not fail on an app with no verdicts. A gate that needs a
+        # full re-audit to pass gets bypassed, and then it means nothing.
+        run: |
+          set -euo pipefail
+          python3 scripts/parity.py --check
+          python3 scripts/parity.py
+
   # The Linux gate does not compile the Windows-only code: a cfg(target_os = "windows")
   # block is invisible to it. That is how an "extern blocks must be unsafe" error (Rust
   # 2024) sat in the tree until a release run hit it fifty minutes later. This job checks
