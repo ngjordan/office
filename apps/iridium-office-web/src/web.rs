@@ -39,6 +39,7 @@ pub fn start() {
                 Ok(Box::new(App {
                     suite: Suite::new(Vec::new()),
                     _cc: cc.egui_ctx.clone(),
+                    drawn: false,
                 }))
             }),
         );
@@ -58,6 +59,9 @@ struct App {
     suite: Suite,
     /// The egui context, kept so the app can ask for a repaint.
     _cc: egui::Context,
+    /// Whether the suite has drawn yet, so the page's loading message goes
+    /// down on the first frame.
+    drawn: bool,
 }
 
 impl eframe::App for App {
@@ -79,6 +83,14 @@ impl eframe::App for App {
         self.suite.ui(ui, frame.storage());
         if self.suite.after_pass(frame) {
             ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
+        }
+        // The page shows a message until the suite draws. Take it down on the
+        // first frame, so a working app is not covered by "Loading...".
+        if !self.drawn {
+            self.drawn = true;
+            if let Some(el) = status_element() {
+                el.set_attribute("hidden", "");
+            }
         }
     }
 
