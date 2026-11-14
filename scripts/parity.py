@@ -654,6 +654,30 @@ def absent_but_registered(app: str, repo: Path) -> list[tuple[str, str]]:
     return out
 
 
+def unexplained_gaps(app: str, repo: Path) -> list[str]:
+    """Rows that are PARTIAL or ABSENT but do not say what is missing.
+
+    A partial verdict is a claim that something is missing, so the row has
+    to name it. Without that, the row says only "not done", and whoever
+    comes to fix it has to re-read the whole codebase to find out what.
+
+    This happened for real: 205 rows across Sheets, Docs and Light carried
+    the explanation as a TOML comment, which the reader cannot see, so the
+    generator and the fixer both saw a gap with no explanation.
+    """
+    out = []
+    for key, verdict in load_verdicts(app, repo).items():
+        label = str(verdict.get("verdict", "")).upper()
+        if label not in ("PARTIAL", "ABSENT", "STUB"):
+            continue
+        note = str(verdict.get("note", "") or "").strip()
+        if note:
+            continue
+        title = str(verdict.get("title", "")) or key
+        out.append(f"{app}: verdict {key} is {label} but does not say what is missing ({title})")
+    return out
+
+
 def bad_evidence(app: str, repo: Path) -> list[tuple[str, str]]:
     """Verdict evidence whose path does not resolve."""
     problems = []
@@ -929,6 +953,8 @@ def main() -> int:
                     warnings.append(message + " (registry scan is not complete; not failing)")
             for key, path in bad_evidence(app, repo):
                 failures.append(f"{app}: verdict {key} cites {path}, which does not exist")
+            for message in unexplained_gaps(app, repo):
+                failures.append(message)
             for key, cid in absent_but_registered(app, repo):
                 warnings.append(
                     f"{app}: verdict {key} is ABSENT but {cid} is registered; "
