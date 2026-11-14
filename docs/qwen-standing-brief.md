@@ -14,6 +14,12 @@ Paths (use exactly these, never `/workspace/...`):
 OFFICE = /opt/hermes-agent/workspace/office
 VENDOR = /opt/hermes-agent/workspace/office-vendor     # sheets docs decks pdf cad mail photos film light
 REPORTS = /opt/hermes-agent/workspace/reports/telegram
+# Every report path in this brief is written out in full. Do not shorten it,
+# do not rename a file, and do not invent a name: a report written under a
+# different name is not a deliverable.
+# REPORTS is ABSOLUTE. It is NOT under the office repo. The worker starts in
+# /opt/hermes-agent/workspace/office, so "reports/telegram" would land in
+# office/docs/ or office/reports/ — write the full path every time.
 ```
 
 Each app's parity files are at `VENDOR/<app>/parity/`:
@@ -171,7 +177,7 @@ print("\n".join(out[:20]))
 
 Step 2. Run it: `python3 /home/coreuser/.hermes/cache/scratch/verify_parity.py`
 
-Step 3. Read the printed table. The script already replaced `REPORTS/parity-verification.md`. Do not rewrite it by hand.
+Step 3. Read the printed table. The script already replaced `/opt/hermes-agent/workspace/reports/telegram/parity-verification.md`. Do not rewrite it by hand.
 
 What the script checks, mapped to the brief:
 - a. every feature slug has a verdict slug (`unjudged` = a feature with no verdict, which is UNAUDITED and legal; list it, do not fix it). A verdict with no feature is `orphan_verdict` and is a defect.
@@ -291,7 +297,9 @@ Stop when: nine counts are printed.
 
 Purpose: a verdict that says ABSENT on a command that IS registered is a registered command that does not do the work. That is the work list.
 
-Step 1. Write to `/home/coreuser/.hermes/cache/scratch/stub_candidates.py` and run it:
+Step 1. Write to `/home/coreuser/.hermes/cache/scratch/stub_candidates.py` and run it.
+If the file already exists, DELETE IT FIRST and write it again. A refused
+write means you are about to use a stale script.
 
 ```python
 #!/usr/bin/env python3
@@ -333,16 +341,19 @@ print(len(cands), "candidates")
 This is the same list `parity.py --check` prints as "ABSENT but ... is registered" warnings.
 
 Step 2. For EACH candidate (at most 15 per run; leave the rest for the next run and say so):
+0. Read the verdict's `title` and `note` FIRST and write down the SPECIFIC thing it says is missing. You cannot judge the row without that. The note is a CLAIM; the code is the EVIDENCE. Judge the code against the specific item, not against the command's name.
 1. Take the first evidence entry, split `path:line`. If it has no line, search the file for the command id: `grep -n "<commandId>" <path>`.
 2. Check the file exists (`os.path.exists`). If not, mark the candidate `evidence missing` and move on.
 3. Read about 30 lines around that line with `read_file` (offset = line - 10, limit = 30). Read the handler only. Do not follow imports.
 4. Decide with this table and nothing else:
    - Handler body only prints/returns a hint string, "not available", "not implemented", "needs an online service", `todo!()`, or does nothing: CONFIRMED STUB. Write one line saying what it does instead (quote the string or action).
-   - Handler does real work (mutates the document/state, calls an engine function): FALSE POSITIVE. The verdict is wrong, or the command is wired differently. Write "false positive: <one line why>". Do not change the verdict; an expensive model decides.
+   - Handler does real work BUT NOT the thing the verdict is about: NOT a false positive. The verdict stays ABSENT. Read the verdict's `title` and `note` first and name the SPECIFIC missing item; then read the handler and ask whether it does THAT. Examples from this suite: a row about "Camera metadata (XDCAM/P2 sidecars)" cites `metadata.get`, but that handler returns the clip's own fields, which is not a camera sidecar. A row about "Object Mask (AI masking)" cites `masks.add`, but that handler builds a manual ellipse/polygon, which is not AI selection. Both rows are correctly ABSENT.
+   - Handler does the SPECIFIC thing the verdict says is missing, so the ABSENT verdict is wrong: FALSE POSITIVE. Write "false positive: <one line why>". Do not change the verdict; an expensive model decides. This is the rare case: it means the verdict was written against a different reading of the feature than the one in the code.
+   - Rule to remember: a REGISTERED command proves WIRING, not BEHAVIOUR. Never call a verdict wrong just because the command runs. Ask what the command does, then ask whether that is the feature the row is about.
    - Handler is not at the cited line, or delegates to a helper you did not open: UNCONFIRMED. Write "unconfirmed: <reason>". Do not guess.
 5. A candidate you did not open goes under "Not yet checked", never under "Confirmed".
 
-Step 3. Write `REPORTS/parity-stub-list.md`, replacing it:
+Step 3. Write `/opt/hermes-agent/workspace/reports/telegram/parity-stub-list.md`, replacing it:
 
 ```
 # Parity stub list
@@ -353,7 +364,7 @@ Order: tier P0, then P1, then P2; within a tier, more registered ids first.
 | # | App | Tier | Command id(s) | file:line | What it does instead |
 |--:|---|---|---|---|---|
 
-## False positives (verdict probably wrong; needs a judge)
+## False positives (the handler does the SPECIFIC thing the note says is missing)
 - <app> <slug> <command> <file:line>: <one line>
 
 ## Unconfirmed
@@ -389,7 +400,7 @@ Stop when: every candidate you opened is in a section, the rest is counted under
 
 ## 5. THE REPORT
 
-At the end of every run, write `REPORTS/qwen-run-summary.md`, replacing it. A human reads this one file. Keep it under 60 lines. Use this template exactly:
+At the end of every run, write `/opt/hermes-agent/workspace/reports/telegram/qwen-run-summary.md`, replacing it. A human reads this one file. Keep it under 60 lines. Use this template exactly:
 
 ```
 # Qwen run summary
