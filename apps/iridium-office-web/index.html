@@ -13,6 +13,10 @@
     #workspace_canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
     #workspace_status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
       color: #555; font: 14px system-ui, sans-serif; pointer-events: none; padding: 0 2em; text-align: center; }
+    /* The suite sets the `hidden` attribute on the message once it has drawn.
+       The rule above sets `display`, and a page rule beats the user agent's
+       `hidden` styling, so the message needs its own rule to go away. */
+    #workspace_status[hidden] { display: none; }
   </style>
 </head>
 <body>
