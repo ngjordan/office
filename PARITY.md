@@ -8,7 +8,7 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 |---|---|---:|---:|---:|---:|---:|---:|
 | **Sheets** | Excel (Microsoft 365) | 294 | 272 (92.5 %) | 14 (4.8 %) | 8 (2.7 %) | **0 (0.0 %)** | 278 (94.6 %) |
 | **Docs** | Word | 518 | 492 (95.0 %) | 11 (2.1 %) | 15 (2.9 %) | **0 (0.0 %)** | 505 (97.5 %) |
-| **Decks** | PowerPoint | 191 | 124 (64.9 %) | 50 (26.2 %) | 13 (6.8 %) | **4 (2.1 %)** | 152 (79.6 %) |
+| **Decks** | PowerPoint | 191 | 126 (66.0 %) | 56 (29.3 %) | 9 (4.7 %) | **0 (0.0 %)** | 152 (79.6 %) |
 | **PDF** | Acrobat Pro | 834 | 467 (56.0 %) | 125 (15.0 %) | 242 (29.0 %) | **0 (0.0 %)** | 0 (0.0 %) |
 | **CAD** | AutoCAD | 75 | 47 (62.7 %) | 17 (22.7 %) | 11 (14.7 %) | **0 (0.0 %)** | 55 (73.3 %) |
 | **Mail** | Outlook | 1569 | 1559 (99.4 %) | 10 (0.6 %) | 0 (0.0 %) | **0 (0.0 %)** | 1569 (100.0 %) |
@@ -48,15 +48,15 @@ Catalogue rows: 520. Verdicts recorded: 520. Registry ids: 677.
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P0 | 72 | 61 (84.7 %) | 11 (15.3 %) | 0 (0.0 %) | **0 (0.0 %)** | 60 (83.3 %) | 0 |
-| P1 | 65 | 45 (69.2 %) | 16 (24.6 %) | 3 (4.6 %) | **1 (1.5 %)** | 52 (80.0 %) | 0 |
-| P2 | 54 | 18 (33.3 %) | 23 (42.6 %) | 10 (18.5 %) | **3 (5.6 %)** | 40 (74.1 %) | 0 |
+| P0 | 72 | 62 (86.1 %) | 10 (13.9 %) | 0 (0.0 %) | **0 (0.0 %)** | 60 (83.3 %) | 0 |
+| P1 | 65 | 45 (69.2 %) | 19 (29.2 %) | 1 (1.5 %) | **0 (0.0 %)** | 52 (80.0 %) | 0 |
+| P2 | 54 | 19 (35.2 %) | 27 (50.0 %) | 8 (14.8 %) | **0 (0.0 %)** | 40 (74.1 %) | 0 |
 
-**Catalogue coverage:** 174 (91.1 %) of 191 rows are works or partial; 124 (64.9 %) works outright; **4 (2.1 %) unaudited**.
+**Catalogue coverage:** 182 (95.3 %) of 191 rows are works or partial; 126 (66.0 %) works outright; **0 (0.0 %) unaudited**.
 
-**Evidence:** 0 verdict(s) rest on a handler that was read; 187 rest on the command being registered only.
+**Evidence:** 84 verdict(s) rest on a handler that was read; 107 rest on the command being registered only.
 
-Catalogue rows: 191. Verdicts recorded: 187. Registry ids: 427.
+Catalogue rows: 191. Verdicts recorded: 191. Registry ids: 427.
 
 ### PDF — vs Acrobat Pro
 
