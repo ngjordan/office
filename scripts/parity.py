@@ -678,6 +678,43 @@ def unexplained_gaps(app: str, repo: Path) -> list[str]:
     return out
 
 
+def doc_only_evidence(app: str, repo: Path) -> list[tuple[str, str]]:
+    """ABSENT rows whose evidence names only a doc, not the code.
+
+    A gap doc lists what is missing. It does not prove the code lacks it:
+    the doc can be out of date, wrong, or describing a decision rather than
+    a fact. For an ABSENT verdict the reader has to be able to open the
+    cited line in the SOURCE and see the absence for themselves.
+
+    This is not a style rule. A doc-only absence is a claim nobody
+    verified, so it belongs to neither the Broken share nor the Works
+    share -- it is unaudited until it points at the place the feature
+    would have to live.
+
+    A doc citation is still allowed alongside a source citation: naming the
+    gap entry says WHY the row matters, naming the source says the feature
+    is not there.
+    """
+    problems = []
+    for key, verdict in load_verdicts(app, repo).items():
+        label = str(verdict.get("verdict", "")).upper()
+        if label not in ("ABSENT", "STUB"):
+            continue
+        evidence = verdict.get("evidence", []) or []
+        paths = []
+        for item in evidence:
+            for token in re.split(r"[;,]", str(item)):
+                token = token.strip().strip("`")
+                match = re.match(r"([\w./-]+\.\w+)", token)
+                if match:
+                    paths.append(match.group(1))
+        if not paths:
+            continue
+        if all(p.startswith("docs/") or p.endswith(".md") for p in paths):
+            problems.append((key, ", ".join(paths)))
+    return problems
+
+
 def bad_evidence(app: str, repo: Path) -> list[tuple[str, str]]:
     """Verdict evidence whose path does not resolve."""
     problems = []
@@ -955,6 +992,15 @@ def main() -> int:
                 failures.append(f"{app}: verdict {key} cites {path}, which does not exist")
             for message in unexplained_gaps(app, repo):
                 failures.append(message)
+            # A warning, not a failure: this rule is new, and the rows it
+            # catches are pre-existing. A warning says the claim is not
+            # verified without blocking the build; the re-audit that fixes
+            # them is what turns it into a failure.
+            for key, paths in doc_only_evidence(app, repo):
+                warnings.append(
+                    f"{app}: verdict {key} is ABSENT but its evidence names only a "
+                    f"doc ({paths}); a gap list does not prove the code lacks the "
+                    "feature -- cite the source where it would live")
             for key, cid in absent_but_registered(app, repo):
                 warnings.append(
                     f"{app}: verdict {key} is ABSENT but {cid} is registered; "
