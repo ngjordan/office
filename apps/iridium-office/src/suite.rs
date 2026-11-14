@@ -449,8 +449,13 @@ impl Suite {
                 .frame(egui::Frame::new().fill(chrome.window))
                 .show(chrome_ui, |ui| {
                     ui.vertical_centered(|ui| {
+                        // The cards are laid out for a wide window, but the
+                        // layout has to fit the window it is in: a fixed
+                        // width overflows a narrow one, and the centred
+                        // content is then clipped at both edges.
+                        let width = ui.available_width().min(960.0);
                         ui.allocate_ui_with_layout(
-                            egui::vec2(960.0, 0.0),
+                            egui::vec2(width, 0.0),
                             egui::Layout::top_down(egui::Align::Center),
                             |ui| {
                                 ui.add_space(crate::chrome::space::XXL);

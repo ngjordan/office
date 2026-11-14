@@ -20,6 +20,10 @@ pub fn start() {
         return;
     }
 
+    // Without a logger every failure in the runner is invisible: the console
+    // stays empty and the page just never draws.
+    let _ = eframe::WebLogger::init(log::LevelFilter::Debug);
+
     let mut web_options = eframe::WebOptions::default();
     // `?webgl` forces WebGL2 for a browser whose WebGPU adapter will not
     // start. The page reloads with it when the first attempt fails.
