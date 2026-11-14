@@ -6,13 +6,13 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 
 | App | vs | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) |
 |---|---|---:|---:|---:|---:|---:|---:|
-| **Sheets** | Excel (Microsoft 365) | 292 | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | **292 (100.0 %)** | 292 (100.0 %) |
+| **Sheets** | Excel (Microsoft 365) | 294 | 272 (92.5 %) | 14 (4.8 %) | 8 (2.7 %) | **0 (0.0 %)** | 278 (94.6 %) |
 | **Docs** | Word | 78 | 44 (56.4 %) | 17 (21.8 %) | 8 (10.3 %) | **9 (11.5 %)** | 62 (79.5 %) |
-| **Decks** | PowerPoint | 86 | 51 (59.3 %) | 22 (25.6 %) | 10 (11.6 %) | **1 (1.2 %)** | 0 (0.0 %) |
-| **PDF** | Acrobat Pro | 91 | 48 (52.7 %) | 17 (18.7 %) | 20 (22.0 %) | **4 (4.4 %)** | 0 (0.0 %) |
+| **Decks** | PowerPoint | 84 | 51 (60.7 %) | 22 (26.2 %) | 10 (11.9 %) | **1 (1.2 %)** | 0 (0.0 %) |
+| **PDF** | Acrobat Pro | 89 | 48 (53.9 %) | 17 (19.1 %) | 20 (22.5 %) | **4 (4.5 %)** | 0 (0.0 %) |
 | **CAD** | AutoCAD | 75 | 41 (54.7 %) | 21 (28.0 %) | 12 (16.0 %) | **1 (1.3 %)** | 2 (2.7 %) |
-| **Mail** | Outlook | 1698 | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | **1698 (100.0 %)** | 222 (13.1 %) |
-| **Photos** | Photoshop | 52 | 24 (46.2 %) | 16 (30.8 %) | 8 (15.4 %) | **2 (3.8 %)** | 0 (0.0 %) |
+| **Mail** | Outlook | 1569 | 1559 (99.4 %) | 10 (0.6 %) | 0 (0.0 %) | **0 (0.0 %)** | 1569 (100.0 %) |
+| **Photos** | Photoshop | 50 | 24 (48.0 %) | 16 (32.0 %) | 8 (16.0 %) | **2 (4.0 %)** | 1 (2.0 %) |
 | **Film** | Premiere Pro | 14 | 7 (50.0 %) | 4 (28.6 %) | 1 (7.1 %) | **2 (14.3 %)** | 0 (0.0 %) |
 | **Light** | Lightroom | 13 | 7 (53.8 %) | 3 (23.1 %) | 3 (23.1 %) | **0 (0.0 %)** | 0 (0.0 %) |
 
@@ -20,11 +20,13 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P2 | 292 | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | **292 (100.0 %)** | 292 (100.0 %) | 0 |
+| P0 | 101 | 101 (100.0 %) | 0 (0.0 %) | 0 (0.0 %) | **0 (0.0 %)** | 99 (98.0 %) | 0 |
+| P1 | 132 | 122 (92.4 %) | 10 (7.6 %) | 0 (0.0 %) | **0 (0.0 %)** | 129 (97.7 %) | 0 |
+| P2 | 61 | 49 (80.3 %) | 4 (6.6 %) | 8 (13.1 %) | **0 (0.0 %)** | 50 (82.0 %) | 0 |
 
-**Catalogue coverage:** 0 (0.0 %) of 292 rows are works or partial; 0 (0.0 %) works outright; **292 (100.0 %) unaudited**.
+**Catalogue coverage:** 286 (97.3 %) of 294 rows are works or partial; 272 (92.5 %) works outright; **0 (0.0 %) unaudited**.
 
-Catalogue rows: 292. Verdicts recorded: 0. Registry ids: 433.
+Catalogue rows: 302. Verdicts recorded: 302. Registry ids: 403.
 
 ### Docs — vs Word
 
@@ -34,27 +36,27 @@ Catalogue rows: 292. Verdicts recorded: 0. Registry ids: 433.
 
 **Catalogue coverage:** 61 (78.2 %) of 78 rows are works or partial; 44 (56.4 %) works outright; **9 (11.5 %) unaudited**.
 
-Catalogue rows: 78. Verdicts recorded: 69. Registry ids: 889.
+Catalogue rows: 78. Verdicts recorded: 69. Registry ids: 677.
 
 ### Decks — vs PowerPoint
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P2 | 86 | 51 (59.3 %) | 22 (25.6 %) | 10 (11.6 %) | **1 (1.2 %)** | 0 (0.0 %) | 0 |
+| P2 | 84 | 51 (60.7 %) | 22 (26.2 %) | 10 (11.9 %) | **1 (1.2 %)** | 0 (0.0 %) | 0 |
 
-**Catalogue coverage:** 73 (84.9 %) of 86 rows are works or partial; 51 (59.3 %) works outright; **1 (1.2 %) unaudited**.
+**Catalogue coverage:** 73 (86.9 %) of 84 rows are works or partial; 51 (60.7 %) works outright; **1 (1.2 %) unaudited**.
 
-Catalogue rows: 86. Verdicts recorded: 85. Registry ids: 305.
+Catalogue rows: 86. Verdicts recorded: 85. Registry ids: 427.
 
 ### PDF — vs Acrobat Pro
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P2 | 91 | 48 (52.7 %) | 17 (18.7 %) | 20 (22.0 %) | **4 (4.4 %)** | 0 (0.0 %) | 0 |
+| P2 | 89 | 48 (53.9 %) | 17 (19.1 %) | 20 (22.5 %) | **4 (4.5 %)** | 0 (0.0 %) | 0 |
 
-**Catalogue coverage:** 65 (71.4 %) of 91 rows are works or partial; 48 (52.7 %) works outright; **4 (4.4 %) unaudited**.
+**Catalogue coverage:** 65 (73.0 %) of 89 rows are works or partial; 48 (53.9 %) works outright; **4 (4.5 %) unaudited**.
 
-Catalogue rows: 91. Verdicts recorded: 87. Registry ids: 150.
+Catalogue rows: 91. Verdicts recorded: 87. Registry ids: 67.
 
 ### CAD — vs AutoCAD
 
@@ -64,27 +66,29 @@ Catalogue rows: 91. Verdicts recorded: 87. Registry ids: 150.
 
 **Catalogue coverage:** 62 (82.7 %) of 75 rows are works or partial; 41 (54.7 %) works outright; **1 (1.3 %) unaudited**.
 
-Catalogue rows: 75. Verdicts recorded: 74. Registry ids: 537.
+Catalogue rows: 75. Verdicts recorded: 74. Registry ids: 463.
 
 ### Mail — vs Outlook
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P2 | 1698 | 0 (0.0 %) | 0 (0.0 %) | 0 (0.0 %) | **1698 (100.0 %)** | 222 (13.1 %) | 0 |
+| P0 | 224 | 224 (100.0 %) | 0 (0.0 %) | 0 (0.0 %) | **0 (0.0 %)** | 224 (100.0 %) | 0 |
+| P1 | 1025 | 1025 (100.0 %) | 0 (0.0 %) | 0 (0.0 %) | **0 (0.0 %)** | 1025 (100.0 %) | 0 |
+| P2 | 320 | 310 (96.9 %) | 10 (3.1 %) | 0 (0.0 %) | **0 (0.0 %)** | 320 (100.0 %) | 0 |
 
-**Catalogue coverage:** 0 (0.0 %) of 1698 rows are works or partial; 0 (0.0 %) works outright; **1698 (100.0 %) unaudited**.
+**Catalogue coverage:** 1569 (100.0 %) of 1569 rows are works or partial; 1559 (99.4 %) works outright; **0 (0.0 %) unaudited**.
 
-Catalogue rows: 1698. Verdicts recorded: 0. Registry ids: 1081.
+Catalogue rows: 1698. Verdicts recorded: 1698. Registry ids: 971.
 
 ### Photos — vs Photoshop
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P2 | 52 | 24 (46.2 %) | 16 (30.8 %) | 8 (15.4 %) | **2 (3.8 %)** | 0 (0.0 %) | 0 |
+| P2 | 50 | 24 (48.0 %) | 16 (32.0 %) | 8 (16.0 %) | **2 (4.0 %)** | 1 (2.0 %) | 0 |
 
-**Catalogue coverage:** 40 (76.9 %) of 52 rows are works or partial; 24 (46.2 %) works outright; **2 (3.8 %) unaudited**.
+**Catalogue coverage:** 40 (80.0 %) of 50 rows are works or partial; 24 (48.0 %) works outright; **2 (4.0 %) unaudited**.
 
-Catalogue rows: 52. Verdicts recorded: 50. Registry ids: 1039.
+Catalogue rows: 52. Verdicts recorded: 50. Registry ids: 867.
 
 ### Film — vs Premiere Pro
 
@@ -94,7 +98,7 @@ Catalogue rows: 52. Verdicts recorded: 50. Registry ids: 1039.
 
 **Catalogue coverage:** 11 (78.6 %) of 14 rows are works or partial; 7 (50.0 %) works outright; **2 (14.3 %) unaudited**.
 
-Catalogue rows: 14. Verdicts recorded: 12. Registry ids: 652.
+Catalogue rows: 14. Verdicts recorded: 12. Registry ids: 695.
 
 ### Light — vs Lightroom
 
@@ -104,4 +108,4 @@ Catalogue rows: 14. Verdicts recorded: 12. Registry ids: 652.
 
 **Catalogue coverage:** 10 (76.9 %) of 13 rows are works or partial; 7 (53.8 %) works outright; **0 (0.0 %) unaudited**.
 
-Catalogue rows: 13. Verdicts recorded: 13. Registry ids: 190.
+Catalogue rows: 13. Verdicts recorded: 13. Registry ids: 443.

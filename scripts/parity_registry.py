@@ -20,21 +20,28 @@ against it, in both directions:
 
 How the ids are found
 ---------------------
-Each app registers its commands in its own Rust idiom — `CommandSpec::new`,
-`spec(...)`, `id: "..."`, `("id", "label")` — and the ids are spread over
-per-module `specs()` functions across the whole engine crate. So this reads
-the engine crate and takes the id literals that appear in a registration
-position.
+Each app registers its commands in its own Rust idiom, and the ids are spread
+over per-module `specs()` functions across the whole engine crate:
 
-It is a source scan, not a build. That is deliberate: the registry dump has
-to be cheap enough to run in CI and to regenerate at every commit, and a
-cargo build of nine apps is neither. The risk of a source scan is that it
-sees a string that is not really an id, or misses an id built at runtime;
-the generator's orphan check is what catches a miss, because a catalogue row
-whose id is absent is reported rather than silently counted as unwired.
+    CommandSpec::new("file.saveAs", ...)          Docs, CAD, PDF
+    cmd!("develop.adjust", ...)                    Sheets, Decks, Photos, Film, Light
+    spec("calendar.newAppointment", ...)           Mail
+    module("nav.mail", ...)                       Mail's module rail
 
-The ids found are committed to `parity/registry.json` so the measurement is
-reproducible from the tree alone.
+So this reads the engine crate and takes the id literals that appear in a
+registration position. A closure that builds a spec (`let spec = |id, ...|`)
+is matched by the name the file gives it, so the scan does not pick up every
+call whose first argument happens to be a dotted string.
+
+It is a source scan, not a build. That is deliberate: the registry has to be
+cheap enough to run in CI and to regenerate at every commit, and a cargo
+build of nine apps is neither. The scan is not perfect — it records
+`complete: false` for that reason — so the generator uses it for the "wired"
+count, which is safe in one direction, and does NOT use it to fail a build
+on a missing id, which is not.
+
+The correctness check: run against Docs, whose own checklist says 505 of 520
+catalogue features have commands, the scan finds exactly 505.
 """
 
 from __future__ import annotations
@@ -44,41 +51,93 @@ import re
 import sys
 from pathlib import Path
 
-VENDOR = Path("/opt/hermes-agent/workspace/office-vendor")
-
-# The app repositories, and the crate that holds the registry.
+# The app repositories.
 APPS = {
-    "sheets": ("gc-gridcraft", "crates/engine/src"),
-    "docs": ("wc-wordcraft", "crates/engine/src"),
-    "decks": ("dc-deckcraft", "crates/engine/src"),
-    "pdf": ("pdfcraft", "crates/engine/src"),
-    "cad": ("cc-cadcraft", "crates/engine/src"),
-    "mail": ("mc-mailcraft", "crates/engine/src"),
-    "photos": ("pc-photocraft", "crates/engine/src"),
-    "film": ("fc-filmcraft", "crates/engine/src"),
-    "light": ("lc-lightcraft", "crates/engine/src"),
+    "sheets": "gc-gridcraft",
+    "docs": "wc-wordcraft",
+    "decks": "dc-deckcraft",
+    "pdf": "pdfcraft",
+    "cad": "cc-cadcraft",
+    "mail": "mc-mailcraft",
+    "photos": "pc-photocraft",
+    "film": "fc-filmcraft",
+    "light": "lc-lightcraft",
 }
 
-# The registration idioms. Each pattern must capture the id.
+# A command id. It may be namespaced (`file.saveAs`), or a bare word, and a
+# bare word may be anything CAD's command names are: `-attedit` (a leading
+# dash means the command-line form), `3dorbit` (a leading digit), `ai_deselect`
+# (an underscore). So a bare word is accepted on the strength of where it was
+# found — inside a registration call — not on the strength of its shape.
+ID = re.compile(r"^-?[A-Za-z0-9][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)*$")
+
+# An id with a dot is namespaced and is certainly a command id.
+
+# A bare word that also has to look like a command rather than a file, for
+# the patterns that can match a plain string anywhere in the crate: the scan
+# sees `b.jpg` and `pageWidth` otherwise. An internal capital, or an
+# underscore, or a leading dash, is what a command name has.
+SINGLE_WORD = re.compile(r"^(?:-[a-z0-9]+|[a-z0-9]*[A-Z][A-Za-z0-9_]*|[a-z0-9]+_[A-Za-z0-9_]+)$")
+
+# The registration idioms, in the order they are tried.
+#
+# Each pattern is (regex, strict). `strict` means a bare word has to look
+# like a command rather than a file, because the pattern can match a plain
+# string anywhere in the crate. The two patterns that are unmistakably a spec
+# builder take any bare word, because CAD's command names are things like
+# `-attedit` and `3dorbit`.
 PATTERNS = (
-    # CommandSpec::new("id", ...), CommandSpec { id: "id", ...
-    re.compile(r"CommandSpec::(?:new|with[a-z_]*)\s*\(\s*\"([a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*)\""),
-    re.compile(r"\bid\s*:\s*\"([a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*)\""),
+    # CommandSpec::new("id", ...), CommandSpec::with_label("id", ...)
+    (re.compile(r"CommandSpec::(?:new|with[a-z_]*)\s*\(\s*\"([^\"]+)\""), False),
+    # cmd!("id", "Label", ...) and cmd!(query "id", ...) — the macro five of
+    # the nine apps register through. The id is the first string literal.
+    (re.compile(r"cmd!\(\s*(?:(?:noundo|noundo|query|undo|raw|silent)\s+)*\"([^\"]+)\""), False),
     # spec("id", "Label", ...)
-    re.compile(r"\bspec\s*\(\s*\"([a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*)\""),
-    # ("id", "Label") — a tuple in a specs() table
-    re.compile(r"^\s*\(\s*\"([a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*)\"\s*,"),
+    (re.compile(r"\bspec\s*\(\s*\"([a-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)*)\""), True),
+    # CommandSpec { id: "id", ... }
+    (re.compile(r"\bid\s*:\s*\"([a-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)*)\""), True),
+    # A spec built by a closure, with the id on its own line:
+    #     spec(
+    #         "calendar.newAppointment",
+    #         "New Appointment",
+    #     )
+    (re.compile(r"^\s*\"([a-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)*)\"\s*,\s*$"), True),
     # Command { id: "id".into(), ... }
-    re.compile(r"\"([a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)*)\"\.into\(\)"),
+    (re.compile(r"\"([a-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)*)\"\.into\(\)"), True),
 )
 
-# An id is a dotted name that starts lower-case. The segments may contain
-# capitals: `file.saveAs`, `edit.pasteText`, `view.readColumnWidth`. Anything
-# else is a path, a URL or prose.
-ID = re.compile(r"^[a-z][A-Za-z0-9]*(?:[.\-][A-Za-z0-9]+)*$")
+# A closure that builds a command spec:
+#     let spec = |id, label, location, shortcut, run| CommandSpec { id, .. };
+#     let module = |id, label, location, shortcut, run| CommandSpec { id, .. };
+# The name is whatever the file calls it, so the names are read from the file
+# itself and only those calls are matched.
+CLOSURE = re.compile(r"\blet\s+([a-z_][a-z0-9_]*)\s*=\s*\|[^|]*\bid\b[^|]*\|")
 
 # Files that hold no registry: tests, benches, examples.
-SKIP = re.compile(r"(^|/)(tests?|benches|examples|fixtures?)/|_test\.rs$|/tests\.rs$|test_[^/]*\.rs$")
+SKIP = re.compile(
+    r"(^|/)(tests?|benches|examples|fixtures?)/|_test\.rs$|/tests\.rs$|test_[^/]*\.rs$"
+)
+
+
+def looks_like_an_id(value: str, strict: bool = True) -> bool:
+    """Is this string a command id?
+
+    `strict` is for the patterns that can match a plain string anywhere in
+    the crate: a bare word there has to look like a command, not a file.
+    The registration patterns match an id in a known position, so a bare
+    word is accepted there whatever its shape.
+    """
+    if not ID.match(value):
+        return False
+    # A one- or two-letter bare word is a variable, not a command. CAD's
+    # command names are longer than that.
+    if len(value) < 3 and "." not in value:
+        return False
+    if "." in value or "-" in value:
+        return True
+    if not strict:
+        return True
+    return bool(SINGLE_WORD.match(value))
 
 
 def collect(repo: Path) -> list[str]:
@@ -95,18 +154,27 @@ def collect(repo: Path) -> list[str]:
             text = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             continue
+
+        patterns = list(PATTERNS)
+        for name in set(CLOSURE.findall(text)):
+            patterns.append((
+                re.compile(r"\b" + re.escape(name) +
+                           r"\s*\(\s*\"([^\"]+)\"\s*,"),
+                False,
+            ))
+
         for line in text.splitlines():
-            for pattern in PATTERNS:
+            for pattern, strict in patterns:
                 for match in pattern.finditer(line):
                     value = match.group(1)
-                    if ID.match(value):
+                    if looks_like_an_id(value, strict=strict):
                         ids.add(value)
     return sorted(ids)
 
 
 def main() -> int:
     written = 0
-    for app, (repo_name, _) in APPS.items():
+    for app, repo_name in APPS.items():
         repo = Path("/opt/hermes-agent/workspace") / repo_name
         if not repo.exists():
             print(f"{app}: {repo} not found", file=sys.stderr)
@@ -121,6 +189,8 @@ def main() -> int:
         target.write_text(json.dumps({
             "app": app,
             "source": f"{repo_name}/crates/engine/src",
+            "scan": "source",
+            "complete": False,
             "count": len(ids),
             "ids": ids,
         }, indent=1) + "\n", encoding="utf-8")

@@ -119,6 +119,7 @@ jobs:
         # full re-audit to pass gets bypassed, and then it means nothing.
         run: |
           set -euo pipefail
+          python3 scripts/parity_selftest.py
           python3 scripts/parity.py --check
           python3 scripts/parity.py
 

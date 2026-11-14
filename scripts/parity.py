@@ -125,7 +125,17 @@ def read_toml(path: Path) -> dict:
             continue
         if line.startswith("["):
             name = line[1:].strip().rstrip("]")
-            current = out.setdefault(name, {})
+            # `[feature."some-key"]` is a table named "some-key" inside
+            # "feature". Flattening it to the literal name `feature."some-key"`
+            # makes the catalogue and the verdicts disagree on their row ids,
+            # so the join between them silently falls back to matching on the
+            # title. Nest it properly.
+            quoted = re.match(r'^([\w.]+)\.["\']([^"\']+)["\']$', name)
+            if quoted:
+                base, key = quoted.group(1), quoted.group(2)
+                current = out.setdefault(base, {}).setdefault(key, {})
+            else:
+                current = out.setdefault(name, {})
             array_key = None
             continue
         if "=" not in line:
@@ -292,13 +302,13 @@ def load_mail_catalogue(repo: Path) -> list[dict]:
             parts = [p.strip() for p in line.split("|")]
             if len(parts) < 4:
                 continue
-            # Area|Path|Label|id|note. The id is the fourth field, or the
-            # fifth when the row carries a note. A row whose id is "-" has no
-            # command — it is a cloud-only service, so it counts as absent
-            # rather than unwired.
+            # Area|Path|Label|id|note. The id is always the fourth field; a
+            # dash there means the feature has NO command — it is a
+            # cloud-only Outlook service, and the fifth field is the reason.
+            # Taking that note as the id would put "Microsoft 365 Groups
+            # (cloud-only)" in the registry check, where it can never
+            # resolve.
             cid = parts[3]
-            if cid == "-" and len(parts) >= 5:
-                cid = parts[4]
             if cid == "-":
                 cid = ""
             rows.append({
@@ -335,22 +345,37 @@ def load_features_toml(repo: Path) -> list[dict]:
     """
     data = read_toml(repo / "parity" / "features.toml")
     rows = []
-    # The file may be a table of tables (`[feature."key"]`) or an array of
-    # tables (`[[feature]]`). Both are read; the key is the table name for
-    # the first and the title for the second.
-    for key, value in data.items():
-        if not isinstance(value, dict):
-            continue
-        if key in ("schema", "verdict"):
-            continue
-        if "title" in value:
-            rows.append({
-                "id": key,
-                "title": value.get("title", key),
-                "tier": value.get("tier", "P2"),
-                "area": value.get("area", ""),
-                "commands": value.get("commands", []),
-            })
+    for row in feature_rows(data, "feature"):
+        rows.append({
+            "id": row.get("id", ""),
+            "title": row.get("title", row.get("id", "")),
+            "tier": row.get("tier", "all"),
+            "area": row.get("area", ""),
+            "commands": row.get("commands", []) or [],
+        })
+    return rows
+
+
+def feature_rows(data: dict, kind: str) -> list[dict]:
+    """The rows of a `feature` or `verdict` table, whatever shape it has.
+
+    The file may nest the rows one level (`[feature."key"]`, which the reader
+    collects into a dict of dicts) or list them (`[[feature]]`, an array of
+    tables). Both are read, and the id is the table name when there is one.
+    """
+    rows = []
+    value = data.get(kind)
+    if value is None:
+        return rows
+    if isinstance(value, list):
+        for entry in value:
+            if isinstance(entry, dict):
+                rows.append({"id": entry.get("id", entry.get("title", "")), **entry})
+        return rows
+    if isinstance(value, dict):
+        for sub, entry in value.items():
+            if isinstance(entry, dict):
+                rows.append({"id": sub, **entry})
     return rows
 
 
@@ -376,9 +401,9 @@ def load_verdicts(app: str, repo: Path) -> dict[str, dict]:
         return {}
     data = read_toml(path)
     out = {}
-    for key, value in data.items():
-        if isinstance(value, dict) and "verdict" in value:
-            out[key] = value
+    for row in feature_rows(data, "verdict"):
+        if "verdict" in row:
+            out[row["id"]] = row
     return out
 
 
@@ -445,7 +470,7 @@ def measure(app: str, repo: Path) -> dict:
 
     tiers: dict[str, dict] = {}
     for row in catalogue:
-        tier = str(row.get("tier") or "P2").strip()
+        tier = str(row.get("tier") or "all").strip()
         if tier in ("NA", "N/A"):
             tier = "NA"
         bucket = tiers.setdefault(tier, {
@@ -453,6 +478,8 @@ def measure(app: str, repo: Path) -> dict:
             "unaudited": 0, "stale": 0, "wired": 0, "na": 0,
         })
         if tier == "NA":
+            # Out of scope: not applicable, so it is neither works nor broken
+            # nor unaudited. It is counted apart, and the verdict says why.
             bucket["na"] += 1
             continue
         bucket["applicable"] += 1
@@ -486,6 +513,13 @@ def measure(app: str, repo: Path) -> dict:
         if bucket_key is None:
             bucket["unaudited"] += 1
             continue
+        if bucket_key == "excluded":
+            # Out of scope: the row is not applicable, so it leaves the
+            # denominator. Counting it as unaudited would understate the
+            # coverage of the rows that ARE in scope.
+            bucket["na"] += 1
+            bucket["applicable"] -= 1
+            continue
         if bucket_key == "works":
             bucket["works"] += 1
         elif bucket_key == "partial":
@@ -508,6 +542,23 @@ def measure(app: str, repo: Path) -> dict:
         "registry": len(registry),
         "tiers": tiers,
     }
+
+
+def registry_is_complete(repo: Path) -> bool:
+    """Is the registry a full dump, or a source scan?
+
+    A scan can miss an id, so a missing id is not proof that the command is
+    gone. The check may only fail on a registry that came from the app's own
+    CLI, which lists every id it registers.
+    """
+    path = repo / "parity" / "registry.json"
+    if not path.exists():
+        return False
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return False
+    return bool(data.get("complete"))
 
 
 def orphans(app: str, repo: Path) -> tuple[list[dict], list[str]]:
@@ -576,7 +627,7 @@ def render(app_report: dict) -> str:
         return "\n".join(lines)
     lines.append("| Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |")
     lines.append("|---|---:|---:|---:|---:|---:|---:|---:|")
-    for tier in ("P0", "P1", "P2", "P3", "P2/P3", "NA"):
+    for tier in ("P0", "P1", "P2", "P3", "P2/P3", "all", "NA"):
         bucket = app_report["tiers"].get(tier)
         if not bucket:
             continue
@@ -611,21 +662,32 @@ def render(app_report: dict) -> str:
 
 
 def suite_table(reports: list[dict]) -> str:
-    """The nine-row table. P0 only, and no total: nine apps at different
-    catalogue grain do not add."""
+    """The nine-row table.
+
+    Each row is the app's WHOLE catalogue, not one tier: a reader comparing
+    the apps wants the app, and the per-tier numbers are in each app's own
+    page. There is no total across the nine: nine apps at different
+    catalogue grain do not add.
+    """
     lines = ["| App | vs | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) |",
              "|---|---|---:|---:|---:|---:|---:|---:|"]
     for report in reports:
-        bucket = report["tiers"].get("P0") or report["tiers"].get("P1") or report["tiers"].get("P2")
-        if not bucket:
+        total = {"applicable": 0, "works": 0, "partial": 0, "broken": 0,
+                 "unaudited": 0, "wired": 0}
+        for tier, bucket in report["tiers"].items():
+            if tier == "NA":
+                continue
+            for key in total:
+                total[key] += bucket.get(key, 0)
+        if not total["applicable"]:
             lines.append(f"| **{report['name']}** | {report['counterpart']} | — | — | — | — | — | — |")
             continue
-        app = bucket["applicable"]
+        app = total["applicable"]
         lines.append(
             f"| **{report['name']}** | {report['counterpart']} | {app} | "
-            f"{pct(bucket['works'], app)} | {pct(bucket['partial'], app)} | "
-            f"{pct(bucket['broken'], app)} | **{pct(bucket['unaudited'], app)}** | "
-            f"{pct(bucket['wired'], app)} |"
+            f"{pct(total['works'], app)} | {pct(total['partial'], app)} | "
+            f"{pct(total['broken'], app)} | **{pct(total['unaudited'], app)}** | "
+            f"{pct(total['wired'], app)} |"
         )
     return "\n".join(lines)
 
@@ -638,11 +700,45 @@ def suite_table(reports: list[dict]) -> str:
 # says 81.6 % of 532 rows while its own parity doc says 83.2 % of 546, and
 # Docs quotes 493/508, 504/520 and 505/520 in three places. Per-feature
 # depth percentages are a different measurement and are left alone.
-SHARE_WORDS = re.compile(
-    r"catalog(?:ue)? coverage|ribbon(?: and menu| and|/)? catalog|"
-    r"menu catalog|feature breadth",
+# The metric labels whose value must be single-sourced.
+#
+# The exact label, not a keyword: "Feature breadth, 2D menus only" and
+# "Feature breadth, mainstream practitioner" are different measurements with
+# their own denominators, and flagging them would be wrong. The headline is
+# the plain label.
+METRIC_LABELS = (
+    "catalog coverage",
+    "catalogue coverage",
+    "ribbon/menu catalog coverage",
+    "ribbon and menu catalog",
+    "ribbon and menu catalog coverage",
+    "ribbon/menu catalog",
+    "menu catalog",
+    "menu catalog coverage",
+    "feature breadth",
+    "feature breadth (checklist)",
+    "feature breadth, checklist",
+    "feature breadth, tier-weighted",
+)
+
+# A label that narrows the measurement: it has its own denominator and its
+# own method, so it is not the headline.
+NARROWED = re.compile(
+    r"2d|3d|mainstream|essentials|practitioner|weighted by use|unweighted|"
+    r"per-area|per area|only|excluding",
     re.IGNORECASE,
 )
+
+
+def is_headline_metric(label: str) -> bool:
+    """Is this table row the headline coverage metric?"""
+    text = label.strip().strip("*").strip()
+    text = re.sub(r"\s*\(.*?\)\s*$", "", text).strip()
+    if NARROWED.search(text):
+        return False
+    return text.lower() in METRIC_LABELS
+
+
 SHARE = re.compile(r"\d+(\.\d+)?\s*%|\b\d+\s*/\s*\d+\b")
 
 
@@ -667,7 +763,25 @@ def stray_percentages(repo: Path) -> list[str]:
         if not path.exists():
             continue
         for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            if SHARE.search(line) and SHARE_WORDS.search(line) and not is_target(line):
+            if is_target(line):
+                continue
+            if line.startswith("|"):
+                cells = [c.strip() for c in line.strip("|").split("|")]
+                if not cells or not is_headline_metric(cells[0]):
+                    continue
+                # The VALUE cell is the one that carries the share. The note
+                # cell may quote sub-measurements — menus 92 %, tools 56/68 —
+                # which have their own denominators and are not the headline.
+                value = cells[1] if len(cells) > 1 else ""
+                if SHARE.search(value):
+                    hits.append(f"{name}:{number}")
+                continue
+            # A heading or a bullet that states the headline in prose.
+            if not line.lstrip().startswith("#"):
+                continue
+            if not is_headline_metric(line):
+                continue
+            if SHARE.search(line):
                 hits.append(f"{name}:{number}")
     return hits
 
@@ -702,6 +816,7 @@ def main() -> int:
     apps = [args.app] if args.app else list(APPS)
     reports = []
     failures = []
+    warnings = []
     for app in apps:
         if app not in APPS:
             print(f"unknown app: {app}", file=sys.stderr)
@@ -715,8 +830,19 @@ def main() -> int:
 
         if args.check:
             missing, uncited = orphans(app, repo)
+            # The registry is a source scan, so a missing id is a WEAK signal:
+            # the id may be registered in a form the scan does not match. The
+            # check is therefore only allowed to FAIL on a registry that is
+            # marked complete — one dumped from the app's own CLI, which
+            # lists every id it registers.
+            complete = registry_is_complete(repo)
             for entry in missing:
-                failures.append(f"{app}: catalogue row {entry['id']} cites {entry['command']}, which the registry does not have")
+                message = (f"{app}: catalogue row {entry['id']} cites {entry['command']}, "
+                           "which the registry does not have")
+                if complete:
+                    failures.append(message)
+                else:
+                    warnings.append(message + " (registry scan is not complete; not failing)")
             for key, path in bad_evidence(app, repo):
                 failures.append(f"{app}: verdict {key} cites {path}, which does not exist")
             for hit in stray_percentages(repo):
@@ -737,12 +863,14 @@ def main() -> int:
         return 0
 
     if args.check:
+        for warning in warnings:
+            print(f"::warning::{warning}", file=sys.stderr)
         for failure in failures:
             print(f"::error::{failure}", file=sys.stderr)
         if failures:
             print(f"{len(failures)} parity drift(s)", file=sys.stderr)
             return 1
-        print("parity: no drift")
+        print(f"parity: no drift ({len(warnings)} warning(s))")
         return 0
 
     out = ["# Workspace suite — parity", ""]
