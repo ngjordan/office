@@ -204,5 +204,8 @@ jobs:
       - name: Create the vendor tree
         run: packaging/setup-vendor.sh "$(dirname "$GITHUB_WORKSPACE")"
 
+      # The macOS runner is an arm64 host, so the target to check is the arm64
+      # one. Cross-compiling the other way needs the target's standard library
+      # installed, which the runner does not have.
       - name: Check the macOS build
-        run: cargo check -p iridium-office --all-targets --target x86_64-apple-darwin
+        run: cargo check -p iridium-office --all-targets --target aarch64-apple-darwin
