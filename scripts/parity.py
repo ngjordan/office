@@ -476,6 +476,7 @@ def measure(app: str, repo: Path) -> dict:
         bucket = tiers.setdefault(tier, {
             "applicable": 0, "works": 0, "partial": 0, "broken": 0,
             "unaudited": 0, "stale": 0, "wired": 0, "na": 0,
+            "read": 0, "wired_only": 0,
         })
         if tier == "NA":
             # Out of scope: not applicable, so it is neither works nor broken
@@ -532,6 +533,16 @@ def measure(app: str, repo: Path) -> dict:
         commit = str(verdict.get("commit", ""))
         if files and commit and git_log_since(repo, commit, files):
             bucket["stale"] += 1
+
+        # How far the evidence goes. A "wired" verdict is a claim about the
+        # registration, not about the handler, so it is weaker than a "read"
+        # one. The count is reported, so a reader can see how much of the
+        # Works column rests on which.
+        level = str(verdict.get("level", "")).strip().lower()
+        if level in ("read", "run", "fidelity"):
+            bucket["read"] += 1
+        elif level:
+            bucket["wired_only"] += 1
 
     return {
         "app": app,
@@ -653,6 +664,20 @@ def render(app_report: dict) -> str:
                  f"{pct(total['works'], total['applicable'])} works outright; "
                  f"**{pct(total['unaudited'], total['applicable'])} unaudited**.")
     lines.append("")
+
+    # How far the evidence goes. A verdict at "wired" says the command is
+    # registered; a verdict at "read" says the handler was read and does the
+    # work. Reporting the split keeps the Works column honest: a reader can
+    # see how much of it rests on which.
+    read = sum(b.get("read", 0) for t, b in app_report["tiers"].items() if t != "NA")
+    wired_only = sum(b.get("wired_only", 0) for t, b in app_report["tiers"].items() if t != "NA")
+    if read + wired_only:
+        lines.append(
+            f"**Evidence:** {read} verdict(s) rest on a handler that was read; "
+            f"{wired_only} rest on the command being registered only."
+        )
+        lines.append("")
+
     lines.append(
         f"Catalogue rows: {app_report['rows']}. Verdicts recorded: {app_report['verdicts']}. "
         f"Registry ids: {app_report['registry']}."
