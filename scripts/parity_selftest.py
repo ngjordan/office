@@ -154,9 +154,93 @@ def test_gate_catches_drift() -> None:
         roadmap.write_text(original, encoding="utf-8")
 
 
+def test_an_unpinned_absence_is_unaudited() -> None:
+    """An ABSENT verdict with no pinned location is unaudited, not broken.
+
+    A verdict that says a feature is absent is a claim about the code. When
+    the evidence names a whole file and no line, the auditor could not
+    conclude -- their own note says the sweep was inconclusive. Counting
+    that as broken would claim a conclusion nobody reached.
+
+    The check is a real one: take a row whose evidence pins a line, strip
+    the line, and the broken share must fall while the unaudited share
+    rises by exactly one.
+    """
+    repo = parity.app_dir("pdf")
+    if repo is None:
+        return
+    verdicts = parity.load_verdicts("pdf", repo)
+    catalogue = parity.load_catalogue("pdf", repo)
+    by_title = parity.verdict_index(verdicts)
+
+    # Find a row that the measurement joins to a catalogue entry and that
+    # currently counts as broken. A verdict nobody joins changes nothing.
+    target = None
+    for row in catalogue:
+        key = str(row.get("id") or "")
+        verdict = verdicts.get(key) if key else None
+        if verdict is None:
+            verdict = by_title.get(
+                parity.normalise_title(str(row.get("title") or key)))
+        if verdict is None:
+            continue
+        label = str(verdict.get("verdict", "")).upper()
+        if label not in ("ABSENT", "STUB"):
+            continue
+        if not parity.evidence_pins_location(verdict.get("evidence", []) or []):
+            continue
+        target = (key, verdict)
+        break
+    if target is None:
+        return
+
+    def shares() -> tuple[int, int]:
+        report = parity.measure("pdf", repo)
+        return (sum(b["broken"] for b in report["tiers"].values()),
+                sum(b["unaudited"] for b in report["tiers"].values()))
+
+    key, verdict = target
+    before_broken, before_unaudited = shares()
+
+    # How many rows share this citation? Unpinning one string in the file
+    # unpins every row that cites it, so the shift is that many rows.
+    evidence = str(verdict.get("evidence", [])[0])
+    affected = 0
+    for row in catalogue:
+        row_key = str(row.get("id") or "")
+        row_verdict = verdicts.get(row_key) if row_key else None
+        if row_verdict is None:
+            row_verdict = by_title.get(
+                parity.normalise_title(str(row.get("title") or row_key)))
+        if row_verdict is None:
+            continue
+        if str(row_verdict.get("verdict", "")).upper() not in ("ABSENT", "STUB"):
+            continue
+        if evidence in [str(e) for e in row_verdict.get("evidence", []) or []]:
+            affected += 1
+
+    # The measurement reads the file, so the edit has to be in the file.
+    path = repo / "parity" / "verdicts.toml"
+    original = path.read_text(encoding="utf-8")
+    try:
+        path.write_text(original.replace(evidence, re.sub(r":\d+.*$", "", evidence)),
+                        encoding="utf-8")
+        after_broken, after_unaudited = shares()
+        check(after_broken == before_broken - affected,
+              f"unpinning {key} left the broken share at {after_broken}, "
+              f"not {before_broken - affected}: an absence with no pinned "
+              f"location is still being counted as broken")
+        check(after_unaudited == before_unaudited + affected,
+              f"unpinning {key} left the unaudited share at "
+              f"{after_unaudited}, not {before_unaudited + affected}")
+    finally:
+        path.write_text(original, encoding="utf-8")
+
+
 def main() -> int:
     for test in (test_joins_hold, test_evidence_resolves, test_counts_add_up,
-                 test_registry_matches_ground_truth, test_gate_catches_drift):
+                 test_registry_matches_ground_truth, test_gate_catches_drift,
+                 test_an_unpinned_absence_is_unaudited):
         test()
         print(f"  {test.__name__}: {'FAIL' if failures else 'ok'}")
     if failures:

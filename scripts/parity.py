@@ -461,6 +461,25 @@ def evidence_files(evidence: list[str]) -> list[str]:
     return files
 
 
+def evidence_pins_location(evidence: list[str]) -> bool:
+    """Does the evidence name a line, not just a file?
+
+    A verdict that says a feature is ABSENT is a claim about the code: the
+    reader should be able to open the cited line and see the absence. When
+    the evidence names a whole file and nothing in it, the auditor did a
+    sweep and could not conclude anything -- their own note says so. Such a
+    row is unaudited, not broken: counting it as broken would claim a
+    conclusion nobody reached, and would make the broken share smaller than
+    the truth.
+    """
+    for item in evidence or []:
+        for token in re.split(r"[;,]", str(item)):
+            token = token.strip().strip("`")
+            if re.search(r":\d+", token):
+                return True
+    return False
+
+
 def measure(app: str, repo: Path) -> dict:
     """The four shares, per tier, for one app."""
     catalogue = load_catalogue(app, repo)
@@ -532,7 +551,15 @@ def measure(app: str, repo: Path) -> dict:
         elif bucket_key == "partial":
             bucket["partial"] += 1
         elif bucket_key == "broken":
-            bucket["broken"] += 1
+            # An absence has to be pinned to a place. If the evidence names
+            # only a whole file, the auditor could not conclude, so the row
+            # is unaudited rather than broken.
+            if label in ("ABSENT", "STUB") and not evidence_pins_location(
+                verdict.get("evidence", []) or []
+            ):
+                bucket["unaudited"] += 1
+            else:
+                bucket["broken"] += 1
 
         # Staleness: has the evidence moved since the verdict was made?
         files = evidence_files(verdict.get("evidence", []))
