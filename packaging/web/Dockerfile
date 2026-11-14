@@ -37,11 +37,12 @@ RUN rustup target add wasm32-unknown-unknown \
 
 WORKDIR /src
 
-# The whole tree. The suite links the nine apps through the vendor tree, and
-# those apps live in their own repositories: the CI clones them, and so does
-# this image, because a path dependency outside the build context cannot be
-# copied in.
-COPY . .
+# The sources are fetched here rather than copied in.
+#
+# The deployment sends only this Dockerfile: the build context is empty, so
+# there is nothing to copy. That also keeps the build small: the workspace's
+# own tree is 53 GB with its build cache, and none of it belongs in an image.
+RUN git clone --depth 1 https://github.com/ngjordan/office.git /src
 
 # The apps are cloned beside the suite, and the vendor tree points at them.
 # The clone list is the one in packaging/setup-vendor.sh.
@@ -75,7 +76,8 @@ FROM nginx:1.27-alpine
 # or a new build would never be picked up.
 COPY --from=build /src/dist/web/ /usr/share/nginx/html/
 
-COPY packaging/web/nginx.conf /etc/nginx/conf.d/default.conf
+# The nginx configuration comes out of the clone, for the same reason.
+COPY --from=build /src/packaging/web/nginx.conf /etc/nginx/conf.d/default.conf
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD wget -q -O /dev/null http://127.0.0.1/ || exit 1
