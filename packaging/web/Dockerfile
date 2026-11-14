@@ -56,9 +56,9 @@ RUN for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft \
 
 ENV CARGO_BUILD_JOBS=4
 
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/src/target \
-    cd ${APP_DIR} \
+# The cache mounts that would speed this up need BuildKit, which the daemon
+# here does not have, so the build is plain.
+RUN cd ${APP_DIR} \
     && trunk build --release \
     && test -f dist/web/index.html \
     && ls -la dist/web/
