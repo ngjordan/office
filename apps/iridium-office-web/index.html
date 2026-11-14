@@ -19,18 +19,10 @@
   <canvas id="workspace_canvas"></canvas>
   <div id="workspace_status">Loading Workspace&hellip;</div>
   <script>
-    // Trunk's generated script initialises the wasm module and dispatches
-    // TrunkApplicationStarted with it. The module exports the suite's entry
-    // point, but nothing calls it: the module is a cdylib whose start hook
-    // runs on instantiation, and the entry the page wants is the exported
-    // `main`. Calling it here is what starts the suite, and it is called
-    // exactly once.
-    window.addEventListener("TrunkApplicationStarted", function (e) {
-      var wasm = e.detail && e.detail.wasm;
-      if (wasm && typeof wasm.main === "function") {
-        wasm.main();
-      }
-    });
+    // The suite starts itself: the crate is a cdylib and its entry point is a
+    // `#[wasm_bindgen(start)]` function, which wasm-bindgen runs when the
+    // module is instantiated. The page's only job is to wait, and to say so
+    // if the browser could not start WebGPU.
   </script>
   <script>
     // The suite draws once it is ready; until then the page says what it is

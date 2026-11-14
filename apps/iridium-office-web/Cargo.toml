@@ -9,8 +9,17 @@ publish = false
 [lints]
 workspace = true
 
-# Trunk builds a named binary target, and the module's exported `main` is
-# what the page calls to start the suite.
+# The cdylib is what makes wasm-bindgen generate the JavaScript glue and run
+# the `#[wasm_bindgen(start)]` hook when the module is instantiated.
+[lib]
+name = "iridium_office_web"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+# Trunk builds a named binary target. The binary calls the library's entry
+# point: a binary target has no start hook of its own, and an empty `main`
+# would let the linker drop the library (the module would be 13 KB of
+# nothing).
 [[bin]]
 name = "iridium-office-web"
 path = "src/main.rs"

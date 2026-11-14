@@ -17,12 +17,14 @@
 //!   an empty document until they are given one.
 //! - Preferences live in `localStorage`.
 
-#[cfg(target_arch = "wasm32")]
-mod web;
-
+/// The binary target Trunk builds.
+///
+/// It calls the library's entry point, which is where the suite starts. A
+/// binary target has no start hook of its own, and an empty `main` would let
+/// the linker drop the library: the module would be 13 KB of nothing.
 #[cfg(target_arch = "wasm32")]
 fn main() {
-    web::start();
+    iridium_office_web::start();
 }
 
 #[cfg(not(target_arch = "wasm32"))]
