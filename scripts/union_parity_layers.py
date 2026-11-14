@@ -107,6 +107,12 @@ def main() -> int:
 
 
 def _as_repo(parity_dir: Path) -> Path:
+    """A directory shaped like an app repo, so the loader finds parity/.
+
+    When the parity directory is an app's own `parity/`, the holder lands in
+    the repository's root, so it is removed again once the merge is done: a
+    leftover directory is picked up by `git add -A` and committed.
+    """
     if (parity_dir / "parity").is_dir():
         return parity_dir
     holder = parity_dir.parent / f".parity-holder-{parity_dir.name}"
@@ -115,8 +121,22 @@ def _as_repo(parity_dir: Path) -> Path:
         source = parity_dir / name
         if source.exists():
             shutil.copy(source, holder / "parity" / name)
+    _HOLDERS.append(holder)
     return holder
 
 
+# The staging directories made above, removed when the script ends.
+_HOLDERS: list[Path] = []
+
+
+def _cleanup() -> None:
+    for holder in _HOLDERS:
+        shutil.rmtree(holder, ignore_errors=True)
+    _HOLDERS.clear()
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    finally:
+        _cleanup()
