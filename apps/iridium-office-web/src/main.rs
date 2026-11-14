@@ -1,14 +1,12 @@
 //! Workspace in the browser: the desktop stub.
 //!
-//! The browser build is the library's `#[wasm_bindgen(start)]` function,
-//! which wasm-bindgen calls when the module is instantiated. This binary
-//! exists because Trunk builds a named binary target, and it calls the same
-//! entry point so there is one place that starts the suite.
+//! The browser build starts from the library's `#[wasm_bindgen(start)]`
+//! function, which wasm-bindgen calls when the module is instantiated. This
+//! binary exists because Trunk builds a named binary target; it does NOT
+//! start the suite, or the suite would start twice.
 
 #[cfg(target_arch = "wasm32")]
-fn main() {
-    iridium_office_web::start();
-}
+fn main() {}
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {

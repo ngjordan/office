@@ -19,6 +19,20 @@
   <canvas id="workspace_canvas"></canvas>
   <div id="workspace_status">Loading Workspace&hellip;</div>
   <script>
+    // Trunk's generated script initialises the wasm module and dispatches
+    // TrunkApplicationStarted with it. The module exports the suite's entry
+    // point, but nothing calls it: the module is a cdylib whose start hook
+    // runs on instantiation, and the entry the page wants is the exported
+    // `main`. Calling it here is what starts the suite, and it is called
+    // exactly once.
+    window.addEventListener("TrunkApplicationStarted", function (e) {
+      var wasm = e.detail && e.detail.wasm;
+      if (wasm && typeof wasm.main === "function") {
+        wasm.main();
+      }
+    });
+  </script>
+  <script>
     // The suite draws once it is ready; until then the page says what it is
     // waiting for. A browser whose WebGPU adapter will not start is retried
     // with WebGL2, which is what most browsers need.

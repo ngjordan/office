@@ -23,9 +23,12 @@ mod web;
 /// The entry point.
 ///
 /// wasm-bindgen runs this when the module is instantiated, which is what
-/// starts the suite in the browser. A binary's `main` is only called by
-/// wasm-bindgen if the crate is a cdylib, so the entry point lives here and
-/// the binary is a stub for the desktop build.
+/// starts the suite in the browser: a binary's `main` is exported but nothing
+/// calls it, so a page that only initialises the module never starts the app.
+///
+/// The entry point lives in the library because the crate is a cdylib, and it
+/// is the ONLY caller of the runner: the binary's `main` does not call it, so
+/// the suite starts exactly once.
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
 pub fn start() {

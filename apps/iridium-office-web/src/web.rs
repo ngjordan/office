@@ -10,6 +10,16 @@ const CANVAS_ID: &str = "workspace_canvas";
 /// The page supplies the canvas; everything else is the same suite the
 /// desktop app runs.
 pub fn start() {
+    // Two entries reach here: the wasm-bindgen start hook, which runs when
+    // the module is instantiated, and the page, which calls the exported
+    // entry point. A second runner would be a second GPU device drawing to
+    // the same canvas, so the first one wins.
+    static STARTED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+    if STARTED.swap(true, std::sync::atomic::Ordering::SeqCst) {
+        log::warn!("the suite is already running; not starting it twice");
+        return;
+    }
+
     let Some(canvas) = canvas() else {
         log::error!("no <canvas id=\"{CANVAS_ID}\"> on the page");
         return;
