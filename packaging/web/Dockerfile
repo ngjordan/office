@@ -60,17 +60,20 @@ ENV CARGO_BUILD_JOBS=4
 
 # The cache mounts that would speed this up need BuildKit, which the daemon
 # here does not have, so the build is plain.
+#
+# Trunk writes to `../../dist/web` (see the crate's Trunk.toml), so the site
+# lands in the workspace's own dist/, not under the app.
 RUN cd ${APP_DIR} \
     && trunk build --release \
-    && test -f dist/web/index.html \
-    && ls -la dist/web/
+    && test -f /src/dist/web/index.html \
+    && ls -la /src/dist/web/
 
 FROM nginx:1.27-alpine
 
 # The site is a single page plus its wasm. The wasm is large and immutable, so
 # it is served with a long cache lifetime; the html and the loader are not,
 # or a new build would never be picked up.
-COPY --from=build /src/${APP_DIR}/dist/web/ /usr/share/nginx/html/
+COPY --from=build /src/dist/web/ /usr/share/nginx/html/
 
 COPY packaging/web/nginx.conf /etc/nginx/conf.d/default.conf
 
