@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["apps/iridium-office"]
+members = ["apps/iridium-office", "apps/iridium-office-web"]
 
 [workspace.package]
 version = "0.3.0"
@@ -23,8 +23,19 @@ iridium-pdf-ui-egui = { path = "../office-vendor/pdf/crates/ui-egui" }
 iridium-mail-ui-egui = { path = "../office-vendor/mail/crates/ui-egui" }
 iridium-mail-engine = { path = "../office-vendor/mail/crates/engine" }
 
+iridium-office = { path = "apps/iridium-office" }
+
+log = "0.4"
+serde_json = "1"
+# `uuid` needs a source of randomness on wasm32; `js` is the browser's.
+uuid = { version = "1", features = ["js"] }
+
 egui = "0.37"
-eframe = { version = "0.37", default-features = false, features = ["default_fonts", "wgpu", "glow", "accesskit", "persistence"] }
+# `glow` is off: eframe's `on_exit` takes a GL context when the feature is
+# on and takes nothing when it is off, so an app written for the no-glow
+# build (Film) would not compile against the glow one. The suite renders with
+# wgpu, which is the backend it uses everywhere.
+eframe = { version = "0.37", default-features = false, features = ["default_fonts", "wgpu", "accesskit", "persistence"] }
 
 # Phase 1: the five apps' shell libraries (the suite hosts these).
 iridium-sheets-shell = { path = "../office-vendor/sheets/crates/sheets-shell" }
@@ -81,3 +92,12 @@ craft-pdf = { path = "third-party/craft-pdf" }
 [profile.release]
 # The symbol table is half the binary and carries upstream crate and file names.
 strip = true
+# The web build links nine app engines into one module. Without LTO the
+# linker keeps every copy of everything they share, and the module is three
+# hundred megabytes: too big for a browser to load. LTO and one codegen unit
+# collapse it to one copy each.
+lto = "fat"
+codegen-units = 1
+opt-level = "z"
+
+[workspace.lints]

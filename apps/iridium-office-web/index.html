@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>Workspace</title>
+  <!-- The optimiser's validator rejects a bulk-memory operation (the suite's
+       wasm uses memory.copy) unless the feature is switched on, so it is
+       told to expect it. -->
+  <link data-trunk rel="rust" data-bin="iridium-office-web" data-wasm-opt="z" data-wasm-opt-params="--enable-bulk-memory --enable-bulk-memory-opt --enable-sign-ext --enable-mutable-globals --enable-nontrapping-float-to-int --enable-multivalue --enable-reference-types" data-weak-refs />
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #e6e6e6; }
+    #workspace_canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    #workspace_status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #555; font: 14px system-ui, sans-serif; pointer-events: none; padding: 0 2em; text-align: center; }
+  </style>
+</head>
+<body>
+  <canvas id="workspace_canvas"></canvas>
+  <div id="workspace_status">Loading Workspace&hellip;</div>
+  <script>
+    // The suite draws once it is ready; until then the page says what it is
+    // waiting for. A browser whose WebGPU adapter will not start is retried
+    // with WebGL2, which is what most browsers need.
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        var el = document.getElementById("workspace_status");
+        // textContent, not innerHTML: the message is a fixed string, and
+        // there is no reason to hand the page a parser.
+        if (el) el.textContent = "Loading Workspace. If this stays here, the browser could not start WebGPU. Add ?webgl to the URL.";
+      }, 8000);
+    });
+  </script>
+</body>
+</html>

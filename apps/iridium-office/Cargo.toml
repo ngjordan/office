@@ -40,6 +40,9 @@ log = "0.4"
 # installed Chromium. `ureq` is used only to read /json/version; `tungstenite`
 # carries the protocol's WebSocket, and speaks plain `ws://` (the browser's
 # debugging endpoint is on the loopback interface), so it needs no TLS.
+# The embedded browser only: a WebSocket to the browser's debugging port and
+# an HTTP GET of its /json/version. A browser tab has neither.
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tungstenite = { version = "0.29", default-features = false, features = ["handshake"] }
 ureq = { version = "3", default-features = false, features = ["rustls"] }
 

@@ -6,8 +6,8 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 
 | App | vs | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) |
 |---|---|---:|---:|---:|---:|---:|---:|
-| **Sheets** | Excel (Microsoft 365) | 294 | 272 (92.5 %) | 14 (4.8 %) | 8 (2.7 %) | **0 (0.0 %)** | 278 (94.6 %) |
-| **Docs** | Word | 518 | 492 (95.0 %) | 11 (2.1 %) | 15 (2.9 %) | **0 (0.0 %)** | 505 (97.5 %) |
+| **Sheets** | Excel (Microsoft 365) | 294 | 280 (95.2 %) | 6 (2.0 %) | 8 (2.7 %) | **0 (0.0 %)** | 278 (94.6 %) |
+| **Docs** | Word | 518 | 494 (95.4 %) | 9 (1.7 %) | 15 (2.9 %) | **0 (0.0 %)** | 505 (97.5 %) |
 | **Decks** | PowerPoint | 191 | 126 (66.0 %) | 57 (29.8 %) | 8 (4.2 %) | **0 (0.0 %)** | 152 (79.6 %) |
 | **PDF** | Acrobat Pro | 834 | 475 (57.0 %) | 163 (19.5 %) | 196 (23.5 %) | **0 (0.0 %)** | 433 (51.9 %) |
 | **CAD** | AutoCAD | 75 | 47 (62.7 %) | 17 (22.7 %) | 11 (14.7 %) | **0 (0.0 %)** | 55 (73.3 %) |
@@ -21,12 +21,12 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 101 | 101 (100.0 %) | 0 (0.0 %) | 0 (0.0 %) | **0 (0.0 %)** | 99 (98.0 %) | 0 |
-| P1 | 132 | 122 (92.4 %) | 10 (7.6 %) | 0 (0.0 %) | **0 (0.0 %)** | 129 (97.7 %) | 0 |
-| P2 | 61 | 49 (80.3 %) | 4 (6.6 %) | 8 (13.1 %) | **0 (0.0 %)** | 50 (82.0 %) | 0 |
+| P1 | 132 | 129 (97.7 %) | 3 (2.3 %) | 0 (0.0 %) | **0 (0.0 %)** | 129 (97.7 %) | 0 |
+| P2 | 61 | 50 (82.0 %) | 3 (4.9 %) | 8 (13.1 %) | **0 (0.0 %)** | 50 (82.0 %) | 0 |
 
-**Catalogue coverage:** 286 (97.3 %) of 294 rows are works or partial; 272 (92.5 %) works outright; **0 (0.0 %) unaudited**.
+**Catalogue coverage:** 286 (97.3 %) of 294 rows are works or partial; 280 (95.2 %) works outright; **0 (0.0 %) unaudited**.
 
-**Evidence:** 262 verdict(s) rest on a handler that was read; 32 rest on the command being registered only.
+**Evidence:** 268 verdict(s) rest on a handler that was read; 26 rest on the command being registered only.
 
 Catalogue rows: 302. Verdicts recorded: 302. Registry ids: 402.
 
@@ -36,9 +36,9 @@ Catalogue rows: 302. Verdicts recorded: 302. Registry ids: 402.
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 79 | 79 (100.0 %) | 0 (0.0 %) | 0 (0.0 %) | **0 (0.0 %)** | 79 (100.0 %) | 0 |
 | P1 | 214 | 210 (98.1 %) | 3 (1.4 %) | 1 (0.5 %) | **0 (0.0 %)** | 213 (99.5 %) | 0 |
-| P2 | 225 | 203 (90.2 %) | 8 (3.6 %) | 14 (6.2 %) | **0 (0.0 %)** | 213 (94.7 %) | 0 |
+| P2 | 225 | 205 (91.1 %) | 6 (2.7 %) | 14 (6.2 %) | **0 (0.0 %)** | 213 (94.7 %) | 0 |
 
-**Catalogue coverage:** 503 (97.1 %) of 518 rows are works or partial; 492 (95.0 %) works outright; **0 (0.0 %) unaudited**.
+**Catalogue coverage:** 503 (97.1 %) of 518 rows are works or partial; 494 (95.4 %) works outright; **0 (0.0 %) unaudited**.
 
 **Evidence:** 518 verdict(s) rest on a handler that was read; 0 rest on the command being registered only.
 

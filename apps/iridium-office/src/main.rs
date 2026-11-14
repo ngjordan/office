@@ -55,7 +55,7 @@ impl eframe::App for App {
         self.after_frame(ui.ctx(), frame);
     }
 
-    fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+    fn on_exit(&mut self) {
         self.suite.save_state();
     }
 }

@@ -3368,7 +3368,6 @@ dependencies = [
  "egui-wgpu",
  "egui-winit",
  "egui_glow",
- "glow",
  "glutin",
  "glutin-winit",
  "image",
@@ -6557,6 +6556,7 @@ dependencies = [
  "craft-window 0.1.0 (git+https://github.com/ngjordan/craft-libs?rev=e9c3f87b4fb807dcb23dc85e82906510a229b72a)",
  "eframe",
  "egui",
+ "getrandom 0.4.3",
  "hidapi",
  "iridium-cad-engine",
  "iridium-cad-io",
@@ -7550,6 +7550,22 @@ dependencies = [
  "tungstenite",
  "ureq",
  "winresource",
+]
+
+[[package]]
+name = "iridium-office-web"
+version = "0.3.0"
+dependencies = [
+ "eframe",
+ "egui",
+ "iridium-office",
+ "js-sys",
+ "log",
+ "serde_json",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]
@@ -14268,7 +14284,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "once_cell",
  "rustix 1.1.5",
  "windows-sys 0.61.2",

@@ -16,6 +16,10 @@ pub fn brand(key: &str) -> &'static str {
         .unwrap_or_default()
 }
 
+// The embedded browser drives an installed Chromium over the DevTools
+// Protocol: a child process and a WebSocket. A browser tab can do neither,
+// so the module is not part of the web build.
+#[cfg(not(target_arch = "wasm32"))]
 pub mod browser;
 pub mod chrome;
 pub mod look;
