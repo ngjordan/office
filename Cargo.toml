@@ -35,6 +35,11 @@ egui = "0.37"
 # on and takes nothing when it is off, so an app written for the no-glow
 # build (Film) would not compile against the glow one. The suite renders with
 # wgpu, which is the backend it uses everywhere.
+# `glow` is off: eframe's `on_exit` takes a GL context when the feature is
+# on and takes nothing when it is off, so an app written for the no-glow
+# build (Film, PDF, Photos) would not compile against the glow one, and one
+# app's feature switches the signature for every app in the graph. The suite
+# renders with wgpu. Mail's own binary turns the feature on for itself.
 eframe = { version = "0.37", default-features = false, features = ["default_fonts", "wgpu", "accesskit", "persistence"] }
 
 # Phase 1: the five apps' shell libraries (the suite hosts these).

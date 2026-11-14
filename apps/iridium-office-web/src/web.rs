@@ -1,7 +1,7 @@
 //! The browser side of the suite: the eframe web runner, and the app the
 //! runner owns.
 
-use iridium_office::{brand, suite::Suite};
+use iridium_office::suite::Suite;
 
 const CANVAS_ID: &str = "workspace_canvas";
 
@@ -24,7 +24,8 @@ pub fn start() {
         c.instance_descriptor.backends = eframe::wgpu::Backends::GL;
     }
 
-    let title = brand("APP_NAME").to_string();
+    // The window title comes from the page (the <title> element), so the
+    // brand name is not needed here.
     // On wasm the runner's start is a future the browser drives from its
     // event loop, so there is nothing to await here. The runner is created
     // inside the task: it has to outlive the start, and the future borrows
