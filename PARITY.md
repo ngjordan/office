@@ -13,8 +13,8 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 | **CAD** | AutoCAD | 75 | 47 (62.7 %) | 17 (22.7 %) | 11 (14.7 %) | **0 (0.0 %)** | 55 (73.3 %) |
 | **Mail** | Outlook | 1569 | 1560 (99.4 %) | 9 (0.6 %) | 0 (0.0 %) | **0 (0.0 %)** | 1569 (100.0 %) |
 | **Photos** | Photoshop | 50 | 26 (52.0 %) | 18 (36.0 %) | 6 (12.0 %) | **0 (0.0 %)** | 24 (48.0 %) |
-| **Film** | Premiere Pro | 125 | 83 (66.4 %) | 30 (24.0 %) | 12 (9.6 %) | **0 (0.0 %)** | 92 (73.6 %) |
-| **Light** | Lightroom | 546 | 419 (76.7 %) | 72 (13.2 %) | 55 (10.1 %) | **0 (0.0 %)** | 248 (45.4 %) |
+| **Film** | Premiere Pro | 125 | 84 (67.2 %) | 31 (24.8 %) | 10 (8.0 %) | **0 (0.0 %)** | 92 (73.6 %) |
+| **Light** | Lightroom | 546 | 420 (76.9 %) | 72 (13.2 %) | 54 (9.9 %) | **0 (0.0 %)** | 248 (45.4 %) |
 
 ### Sheets — vs Excel (Microsoft 365)
 
@@ -117,12 +117,12 @@ Catalogue rows: 52. Verdicts recorded: 52. Registry ids: 862.
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 23 | 19 (82.6 %) | 3 (13.0 %) | 1 (4.3 %) | **0 (0.0 %)** | 18 (78.3 %) | 0 |
 | P1 | 42 | 37 (88.1 %) | 5 (11.9 %) | 0 (0.0 %) | **0 (0.0 %)** | 37 (88.1 %) | 0 |
-| P2 | 60 | 27 (45.0 %) | 22 (36.7 %) | 11 (18.3 %) | **0 (0.0 %)** | 37 (61.7 %) | 0 |
+| P2 | 60 | 28 (46.7 %) | 23 (38.3 %) | 9 (15.0 %) | **0 (0.0 %)** | 37 (61.7 %) | 0 |
 | NA | 0 | — | — | — | **—** | — | 0 |
 
-**Catalogue coverage:** 113 (90.4 %) of 125 rows are works or partial; 83 (66.4 %) works outright; **0 (0.0 %) unaudited**.
+**Catalogue coverage:** 115 (92.0 %) of 125 rows are works or partial; 84 (67.2 %) works outright; **0 (0.0 %) unaudited**.
 
-**Evidence:** 104 verdict(s) rest on a handler that was read; 21 rest on the command being registered only.
+**Evidence:** 105 verdict(s) rest on a handler that was read; 20 rest on the command being registered only.
 
 Catalogue rows: 127. Verdicts recorded: 127. Registry ids: 693.
 
@@ -132,10 +132,10 @@ Catalogue rows: 127. Verdicts recorded: 127. Registry ids: 693.
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 203 | 193 (95.1 %) | 10 (4.9 %) | 0 (0.0 %) | **0 (0.0 %)** | 91 (44.8 %) | 0 |
 | P1 | 163 | 147 (90.2 %) | 13 (8.0 %) | 3 (1.8 %) | **0 (0.0 %)** | 83 (50.9 %) | 0 |
-| P2 | 180 | 79 (43.9 %) | 49 (27.2 %) | 52 (28.9 %) | **0 (0.0 %)** | 74 (41.1 %) | 0 |
+| P2 | 180 | 80 (44.4 %) | 49 (27.2 %) | 51 (28.3 %) | **0 (0.0 %)** | 74 (41.1 %) | 0 |
 | NA | 0 | — | — | — | **—** | — | 0 |
 
-**Catalogue coverage:** 491 (89.9 %) of 546 rows are works or partial; 419 (76.7 %) works outright; **0 (0.0 %) unaudited**.
+**Catalogue coverage:** 492 (90.1 %) of 546 rows are works or partial; 420 (76.9 %) works outright; **0 (0.0 %) unaudited**.
 
 **Evidence:** 546 verdict(s) rest on a handler that was read; 0 rest on the command being registered only.
 

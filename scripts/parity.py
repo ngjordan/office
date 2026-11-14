@@ -100,12 +100,31 @@ VENDOR = ROOT.parent / "office-vendor"
 
 
 def read_toml(path: Path) -> dict:
-    """A tiny TOML reader.
+    """Read one of the parity TOML files.
 
-    The stdlib has no TOML, and adding a dependency for one script is worse
-    than thirty lines of parser. It reads the shapes these files use: tables,
-    arrays of tables, and scalar keys. Anything else is an error, not a
-    silent skip.
+    Python 3.11 has TOML in the stdlib (`tomllib`), so there is no reason to
+    parse it by hand. The hand parser was written when the stdlib had none,
+    and it was too forgiving: it read a file with an unescaped quote inside a
+    quoted string, so a malformed file loaded and the measurement carried on
+    with the wrong value in it. Nothing reported it.
+
+    `tomllib` rejects a malformed file, which is the point. The hand parser
+    stays as the fallback for an older interpreter, and it is not used to
+    paper over a file that tomllib rejects.
+    """
+    try:
+        import tomllib
+    except ImportError:  # Python < 3.11
+        return _read_toml_by_hand(path)
+    with path.open("rb") as fh:
+        return tomllib.load(fh)
+
+
+def _read_toml_by_hand(path: Path) -> dict:
+    """A tiny TOML reader, for an interpreter without `tomllib`.
+
+    It reads the shapes these files use: tables, arrays of tables, and scalar
+    keys. Anything else is an error, not a silent skip.
     """
     if not path.exists():
         return {}
