@@ -17,7 +17,9 @@
 #   docker build -f packaging/web/Dockerfile -t workspace-web .
 #   docker run -p 8080:80 workspace-web
 
-FROM rust:1.90-bookworm AS build
+# The workspace needs rustc 1.95 or newer (every app's rust-version says so),
+# and the toolchain the suite is built with is 1.99.
+FROM rust:1.99-bookworm AS build
 
 ARG APP_DIR=apps/iridium-office-web
 
