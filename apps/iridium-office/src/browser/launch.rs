@@ -484,7 +484,7 @@ fn process_alive(pid: u32) -> bool {
     #[cfg(all(unix, not(target_os = "linux")))]
     {
         // Signal 0 asks whether the process exists, without touching it.
-        unsafe { libc_kill(pid, 0) == 0 }
+        libc_kill(pid, 0) == 0
     }
     #[cfg(not(unix))]
     {
@@ -494,9 +494,13 @@ fn process_alive(pid: u32) -> bool {
 }
 
 /// `kill(pid, 0)` — asks whether the process exists, without signalling it.
+///
+/// The block is `unsafe extern` because Rust 2024 requires it, and the call
+/// inside it is the unsafe part. This code only builds on macOS and the BSDs,
+/// so it is checked by a macOS cross-check rather than by the Linux gate.
 #[cfg(all(unix, not(target_os = "linux")))]
 fn libc_kill(pid: u32, signal: i32) -> i32 {
-    extern "C" {
+    unsafe extern "C" {
         fn kill(pid: i32, sig: i32) -> i32;
     }
     unsafe { kill(pid as i32, signal) }

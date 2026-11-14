@@ -166,3 +166,43 @@ jobs:
 
       - name: Check the Windows build
         run: cargo check -p iridium-office --all-targets --target x86_64-pc-windows-msvc
+
+  # The Linux gate compiles only Linux code, and the Windows job only Windows
+  # code. A cfg(target_os = "macos") block is invisible to both, so an "extern
+  # blocks must be unsafe" error (Rust 2024) in the browser's signal handling
+  # sat in the tree until the macOS release job hit it after two hours of
+  # building. This job checks the macOS target on every push. cargo check does
+  # not link, so it is quick.
+  macos:
+    name: macOS check
+    runs-on: macos-15
+    env:
+      CRAFT_FONTS_DIR: ${{ github.workspace }}/deps/craft-fonts
+      CRAFT_I18N_DIR: ${{ github.workspace }}/deps/craft-i18n
+      CARGO_BUILD_JOBS: 2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check out the apps
+        run: |
+          set -euo pipefail
+          parent="$(dirname "$GITHUB_WORKSPACE")"
+          for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft decks:dc-deckcraft pdf:pdfcraft mail:mc-mailcraft photos:pc-photocraft film:fc-filmcraft light:lc-lightcraft; do
+            name="${pair%%:*}"; dir="${pair##*:}"
+            git clone --depth 1 "https://github.com/ngjordan/$name.git" "$parent/$dir"
+          done
+
+      - name: Check out the assets
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ngjordan/craft-fonts.git "$GITHUB_WORKSPACE/deps/craft-fonts"
+          git clone --depth 1 https://github.com/ngjordan/craft-i18n.git "$GITHUB_WORKSPACE/deps/craft-i18n"
+
+      # The workspace's path dependencies point at ../office-vendor/<app>.
+      - name: Create the vendor tree
+        run: packaging/setup-vendor.sh "$(dirname "$GITHUB_WORKSPACE")"
+
+      - name: Check the macOS build
+        run: cargo check -p iridium-office --all-targets --target x86_64-apple-darwin
