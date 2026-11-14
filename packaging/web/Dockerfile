@@ -49,11 +49,10 @@ RUN for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft \
         name="${pair%%:*}"; dir="${pair##*:}"; \
         git clone --depth 1 "https://github.com/ngjordan/$name.git" "/$dir"; \
     done \
-    && ./packaging/setup-vendor.sh / \
     && git clone --depth 1 https://github.com/ngjordan/craft-fonts.git "$CRAFT_FONTS_DIR" \
     && git clone --depth 1 https://github.com/ngjordan/craft-i18n.git "$CRAFT_I18N_DIR" \
-    && rm -rf /src/office-vendor \
-    && ls -la /src/office-vendor
+    && ./packaging/setup-vendor.sh / \
+    && ls -la /office-vendor
 
 ENV CARGO_BUILD_JOBS=4
 
