@@ -7,14 +7,14 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 | App | vs | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) |
 |---|---|---:|---:|---:|---:|---:|---:|
 | **Sheets** | Excel (Microsoft 365) | 294 | 272 (92.5 %) | 14 (4.8 %) | 8 (2.7 %) | **0 (0.0 %)** | 278 (94.6 %) |
-| **Docs** | Word | 78 | 44 (56.4 %) | 17 (21.8 %) | 8 (10.3 %) | **9 (11.5 %)** | 62 (79.5 %) |
+| **Docs** | Word | 518 | 492 (95.0 %) | 11 (2.1 %) | 15 (2.9 %) | **0 (0.0 %)** | 505 (97.5 %) |
 | **Decks** | PowerPoint | 84 | 51 (60.7 %) | 22 (26.2 %) | 10 (11.9 %) | **1 (1.2 %)** | 0 (0.0 %) |
-| **PDF** | Acrobat Pro | 89 | 48 (53.9 %) | 17 (19.1 %) | 20 (22.5 %) | **4 (4.5 %)** | 0 (0.0 %) |
-| **CAD** | AutoCAD | 75 | 41 (54.7 %) | 21 (28.0 %) | 12 (16.0 %) | **1 (1.3 %)** | 2 (2.7 %) |
+| **PDF** | Acrobat Pro | 834 | 467 (56.0 %) | 125 (15.0 %) | 242 (29.0 %) | **0 (0.0 %)** | 0 (0.0 %) |
+| **CAD** | AutoCAD | 75 | 47 (62.7 %) | 17 (22.7 %) | 11 (14.7 %) | **0 (0.0 %)** | 55 (73.3 %) |
 | **Mail** | Outlook | 1569 | 1559 (99.4 %) | 10 (0.6 %) | 0 (0.0 %) | **0 (0.0 %)** | 1569 (100.0 %) |
-| **Photos** | Photoshop | 50 | 24 (48.0 %) | 16 (32.0 %) | 8 (16.0 %) | **2 (4.0 %)** | 1 (2.0 %) |
+| **Photos** | Photoshop | 50 | 26 (52.0 %) | 18 (36.0 %) | 6 (12.0 %) | **0 (0.0 %)** | 24 (48.0 %) |
 | **Film** | Premiere Pro | 14 | 7 (50.0 %) | 4 (28.6 %) | 1 (7.1 %) | **2 (14.3 %)** | 0 (0.0 %) |
-| **Light** | Lightroom | 13 | 7 (53.8 %) | 3 (23.1 %) | 3 (23.1 %) | **0 (0.0 %)** | 0 (0.0 %) |
+| **Light** | Lightroom | 546 | 419 (76.7 %) | 71 (13.0 %) | 56 (10.3 %) | **0 (0.0 %)** | 248 (45.4 %) |
 
 ### Sheets — vs Excel (Microsoft 365)
 
@@ -34,13 +34,15 @@ Catalogue rows: 302. Verdicts recorded: 302. Registry ids: 403.
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P2 | 78 | 44 (56.4 %) | 17 (21.8 %) | 8 (10.3 %) | **9 (11.5 %)** | 62 (79.5 %) | 0 |
+| P0 | 79 | 79 (100.0 %) | 0 (0.0 %) | 0 (0.0 %) | **0 (0.0 %)** | 79 (100.0 %) | 0 |
+| P1 | 214 | 210 (98.1 %) | 3 (1.4 %) | 1 (0.5 %) | **0 (0.0 %)** | 213 (99.5 %) | 0 |
+| P2 | 225 | 203 (90.2 %) | 8 (3.6 %) | 14 (6.2 %) | **0 (0.0 %)** | 213 (94.7 %) | 0 |
 
-**Catalogue coverage:** 61 (78.2 %) of 78 rows are works or partial; 44 (56.4 %) works outright; **9 (11.5 %) unaudited**.
+**Catalogue coverage:** 503 (97.1 %) of 518 rows are works or partial; 492 (95.0 %) works outright; **0 (0.0 %) unaudited**.
 
-**Evidence:** 61 verdict(s) rest on a handler that was read; 8 rest on the command being registered only.
+**Evidence:** 518 verdict(s) rest on a handler that was read; 0 rest on the command being registered only.
 
-Catalogue rows: 78. Verdicts recorded: 69. Registry ids: 677.
+Catalogue rows: 520. Verdicts recorded: 520. Registry ids: 677.
 
 ### Decks — vs PowerPoint
 
@@ -58,25 +60,29 @@ Catalogue rows: 86. Verdicts recorded: 85. Registry ids: 427.
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P2 | 89 | 48 (53.9 %) | 17 (19.1 %) | 20 (22.5 %) | **4 (4.5 %)** | 0 (0.0 %) | 0 |
+| P0 | 252 | 228 (90.5 %) | 21 (8.3 %) | 3 (1.2 %) | **0 (0.0 %)** | 0 (0.0 %) | 0 |
+| P1 | 335 | 193 (57.6 %) | 72 (21.5 %) | 70 (20.9 %) | **0 (0.0 %)** | 0 (0.0 %) | 0 |
+| P2 | 202 | 44 (21.8 %) | 29 (14.4 %) | 129 (63.9 %) | **0 (0.0 %)** | 0 (0.0 %) | 0 |
+| P3 | 45 | 2 (4.4 %) | 3 (6.7 %) | 40 (88.9 %) | **0 (0.0 %)** | 0 (0.0 %) | 0 |
+| NA | 0 | — | — | — | **—** | — | 0 |
 
-**Catalogue coverage:** 65 (73.0 %) of 89 rows are works or partial; 48 (53.9 %) works outright; **4 (4.5 %) unaudited**.
+**Catalogue coverage:** 592 (71.0 %) of 834 rows are works or partial; 467 (56.0 %) works outright; **0 (0.0 %) unaudited**.
 
-**Evidence:** 60 verdict(s) rest on a handler that was read; 25 rest on the command being registered only.
+**Evidence:** 535 verdict(s) rest on a handler that was read; 299 rest on the command being registered only.
 
-Catalogue rows: 91. Verdicts recorded: 87. Registry ids: 67.
+Catalogue rows: 857. Verdicts recorded: 857. Registry ids: 67.
 
 ### CAD — vs AutoCAD
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P2 | 75 | 41 (54.7 %) | 21 (28.0 %) | 12 (16.0 %) | **1 (1.3 %)** | 2 (2.7 %) | 0 |
+| P2 | 75 | 47 (62.7 %) | 17 (22.7 %) | 11 (14.7 %) | **0 (0.0 %)** | 55 (73.3 %) | 0 |
 
-**Catalogue coverage:** 62 (82.7 %) of 75 rows are works or partial; 41 (54.7 %) works outright; **1 (1.3 %) unaudited**.
+**Catalogue coverage:** 64 (85.3 %) of 75 rows are works or partial; 47 (62.7 %) works outright; **0 (0.0 %) unaudited**.
 
-**Evidence:** 61 verdict(s) rest on a handler that was read; 13 rest on the command being registered only.
+**Evidence:** 28 verdict(s) rest on a handler that was read; 47 rest on the command being registered only.
 
-Catalogue rows: 75. Verdicts recorded: 74. Registry ids: 463.
+Catalogue rows: 75. Verdicts recorded: 75. Registry ids: 463.
 
 ### Mail — vs Outlook
 
@@ -96,13 +102,13 @@ Catalogue rows: 1698. Verdicts recorded: 1698. Registry ids: 971.
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P2 | 50 | 24 (48.0 %) | 16 (32.0 %) | 8 (16.0 %) | **2 (4.0 %)** | 1 (2.0 %) | 0 |
+| P2 | 50 | 26 (52.0 %) | 18 (36.0 %) | 6 (12.0 %) | **0 (0.0 %)** | 24 (48.0 %) | 0 |
 
-**Catalogue coverage:** 40 (80.0 %) of 50 rows are works or partial; 24 (48.0 %) works outright; **2 (4.0 %) unaudited**.
+**Catalogue coverage:** 44 (88.0 %) of 50 rows are works or partial; 26 (52.0 %) works outright; **0 (0.0 %) unaudited**.
 
-**Evidence:** 40 verdict(s) rest on a handler that was read; 8 rest on the command being registered only.
+**Evidence:** 50 verdict(s) rest on a handler that was read; 0 rest on the command being registered only.
 
-Catalogue rows: 52. Verdicts recorded: 50. Registry ids: 867.
+Catalogue rows: 52. Verdicts recorded: 52. Registry ids: 867.
 
 ### Film — vs Premiere Pro
 
@@ -120,10 +126,13 @@ Catalogue rows: 14. Verdicts recorded: 12. Registry ids: 695.
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P2 | 13 | 7 (53.8 %) | 3 (23.1 %) | 3 (23.1 %) | **0 (0.0 %)** | 0 (0.0 %) | 0 |
+| P0 | 203 | 193 (95.1 %) | 10 (4.9 %) | 0 (0.0 %) | **0 (0.0 %)** | 91 (44.8 %) | 0 |
+| P1 | 163 | 147 (90.2 %) | 13 (8.0 %) | 3 (1.8 %) | **0 (0.0 %)** | 83 (50.9 %) | 0 |
+| P2 | 180 | 79 (43.9 %) | 48 (26.7 %) | 53 (29.4 %) | **0 (0.0 %)** | 74 (41.1 %) | 0 |
+| NA | 0 | — | — | — | **—** | — | 0 |
 
-**Catalogue coverage:** 10 (76.9 %) of 13 rows are works or partial; 7 (53.8 %) works outright; **0 (0.0 %) unaudited**.
+**Catalogue coverage:** 490 (89.7 %) of 546 rows are works or partial; 419 (76.7 %) works outright; **0 (0.0 %) unaudited**.
 
-**Evidence:** 10 verdict(s) rest on a handler that was read; 3 rest on the command being registered only.
+**Evidence:** 546 verdict(s) rest on a handler that was read; 0 rest on the command being registered only.
 
-Catalogue rows: 13. Verdicts recorded: 13. Registry ids: 443.
+Catalogue rows: 581. Verdicts recorded: 581. Registry ids: 443.
