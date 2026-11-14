@@ -13,7 +13,7 @@ to the applicable count, and **Unaudited** is the share nobody has judged.
 | **CAD** | AutoCAD | 75 | 47 (62.7 %) | 17 (22.7 %) | 11 (14.7 %) | **0 (0.0 %)** | 55 (73.3 %) |
 | **Mail** | Outlook | 1569 | 1559 (99.4 %) | 10 (0.6 %) | 0 (0.0 %) | **0 (0.0 %)** | 1569 (100.0 %) |
 | **Photos** | Photoshop | 50 | 26 (52.0 %) | 18 (36.0 %) | 6 (12.0 %) | **0 (0.0 %)** | 24 (48.0 %) |
-| **Film** | Premiere Pro | 128 | 67 (52.3 %) | 35 (27.3 %) | 17 (13.3 %) | **9 (7.0 %)** | 84 (65.6 %) |
+| **Film** | Premiere Pro | 125 | 82 (65.6 %) | 31 (24.8 %) | 12 (9.6 %) | **0 (0.0 %)** | 92 (73.6 %) |
 | **Light** | Lightroom | 546 | 419 (76.7 %) | 72 (13.2 %) | 55 (10.1 %) | **0 (0.0 %)** | 248 (45.4 %) |
 
 ### Sheets — vs Excel (Microsoft 365)
@@ -115,15 +115,16 @@ Catalogue rows: 52. Verdicts recorded: 52. Registry ids: 867.
 
 | Tier | Applicable | Works | Partial | Broken | **Unaudited** | Wired (machine) | Stale |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P0 | 45 | 36 (80.0 %) | 8 (17.8 %) | 1 (2.2 %) | **0 (0.0 %)** | 40 (88.9 %) | 0 |
-| P1 | 41 | 21 (51.2 %) | 15 (36.6 %) | 3 (7.3 %) | **2 (4.9 %)** | 28 (68.3 %) | 0 |
-| P2 | 42 | 10 (23.8 %) | 12 (28.6 %) | 13 (31.0 %) | **7 (16.7 %)** | 16 (38.1 %) | 0 |
+| P0 | 23 | 19 (82.6 %) | 3 (13.0 %) | 1 (4.3 %) | **0 (0.0 %)** | 18 (78.3 %) | 0 |
+| P1 | 42 | 37 (88.1 %) | 5 (11.9 %) | 0 (0.0 %) | **0 (0.0 %)** | 37 (88.1 %) | 0 |
+| P2 | 60 | 26 (43.3 %) | 23 (38.3 %) | 11 (18.3 %) | **0 (0.0 %)** | 37 (61.7 %) | 0 |
+| NA | 0 | — | — | — | **—** | — | 0 |
 
-**Catalogue coverage:** 102 (79.7 %) of 128 rows are works or partial; 67 (52.3 %) works outright; **9 (7.0 %) unaudited**.
+**Catalogue coverage:** 113 (90.4 %) of 125 rows are works or partial; 82 (65.6 %) works outright; **0 (0.0 %) unaudited**.
 
-**Evidence:** 63 verdict(s) rest on a handler that was read; 56 rest on the command being registered only.
+**Evidence:** 104 verdict(s) rest on a handler that was read; 21 rest on the command being registered only.
 
-Catalogue rows: 129. Verdicts recorded: 120. Registry ids: 695.
+Catalogue rows: 127. Verdicts recorded: 127. Registry ids: 695.
 
 ### Light — vs Lightroom
 
