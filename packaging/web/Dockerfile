@@ -76,7 +76,7 @@ RUN cd /src \
     && ./packaging/setup-vendor.sh / \
     && ls -la /office-vendor
 
-ENV CARGO_BUILD_JOBS=4
+ENV CARGO_BUILD_JOBS=12
 
 # The cache mounts that would speed this up need BuildKit, which the daemon
 # here does not have, so the build is plain.
