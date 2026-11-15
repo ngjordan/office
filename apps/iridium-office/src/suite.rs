@@ -456,7 +456,7 @@ impl Suite {
                         let width = ui.available_width().min(960.0);
                         ui.allocate_ui_with_layout(
                             egui::vec2(width, 0.0),
-                            egui::Layout::top_down(egui::Align::Center),
+                            egui::Layout::top_down(egui::Align::Min),
                             |ui| {
                                 ui.add_space(crate::chrome::space::XXL);
                                 ui.painter().text(
@@ -468,19 +468,40 @@ impl Suite {
                                 );
                                 ui.add_space(crate::chrome::space::XL);
 
-                                // A grid of cards, as many columns as fit, four at most.
-                                let columns = ((ui.available_width() - 32.0) / 176.0)
-                                    .floor()
-                                    .clamp(1.0, 4.0)
-                                    as usize;
+                                // A section heading, so the page has structure
+                                // instead of a wall of tiles.
+                                ui.painter().text(
+                                    ui.available_rect_before_wrap().left_center(),
+                                    egui::Align2::LEFT_CENTER,
+                                    "APPS",
+                                    crate::chrome::font(crate::chrome::text::TAB),
+                                    chrome.muted,
+                                );
+                                ui.add_space(crate::chrome::space::M);
+
+                                // Nine apps make a square: three columns of
+                                // cards that fill the content column, so the
+                                // title, the heading and the cards all share
+                                // one left edge. The column count follows the
+                                // width, so a phone gets two cards or one.
+                                let columns = if width >= 720.0 {
+                                    3
+                                } else if width >= 460.0 {
+                                    2
+                                } else {
+                                    1
+                                };
+                                let gap = crate::chrome::space::L;
+                                let card = (width - gap * (columns - 1) as f32) / columns as f32;
                                 egui::Grid::new("home-apps")
-                                    .spacing([crate::chrome::space::L, crate::chrome::space::L])
+                                    .spacing([gap, gap])
                                     .show(ui, |ui| {
                                         for (i, kind) in Kind::ALL.into_iter().enumerate() {
                                             let response = crate::chrome::app_card(
                                                 ui,
                                                 ui.scope_id().with(("home", kind)),
                                                 kind.label(),
+                                                kind.description(),
                                                 kind.mark(),
                                                 if dark {
                                                     kind.accent_dark()
@@ -488,6 +509,7 @@ impl Suite {
                                                     kind.accent()
                                                 },
                                                 chrome,
+                                                card,
                                             );
                                             if response.clicked() {
                                                 chosen = Some(kind);

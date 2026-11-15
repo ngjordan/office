@@ -554,18 +554,25 @@ pub fn document_tab(
     )
 }
 
-/// A home-screen card for one app.
+/// A launcher's app card: the icon, the name, and what the app is for.
+///
+/// The width is the caller's, so the cards fill the content column rather
+/// than leaving a gap beside a fixed tile.
 pub fn app_card(
     ui: &mut Ui,
     id: Id,
     label: &str,
+    description: &str,
     mark: &str,
     accent: Color32,
     chrome: &Chrome,
+    width: f32,
 ) -> Response {
-    let (_, rect) = ui.allocate_space(vec2(160.0, 112.0));
+    let (_, rect) = ui.allocate_space(vec2(width, 84.0));
     let response = ui.interact(rect, id, Sense::click());
 
+    // The visible name is the accessible name. The description under it is
+    // for sighted users: egui's widget info carries no description field.
     response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, label));
 
     let painter = ui.painter();
@@ -580,19 +587,33 @@ pub fn app_card(
     painter.rect_stroke(
         rect,
         CornerRadius::same(radius::CARD),
-        Stroke::new(1.0, chrome.separator),
+        Stroke::new(
+            1.0,
+            if response.hovered() {
+                accent
+            } else {
+                chrome.separator
+            },
+        ),
         StrokeKind::Inside,
     );
 
-    let tile = Rect::from_min_size(rect.min + vec2(16.0, 16.0), vec2(32.0, 32.0));
+    let tile = Rect::from_min_size(rect.min + vec2(16.0, 16.0), vec2(36.0, 36.0));
     accent_tile(painter, tile, mark, accent, chrome.on_accent);
 
     painter.text(
-        rect.min + vec2(16.0, 68.0),
+        rect.min + vec2(64.0, 28.0),
         Align2::LEFT_CENTER,
         label,
         font(text::BODY),
         chrome.text,
+    );
+    painter.text(
+        rect.min + vec2(64.0, 52.0),
+        Align2::LEFT_CENTER,
+        description,
+        font(text::TAB),
+        chrome.muted,
     );
 
     if response.has_focus() {

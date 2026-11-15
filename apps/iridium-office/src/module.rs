@@ -66,6 +66,24 @@ impl Kind {
         }
     }
 
+    /// One line saying what the app is for.
+    ///
+    /// The launcher shows this under the name. A two-letter mark and a name
+    /// tell a first-time user what the app is called, not what it does.
+    pub fn description(self) -> &'static str {
+        match self {
+            Kind::Sheets => "Spreadsheets",
+            Kind::Docs => "Documents",
+            Kind::Cad => "Drafting",
+            Kind::Decks => "Presentations",
+            Kind::Pdf => "Read and edit PDF",
+            Kind::Mail => "Email",
+            Kind::Photos => "Photos and painting",
+            Kind::Film => "Video and audio",
+            Kind::Light => "RAW negatives",
+        }
+    }
+
     /// This app's accent colour, in the light theme.
     ///
     /// Each app keeps its own identity colour. It tints the rail tile and the
