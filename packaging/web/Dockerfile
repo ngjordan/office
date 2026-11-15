@@ -54,12 +54,22 @@ RUN git clone --depth 1 https://github.com/ngjordan/office.git /src \
     && git checkout FETCH_HEAD
 
 # The apps are cloned beside the suite, and the vendor tree points at them.
-# The clone list is the one in packaging/setup-vendor.sh.
-RUN for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft \
+# The clone list is the one in packaging/setup-vendor.sh, and the revision each
+# app is cloned at comes from packaging/web/apps.lock. Pinning them matters:
+# the image is built from a commit, and a build layer is cached by its
+# command, so tracking each app's branch HEAD would serve whichever commit
+# happened to be pushed and would not pick up an app's new work at all.
+RUN cd /src \
+    && set -a && . ./packaging/web/apps.lock && set +a \
+    && for pair in sheets:gc-gridcraft docs:wc-wordcraft cad:cc-cadcraft \
              decks:dc-deckcraft pdf:pdfcraft mail:mc-mailcraft \
              photos:pc-photocraft film:fc-filmcraft light:lc-lightcraft; do \
-        name="${pair%%:*}"; dir="${pair##*:}"; \
-        git clone --depth 1 "https://github.com/ngjordan/$name.git" "/$dir"; \
+        name="${pair%%:*}"; dir="${pair##*:}"; sha="$(printenv "$name")"; \
+        mkdir -p "/$dir" \
+        && git -C "/$dir" init -q \
+        && git -C "/$dir" remote add origin "https://github.com/ngjordan/$name.git" \
+        && git -C "/$dir" fetch -q --depth 1 origin "$sha" \
+        && git -C "/$dir" checkout -q FETCH_HEAD; \
     done \
     && git clone --depth 1 https://github.com/ngjordan/craft-fonts.git "$CRAFT_FONTS_DIR" \
     && git clone --depth 1 https://github.com/ngjordan/craft-i18n.git "$CRAFT_I18N_DIR" \

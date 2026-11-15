@@ -1,0 +1,19 @@
+# The app revisions the web image is built from.
+#
+# The image clones each app from GitHub. Tracking the branch HEAD means a
+# deployment serves whichever commit happened to be pushed, and the build
+# layer is cached by its command: a change in an app would not reach the
+# site. Pinning the revision makes the build reproducible and makes the
+# change visible, because these lines live in this repository and so in
+# the commit the image is built from.
+#
+# Regenerate with: packaging/web/update-apps-lock.sh
+sheets=f8d8f265d6d5a740a8e9f88cc8854ba4494ba6d2
+docs=260471c9d2ffb560947a0397c4f218fede370ba0
+cad=6a6e45d0577d111a2ec962f76d73d8ba4bc991e3
+decks=cecbeac84ee0b2f5fa90895486ff68d783b5373f
+pdf=63d359f1f587d6a93d95790c4020d7d667fdb137
+mail=97ae88cea38df8495b1119d3d61f1b944405be79
+photos=4527fe85f841b397458cdcabc61abad66f76d0e9
+film=73244d756d799b699838c8c6f44d58c1b9208ae1
+light=c99c94c4eb9c1480ab77f39609fd2de4abc949b8
