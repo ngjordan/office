@@ -8,8 +8,8 @@
 # the commit the image is built from.
 #
 # Regenerate with: packaging/web/update-apps-lock.sh
-sheets=f8d8f265d6d5a740a8e9f88cc8854ba4494ba6d2
-docs=260471c9d2ffb560947a0397c4f218fede370ba0
+sheets=c939e4a82b0ef62de73720f6d0eb16bc133d152e
+docs=a102a1735ac5c1a56dc26d24e2d191759ae6c544
 cad=6a6e45d0577d111a2ec962f76d73d8ba4bc991e3
 decks=cecbeac84ee0b2f5fa90895486ff68d783b5373f
 pdf=63d359f1f587d6a93d95790c4020d7d667fdb137
