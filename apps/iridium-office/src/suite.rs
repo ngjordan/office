@@ -322,9 +322,15 @@ impl Suite {
         // borrow of `self` inside the panel does not overlap the switch.
         let mut chosen_doc: Option<(Kind, String)> = None;
         let mut closed: Option<usize> = None;
+        // The chrome's own rects. The app draws in what they leave: a child ui
+        // takes the parent's cursor position instead, and the panels have moved
+        // that to the bottom of the window, so the app's own panels would land
+        // off-screen and nothing would be drawn.
+        let mut strip_rect: Option<egui::Rect> = None;
+        let mut rail_rect: Option<egui::Rect> = None;
         ui.scope(|chrome_ui| {
             chrome_ui.set_style(std::sync::Arc::new(chrome.style()));
-            egui::Panel::top("tabs")
+            let strip = egui::Panel::top("tabs")
                 .exact_size(44.0)
                 .frame(
                     egui::Frame::new()
@@ -365,6 +371,7 @@ impl Suite {
                         });
                     });
                 });
+            strip_rect = Some(strip.response.rect);
         });
         if let Some((kind, _path)) = chosen_doc {
             // The document is already open: clicking its tab only brings its app up.
@@ -384,7 +391,7 @@ impl Suite {
         let mut chosen = None;
         ui.scope(|chrome_ui| {
             chrome_ui.set_style(std::sync::Arc::new(chrome.style()));
-            egui::Panel::left("rail")
+            let rail = egui::Panel::left("rail")
                 .default_size(84.0)
                 .resizable(false)
                 .frame(
@@ -415,6 +422,7 @@ impl Suite {
                         }
                     }
                 });
+            rail_rect = Some(rail.response.rect);
         });
         if let Some(kind) = chosen {
             self.activate(kind, &ctx, storage);
@@ -429,7 +437,22 @@ impl Suite {
         let Some((_, m)) = self.started.iter_mut().find(|(k, _)| *k == active) else {
             return;
         };
-        ui.push_id(active, |ui| m.ui(ui));
+        // The app draws in the space the chrome left.
+        //
+        // It must be given that rect explicitly: a child ui takes the parent's
+        // cursor position, and the rail has moved that to the bottom of the
+        // window, so the app's own panels would land off-screen and the app
+        // would show nothing at all.
+        let screen = ui.max_rect();
+        let left = rail_rect.map_or(0.0, |r| r.max.x - screen.min.x);
+        let top = strip_rect.map_or(0.0, |r| r.max.y - screen.min.y);
+        let app_rect = egui::Rect::from_min_max(
+            egui::pos2(screen.min.x + left, screen.min.y + top),
+            screen.max,
+        );
+        ui.scope_builder(egui::UiBuilder::new().max_rect(app_rect), |ui| {
+            ui.push_id(active, |ui| m.ui(ui));
+        });
         self.last_drawn = Some(active);
     }
 

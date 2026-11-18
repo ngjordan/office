@@ -135,6 +135,10 @@ impl eframe::App for App {
     }
 
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
+        // The web runner calls `App::ui` and never `App::logic`, so the apps'
+        // own logic (their fonts, their state) has to run here. The native
+        // runner calls both, in this order.
+        self.suite.logic(ui.ctx());
         self.suite.ui(ui, frame.storage());
         if self.suite.after_pass(frame) {
             ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
