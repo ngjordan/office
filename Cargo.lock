@@ -7516,7 +7516,7 @@ dependencies = [
 
 [[package]]
 name = "iridium-office"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "base64 0.22.1",
  "eframe",
@@ -7554,7 +7554,7 @@ dependencies = [
 
 [[package]]
 name = "iridium-office-web"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "eframe",
  "egui",

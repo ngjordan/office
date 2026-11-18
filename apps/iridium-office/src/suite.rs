@@ -277,6 +277,35 @@ impl Suite {
             self.started[i].1.logic(ctx);
             self.capture_look(ctx, kind, before);
         }
+        self.update_title(ctx);
+    }
+
+    /// The window title: the app on screen, and the document it has open.
+    ///
+    /// Each app sets its own title from its own state, and an app that is not
+    /// on screen must not decide it: the title said the app the user had left.
+    /// The suite owns the title instead, and says when the app has unsaved work.
+    fn update_title(&mut self, ctx: &egui::Context) {
+        let Some(active) = self.active else {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Title(
+                crate::brand("APP_NAME").to_string(),
+            ));
+            return;
+        };
+        let mut title = active.label().to_string();
+        if let Some(path) = self.active_document.as_deref() {
+            let name = path.rsplit(['/', '\\']).next().unwrap_or(path);
+            title = format!("{title} — {name}");
+        }
+        if self
+            .started
+            .iter()
+            .find(|(k, _)| *k == active)
+            .is_some_and(|(_, m)| !m.can_close())
+        {
+            title.push_str(" — Edited");
+        }
+        ctx.send_viewport_cmd(egui::ViewportCommand::Title(title));
     }
 
     /// Raw input for every started module.
