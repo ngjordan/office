@@ -26,7 +26,10 @@ param(
   # script does not sign anything and does not build the portable archive: it leaves the
   # executable and the installer in $Dist\signpath\ for the signing request, and the
   # portable archive is built afterwards from the signed executable.
-  [switch] $DeferSigning
+  [switch] $DeferSigning,
+  # The portable archive is the no-installer build. A release does not carry it: the MSI is
+  # the installer, and the archive is a second copy of the same app in the release storage.
+  [switch] $NoPortable
 )
 $ErrorActionPreference = 'Stop'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
@@ -143,6 +146,7 @@ if ($DeferSigning) {
 & (Join-Path $PSScriptRoot 'sign.ps1') $Msi
 
 # ---- portable zip ------------------------------------------------------------------------------
+if (-not $NoPortable) {
 $Portable = Join-Path $TargetDir "windows-package\iridium-office-$Version-windows-$Arch-portable"
 Remove-Item -Recurse -Force $Portable -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $Portable | Out-Null
@@ -160,5 +164,6 @@ if ($env:CRAFT_FONTS_DIR) {
 $Zip = Join-Path $Dist "iridium-office-$Version-windows-$Arch-portable.zip"
 Remove-Item -Force $Zip -ErrorAction SilentlyContinue
 Compress-Archive -Path $Portable -DestinationPath $Zip
+}
 
-Get-Item $Msi, $Zip | Format-Table Name, Length
+if ($NoPortable) { Get-Item $Msi | Format-Table Name, Length } else { Get-Item $Msi, $Zip | Format-Table Name, Length }

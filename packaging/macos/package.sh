@@ -27,10 +27,14 @@ APP_ID="${APP_ID:-ph.office}"
 
 ARCH=universal
 SKIP_BUILD=0
+# The zip is the no-installer build. A release does not carry it: the DMG is the
+# installer, and the zip is a second copy of the same app in the release storage.
+PORTABLE=1
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --arch) ARCH="$2"; shift 2 ;;
     --skip-build) SKIP_BUILD=1; shift ;;
+    --no-portable) PORTABLE=0; shift ;;
     -h | --help) sed -n '2,16p' "$0"; exit 0 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
@@ -247,9 +251,11 @@ fi
 # ---- zip ---------------------------------------------------------------------------------------
 # The DMG is the installer; the zip is what a CI job can attach to a release, and what a user who
 # prefers not to mount an image can unzip and drag to Applications.
-echo "==> building $ZIP"
-rm -f "$ZIP"
-ditto -c -k --keepParent "$APP" "$ZIP"
+if [[ "$PORTABLE" = 1 ]]; then
+  echo "==> building $ZIP"
+  rm -f "$ZIP"
+  ditto -c -k --keepParent "$APP" "$ZIP"
+fi
 
 # The release notes have to say whether the artifacts are notarized, and the release job
 # cannot ask the build job: it writes this instead.
@@ -260,4 +266,4 @@ else
 fi
 
 echo "==> done"
-ls -lh "$DMG" "$ZIP"
+if [[ "$PORTABLE" = 1 ]]; then ls -lh "$DMG" "$ZIP"; else ls -lh "$DMG"; fi
