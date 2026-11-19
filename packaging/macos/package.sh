@@ -99,7 +99,19 @@ sign() {
   [[ "$IDENTITY" = "-" ]] && ts=(--timestamp=none)
   local kc=()
   [[ -n "${MACOS_KEYCHAIN:-}" ]] && kc=(--keychain "$MACOS_KEYCHAIN")
-  codesign --force --sign "$IDENTITY" ${kc[@]+"${kc[@]}"} "${ts[@]}" "$@"
+  # The timestamp server is a network service. A runner that cannot reach it fails the
+  # signing, and with it the whole release, after the build has already spent hours.
+  # Try again before giving up: the service comes back, and a retry costs seconds.
+  local attempt=1
+  while ! codesign --force --sign "$IDENTITY" ${kc[@]+"${kc[@]}"} "${ts[@]}" "$@"; do
+    if [[ $attempt -ge 5 ]]; then
+      echo "codesign failed after $attempt attempts" >&2
+      return 1
+    fi
+    echo "codesign failed (attempt $attempt); waiting for the timestamp service" >&2
+    sleep $((attempt * 20))
+    attempt=$((attempt + 1))
+  done
 }
 
 # `stapler staple` and `stapler validate` both fetch the ticket from Apple's CloudKit, and a dropped
