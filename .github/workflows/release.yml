@@ -9,6 +9,10 @@ on:
         description: "Version override for a test run, e.g. 0.2.0-rc.1 (empty: Cargo.toml)"
         type: string
         default: ""
+      macos_arch:
+        description: "macOS architecture: universal (both) or one of aarch64, x86_64"
+        type: string
+        default: "universal"
 
 permissions:
   contents: write
@@ -147,7 +151,7 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: packaging/macos/package.sh --arch universal --no-portable
+        run: packaging/macos/package.sh --arch ${{ inputs.macos_arch || 'universal' }} --no-portable
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:

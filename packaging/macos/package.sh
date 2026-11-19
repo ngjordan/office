@@ -105,6 +105,14 @@ sign() {
   local attempt=1
   while ! codesign --force --sign "$IDENTITY" ${kc[@]+"${kc[@]}"} "${ts[@]}" "$@"; do
     if [[ $attempt -ge 5 ]]; then
+      # The timestamp service is unreachable. A signature without a secure timestamp
+      # still installs: the user allows the app once. Apple will not notarize it,
+      # so the release says "not notarized" and the build carries on.
+      if [[ "$IDENTITY" != "-" ]] && codesign --force --sign "$IDENTITY" ${kc[@]+"${kc[@]}"} --timestamp=none "$@"; then
+        warn "the timestamp service is unreachable: signing without a secure timestamp"
+        NOTARIZE=0
+        return 0
+      fi
       echo "codesign failed after $attempt attempts" >&2
       return 1
     fi
